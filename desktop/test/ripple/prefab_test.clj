@@ -11,9 +11,9 @@
     :create (fn [system params]
               {:some-field (* (:x params)
                               (:y params))
-               :stuff (:stuff (asset-db/get-asset system params))}))
+               :stuff (:stuff (asset-db/get-asset system (:stuff params)))}))
 
-  (asset-db/defasset TestAsset
+  (asset-db/defasset test-asset
     :create (fn [system params] params))
 
   ;; TODO - would be nice if we could pass some callback to instantiate, or get the new instance UUID back

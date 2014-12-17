@@ -17,6 +17,8 @@
                  [brute "0.3.0"]]
 
   :source-paths ["src" "src-common"]
+  :resource-paths ["resources"]
+  :test-paths ["test"]
   :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
   :aot [ripple.core.desktop-launcher]
   :main ripple.core.desktop-launcher)

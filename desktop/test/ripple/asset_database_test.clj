@@ -2,8 +2,6 @@
   (:use [clojure.test])
   (:require [ripple.asset-database :as asset-db]))
 
-;; Core asset stuff
-
 (deftest load-asset-file
 
   (testing "with test-asset.yaml"
@@ -32,7 +30,8 @@
 
   (let [system (asset-db/start {} "resources/test/test-asset.yaml")]
     (testing "should return created asset"
-      (is (= (asset-db/get-asset system "test-asset")
+      (is (= (asset-db/get-asset system "TestAsset")
              "CREATED ASSET")))))
 
-;; Tests for texture assets?
+;; TODO - will need to some kind of integration test framework to actually try
+;; loading texture assets or anything else that requires an OpenGL context

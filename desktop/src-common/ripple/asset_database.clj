@@ -3,8 +3,7 @@
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx.maps MapLayer]
            [com.badlogic.gdx.maps.tiled TmxMapLoader]
-           [ripple.components Position SpriteRenderer TiledMapRendererComponent Player]
-           )
+           [ripple.components Position SpriteRenderer TiledMapRendererComponent Player])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
@@ -32,7 +31,7 @@
   "Get an asset by name and instantiate it"
   (let [asset-db (:asset-db system)
         asset (get asset-db asset-name)
-        create-fn (-> (symbol asset-name)
+        create-fn (-> (symbol (:asset asset))
                       (get-asset-def)
                       (:create))]
     (create-fn system asset)))

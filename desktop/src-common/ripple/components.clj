@@ -30,10 +30,10 @@
   `(let [options# ~(apply hash-map options)
          create-fn# (:create options#)]
      (register-component-def '~n (assoc options#
-                                        :create-component #(assoc (create-fn# %)
+                                        :create-component #(assoc (create-fn# %1 %2)
                                                                   :type '~n)))))
 
 (defn create-component [system component-symbol params]
   (-> (get-component-def component-symbol)
       (get :create-component)
-      (apply (conj [params] system))))
+      (apply [system params])))
