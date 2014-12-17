@@ -15,14 +15,16 @@
 (defn create-tiled-map-component
   [path unit]
   (let [renderer (orthogonal-tiled-map path unit)]
-    (c/->TiledMapRendererComponent renderer)))
+    (assoc (c/->TiledMapRendererComponent renderer)
+           :type 'TiledMapRendererComponent)))
 
 (defn create-sprite-renderer
   [texture-path tile-coord-x tile-coord-y tile-size-x tile-size-y]
   (let [texture-region (-> (or (u/load-asset texture-path Texture)
                                (Texture. texture-path))
                            (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
-    (c/->SpriteRenderer texture-region)))
+    {:type 'SpriteRenderer
+     :texture texture-region}))
 
 (defn- update-camera-projection [camera]
   (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
@@ -51,8 +53,9 @@
 (defn- render-maps
   "Render any tiled map renderer components"
   [system]
-  (doseq [entity (e/get-all-entities-with-component system TiledMapRendererComponent)]
-    (let [tiled-map-component (e/get-component system entity TiledMapRendererComponent)
+  (doseq [entity (e/get-all-entities-with-component system 'TiledMapRendererComponent)]
+    (println "??")
+    (let [tiled-map-component (e/get-component system entity 'TiledMapRendererComponent)
           tiled-map-renderer (:tiled-map-renderer tiled-map-component)
           camera (:camera (:renderer system))]
       (.setView tiled-map-renderer camera)
@@ -66,9 +69,9 @@
         ]
     (.setProjectionMatrix sprite-batch (.combined camera))
     (.begin sprite-batch)
-    (doseq [entity (e/get-all-entities-with-component system SpriteRenderer)]
-      (let [sprite-renderer (e/get-component system entity SpriteRenderer)
-            position (e/get-component system entity Position)
+    (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
+      (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
+            position (e/get-component system entity 'Position)
             texture (:texture sprite-renderer)
             x (float (/ (:x position) pixels-per-unit))
             y (float (/ (:y position) pixels-per-unit))]
@@ -81,21 +84,21 @@
   (let [camera (:camera (:renderer system))]
 
     ;; Temp..
-    (when (key-pressed? :w)
-      (.translate camera 0 1)
-      (.update camera))
+    ;; (when (key-pressed? :w)
+    ;;   (.translate camera 0 1)
+    ;;   (.update camera))
 
-    (when (key-pressed? :s)
-      (.translate camera 0 -1)
-      (.update camera))
+    ;; (when (key-pressed? :s)
+    ;;   (.translate camera 0 -1)
+    ;;   (.update camera))
 
-    (when (key-pressed? :a)
-      (.translate camera -1 0)
-      (.update camera))
+    ;; (when (key-pressed? :a)
+    ;;   (.translate camera -1 0)
+    ;;   (.update camera))
 
-    (when (key-pressed? :d)
-      (.translate camera 01 0)
-      (.update camera))
+    ;; (when (key-pressed? :d)
+    ;;   (.translate camera 01 0)
+    ;;   (.update camera))
 
     (render-maps system)
     (render-sprites system))

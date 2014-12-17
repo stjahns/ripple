@@ -164,7 +164,7 @@
 
 (defn start
   "Start this system"
-  [system asset-file]
+  [system asset-files]
   (let [asset-db (init-asset-db)
-        parsed-assets (load-asset-file asset-file)]
+        parsed-assets (into [] (map load-asset-file asset-files))]
     (assoc system :asset-db (reduce load-asset asset-db parsed-assets))))

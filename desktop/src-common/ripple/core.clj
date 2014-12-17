@@ -34,8 +34,10 @@
   (let [player (e/create-entity)]
     (-> system
         (e/add-entity player)
-        (e/add-component player (c/->Player))
-        (e/add-component player (c/->Position x y))
+        (e/add-component player {:type 'Player})
+        (e/add-component player {:type 'Position
+                                 :x x
+                                 :y y})
         (e/add-component player (rendering/create-sprite-renderer "sprites/PlayerV2.png" 0 0 32 32)))))
 
 (defn- get-map-objects [tiled-map]
@@ -67,15 +69,14 @@
     (-> system
         (create-entities-in-map (:tiled-map system))
         (create-player 0 0)
-        (assoc :test-texture (asset-db/get-asset system "PlayerSpriteSheet"))
-        (assoc :anim (asset-db/get-asset system "PlayerWalk"))
         (e/add-component tile-map (rendering/create-tiled-map-component "platform.tmx" (/ 1 32))))))
 
 (defn- create-systems
   "Register all the system functions"
   [system]
   (-> system
-      (asset-db/start)
+      (asset-db/start ["resources/prefabs.yaml"
+                       "resources/animations.yaml"])
       (rendering/start)
       (assoc :tiled-map (load-map-file "platform.tmx"))
       (s/add-system-fn rendering/process-one-game-tick)

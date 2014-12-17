@@ -18,14 +18,14 @@
 
 (defn- move-player
   [system player direction]
-  (let [player-position (e/get-component system player Position)
+  (let [player-position (e/get-component system player 'Position)
         [new-x new-y] (get-movement-position player-position direction)]
-    (e/update-component system player Position #(-> % (assoc :x new-x
+    (e/update-component system player 'Position #(-> % (assoc :x new-x
                                                              :y new-y)))))
 
 (defn- move-player-components
   [system direction]
-  (let [player-entities (e/get-all-entities-with-component system Player)]
+  (let [player-entities (e/get-all-entities-with-component system 'Player)]
     (reduce #(move-player %1 %2 direction)
             system player-entities)))
 
