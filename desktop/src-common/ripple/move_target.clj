@@ -1,4 +1,4 @@
-(ns dungeon-sandbox.move-target
+(ns ripple.move-target
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]))
 

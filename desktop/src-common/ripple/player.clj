@@ -1,4 +1,4 @@
-(ns dungeon-sandbox.player
+(ns ripple.player
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]))
 

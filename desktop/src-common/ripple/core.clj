@@ -1,4 +1,4 @@
-(ns dungeon-sandbox.core
+(ns ripple.core
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx.maps MapLayer]
@@ -7,12 +7,12 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [dungeon-sandbox.move-target :as move-target]
-            [dungeon-sandbox.player :as player]
-            [dungeon-sandbox.rendering :as rendering]
-            [dungeon-sandbox.components :as c]
-            [dungeon-sandbox.input :as input]
-            [dungeon-sandbox.asset-database :as asset-db]
+            [ripple.move-target :as move-target]
+            [ripple.player :as player]
+            [ripple.rendering :as rendering]
+            [ripple.components :as c]
+            [ripple.input :as input]
+            [ripple.asset-database :as asset-db]
             [brute.entity :as e]
             [brute.system :as s]))
 
@@ -109,7 +109,7 @@
   (fn [screen entities]
     (clear!)))
 
-(defgame dungeon-sandbox
+(defgame ripple
   :on-create
   (fn [this]
     (set-screen! this main-screen)))
@@ -121,4 +121,4 @@
                            (set-screen! main-screen blank-screen)))))
 
 (defn reload []
-  (on-gl (set-screen! dungeon-sandbox main-screen)))
+  (on-gl (set-screen! ripple main-screen)))

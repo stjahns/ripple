@@ -5,15 +5,15 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleDisplayName</key>
-    <string>dungeon-sandbox</string>
+    <string>ripple</string>
     <key>CFBundleExecutable</key>
-    <string>dungeon-sandbox</string>
+    <string>ripple</string>
     <key>CFBundleIdentifier</key>
-    <string>dungeon_sandbox.core</string>
+    <string>ripple.core</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>dungeon-sandbox</string>
+    <string>ripple</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -46,16 +46,16 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
-	<key>CFBundleIcons</key>
-	<dict>
-		<key>CFBundlePrimaryIcon</key>
-		<dict>
-			<key>CFBundleIconFiles</key>
-			<array>
-				<string>Icon</string>
-				<string>Icon-72</string>
-			</array>
-		</dict>
-	</dict>
+  <key>CFBundleIcons</key>
+  <dict>
+    <key>CFBundlePrimaryIcon</key>
+    <dict>
+      <key>CFBundleIconFiles</key>
+      <array>
+        <string>Icon</string>
+        <string>Icon-72</string>
+      </array>
+    </dict>
+  </dict>
 </dict>
 </plist>

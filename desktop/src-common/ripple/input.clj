@@ -1,11 +1,11 @@
-(ns dungeon-sandbox.input
+(ns ripple.input
   (:require [play-clj.core :refer :all]
-            [dungeon-sandbox.components :as c]
+            [ripple.components :as c]
             [brute.entity :as e]
             [brute.system :as s])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
-           [dungeon_sandbox.components Player Position]))
+           [ripple.components Player Position]))
 
 (defn get-movement-position
   [position direction]

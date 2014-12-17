@@ -1,9 +1,9 @@
-(ns dungeon-sandbox.prefab-test
+(ns ripple.prefab-test
   (:use [clojure.test])
-  (:require [dungeon-sandbox.prefab :as prefab]
+  (:require [ripple.prefab :as prefab]
             [brute.entity :as e]
-            [dungeon-sandbox.asset-database :as asset-db]
-            [dungeon-sandbox.components :as components]))
+            [ripple.asset-database :as asset-db]
+            [ripple.components :as components]))
 
 (deftest prefab
 

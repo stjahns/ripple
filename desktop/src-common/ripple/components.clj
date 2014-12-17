@@ -1,4 +1,4 @@
-(ns dungeon-sandbox.components
+(ns ripple.components
   (:require
    [brute.entity :refer :all])
   (:import
@@ -11,7 +11,6 @@
 (defrecord Position [x y])
 
 (defmethod get-component-type PersistentArrayMap
-  "The type of a component is the value for :type in the map"
   [component]
   (:type component))
 

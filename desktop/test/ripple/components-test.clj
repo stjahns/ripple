@@ -1,6 +1,6 @@
-(ns dungeon-sandbox.components-test
+(ns ripple.components-test
   (:use [clojure.test])
-  (:require [dungeon-sandbox.components :as c]
+  (:require [ripple.components :as c]
             [brute.entity :as e]))
 
 (deftest defcomponent
@@ -35,7 +35,7 @@
   (c/defcomponent TestComponent
     :create (fn [params]
               {:some-field (* (:x params)
-                              (:y params))}))
+                              (:y params))})))
 
   ;; (c/defcomponent TestComponent [x y]
   ;;   :create (fn [component params]

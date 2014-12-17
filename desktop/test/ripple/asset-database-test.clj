@@ -1,6 +1,6 @@
-(ns dungeon-sandbox.asset-database-test
+(ns ripple.asset-database-test
   (:use [clojure.test])
-  (:require [dungeon-sandbox.asset-database :as asset-db]))
+  (:require [ripple.asset-database :as asset-db]))
 
 ;; Core asset stuff
 

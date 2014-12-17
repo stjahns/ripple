@@ -1,4 +1,4 @@
-(defproject dungeon-sandbox "0.0.1-SNAPSHOT"
+(defproject ripple "0.0.1-SNAPSHOT"
   :description "FIXME: write description"
 
   :dependencies [[com.badlogicgames.gdx/gdx "1.1.0"]
@@ -18,5 +18,5 @@
 
   :source-paths ["src" "src-common"]
   :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
-  :aot [dungeon-sandbox.core.desktop-launcher]
-  :main dungeon-sandbox.core.desktop-launcher)
+  :aot [ripple.core.desktop-launcher]
+  :main ripple.core.desktop-launcher)

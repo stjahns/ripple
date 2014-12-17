@@ -1,18 +1,18 @@
-(ns dungeon-sandbox.asset-database
+(ns ripple.asset-database
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite Animation]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx.maps MapLayer]
            [com.badlogic.gdx.maps.tiled TmxMapLoader]
-           [dungeon_sandbox.components Position SpriteRenderer TiledMapRendererComponent Player]
+           [ripple.components Position SpriteRenderer TiledMapRendererComponent Player]
            )
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [dungeon-sandbox.move-target :as move-target]
-            [dungeon-sandbox.player :as player]
-            [dungeon-sandbox.rendering :as rendering]
-            [dungeon-sandbox.components :as c]
-            [dungeon-sandbox.input :as input]
+            [ripple.move-target :as move-target]
+            [ripple.player :as player]
+            [ripple.rendering :as rendering]
+            [ripple.components :as c]
+            [ripple.input :as input]
             [clj-yaml.core :as yaml]
             [brute.entity :as e]
             [brute.system :as s]))

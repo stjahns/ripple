@@ -1,4 +1,4 @@
-package dungeon_sandbox.core;
+package ripple.core;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 import clojure.lang.RT;
 
-import dungeon_sandbox.core.R;
+import ripple.core.R;
 
 public class SplashActivity extends Activity {
 
@@ -46,7 +46,7 @@ public class SplashActivity extends Activity {
     }
 
     public void proceed() {
-        startActivity(new Intent("dungeon_sandbox.core.MAIN"));
+        startActivity(new Intent("ripple.core.MAIN"));
         finish();
     }
 
@@ -62,7 +62,7 @@ public class SplashActivity extends Activity {
                     INIT.invoke(SplashActivity.this.getApplication());
 
                     try {
-                        Class.forName("dungeon_sandbox.core.AndroidLauncher");
+                        Class.forName("ripple.core.AndroidLauncher");
                     } catch (ClassNotFoundException e) {
                         Log.e(TAG, "Failed loading AndroidLauncher", e);
                     }

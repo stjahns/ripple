@@ -1,8 +1,8 @@
-(ns dungeon-sandbox.prefab
+(ns ripple.prefab
   (:require
    [brute.entity :as e]
-   [dungeon-sandbox.asset-database :as asset-db]
-   [dungeon-sandbox.components :as components]))
+   [ripple.asset-database :as asset-db]
+   [ripple.components :as components]))
 
 (asset-db/defasset prefab
   :instantiate

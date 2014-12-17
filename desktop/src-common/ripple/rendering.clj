@@ -1,14 +1,14 @@
-(ns dungeon-sandbox.rendering
+(ns ripple.rendering
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [dungeon-sandbox.components :as c]
+            [ripple.components :as c]
             [brute.entity :as e]
             [brute.system :as s])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx Gdx]
-           [dungeon_sandbox.components Position SpriteRenderer TiledMapRendererComponent]))
+           [ripple.components Position SpriteRenderer TiledMapRendererComponent]))
 
 (def pixels-per-unit 32)
 
