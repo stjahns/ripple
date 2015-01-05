@@ -25,7 +25,7 @@
         (e/add-component player (c/->Position 0 0))
         (e/add-component player (rendering/create-sprite-renderer "sprites/player.png" 0 0 32 32))
 
-        (e/add-component tile-map (rendering/create-tiled-map-component "dungeon.tmx" (/ 1 1))))))
+        (e/add-component tile-map (rendering/create-tiled-map-component "dungeon.tmx" (/ 1 32))))))
 
 (defn- create-systems
   "Register all the system functions"

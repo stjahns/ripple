@@ -10,6 +10,8 @@
            [com.badlogic.gdx Gdx]
            [dungeon_sandbox.components Position SpriteRenderer TiledMapRendererComponent]))
 
+(def pixels-per-unit 32)
+
 (defn create-tiled-map-component
   [path unit]
   (let [renderer (orthogonal-tiled-map path unit)]
@@ -24,8 +26,8 @@
 
 (defn- create-camera []
   (let [camera (orthographic)
-        width (.getWidth Gdx/graphics)
-        height (.getHeight Gdx/graphics)]
+        width (/ (.getWidth Gdx/graphics) pixels-per-unit)
+        height (/ (.getHeight Gdx/graphics) pixels-per-unit)]
     (.setToOrtho camera false width height)
     (.update camera)
     camera))
@@ -58,9 +60,9 @@
       (let [sprite-renderer (e/get-component system entity SpriteRenderer)
             position (e/get-component system entity Position)
             texture (:texture sprite-renderer)
-            x (float (:x position))
-            y (float (:y position))]
-        (.draw sprite-batch texture x y)))
+            x (float (/ (:x position) pixels-per-unit))
+            y (float (/ (:y position) pixels-per-unit))]
+        (.draw sprite-batch texture x y (float 1) (float 1))))
     (.end sprite-batch)))
 
 (defn process-one-game-tick
