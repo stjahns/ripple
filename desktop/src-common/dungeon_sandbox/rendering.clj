@@ -7,10 +7,13 @@
             [brute.system :as s])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
-           [dungeon_sandbox.components Position SpriteRenderer]
-           )
+           [com.badlogic.gdx Gdx]
+           [dungeon_sandbox.components Position SpriteRenderer TiledMapRendererComponent]))
 
-  )
+(defn create-tiled-map-component
+  [path unit]
+  (let [renderer (orthogonal-tiled-map path unit)]
+    (c/->TiledMapRendererComponent renderer)))
 
 (defn create-sprite-renderer
   [texture-path tile-coord-x tile-coord-y tile-size-x tile-size-y]
@@ -19,15 +22,37 @@
                            (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
     (c/->SpriteRenderer texture-region)))
 
+(defn- create-camera []
+  (let [camera (orthographic)
+        width (.getWidth Gdx/graphics)
+        height (.getHeight Gdx/graphics)]
+    (.setToOrtho camera false width height)
+    (.update camera)
+    camera))
+
 (defn start
   "Start this system"
   [system]
-  (assoc system :renderer {:sprite-batch (SpriteBatch.)}))
+  (assoc system :renderer {:sprite-batch (SpriteBatch.)
+                           :camera (create-camera)}))
+
+(defn- render-maps
+  "Render any tiled map renderer components"
+  [system]
+  (doseq [entity (e/get-all-entities-with-component system TiledMapRendererComponent)]
+    (let [tiled-map-component (e/get-component system entity TiledMapRendererComponent)
+          tiled-map-renderer (:tiled-map-renderer tiled-map-component)
+          camera (:camera (:renderer system))]
+      (.setView tiled-map-renderer camera)
+      (.render tiled-map-renderer))))
 
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system]
-  (let [sprite-batch (:sprite-batch (:renderer system))]
+  (let [sprite-batch (:sprite-batch (:renderer system))
+        camera (:camera (:renderer system))
+        ]
+    (.setProjectionMatrix sprite-batch (.combined camera))
     (.begin sprite-batch)
     (doseq [entity (e/get-all-entities-with-component system SpriteRenderer)]
       (let [sprite-renderer (e/get-component system entity SpriteRenderer)
@@ -41,5 +66,25 @@
 (defn process-one-game-tick
   "Render stuff"
   [system _]
-  (render-sprites system)
+  (let [camera (:camera (:renderer system))]
+
+    ;; Temp..
+    (when (key-pressed? :w)
+      (.translate camera 0 1)
+      (.update camera))
+
+    (when (key-pressed? :s)
+      (.translate camera 0 -1)
+      (.update camera))
+
+    (when (key-pressed? :a)
+      (.translate camera -1 0)
+      (.update camera))
+
+    (when (key-pressed? :d)
+      (.translate camera 01 0)
+      (.update camera))
+
+    (render-maps system)
+    (render-sprites system))
   system)

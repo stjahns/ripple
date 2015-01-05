@@ -17,12 +17,15 @@
 (defn- start
   "Create all the initial entities with their components"
   [system]
-  (let [player (e/create-entity)]
+  (let [player (e/create-entity)
+        tile-map (e/create-entity)]
     (-> system
         (e/add-entity player)
         (e/add-component player (c/->Player))
         (e/add-component player (c/->Position 0 0))
-        (e/add-component player (rendering/create-sprite-renderer "sprites/player.png" 0 0 32 32)))))
+        (e/add-component player (rendering/create-sprite-renderer "sprites/player.png" 0 0 32 32))
+
+        (e/add-component tile-map (rendering/create-tiled-map-component "dungeon.tmx" (/ 1 1))))))
 
 (defn- create-systems
   "Register all the system functions"
@@ -32,7 +35,6 @@
       (s/add-system-fn rendering/process-one-game-tick)
       (s/add-system-fn input/process-one-game-tick)))
 
-
 (defscreen main-screen
   :on-show
   (fn [screen entities]
@@ -41,9 +43,7 @@
         (start)
         (create-systems)
         (as-> s (reset! sys s)))
-    (update! screen
-             :renderer (orthogonal-tiled-map "dungeon.tmx" (/ 1 32))
-             :camera (orthographic))
+    (update! screen :renderer (stage) :camera (orthographic)) ;; not actually used at all ...
     nil)
 
   :on-render
@@ -76,5 +76,3 @@
 
 (defn reload []
   (on-gl (set-screen! dungeon-sandbox main-screen)))
-
-;;(reload)
