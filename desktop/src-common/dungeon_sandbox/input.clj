@@ -17,15 +17,17 @@
     nil))
 
 (defn- move-player
-  [system direction]
-  (let [player (first (e/get-all-entities-with-component system Player))
-        player-position (e/get-component system player Position)
+  [system player direction]
+  (let [player-position (e/get-component system player Position)
         [new-x new-y] (get-movement-position player-position direction)]
-    (-> system
-        (e/update-component player Position (fn [position]
-                                              (-> position
-                                                  (assoc :x new-x)
-                                                  (assoc :y new-y)))))))
+    (e/update-component system player Position #(-> % (assoc :x new-x
+                                                             :y new-y)))))
+
+(defn- move-player-components
+  [system direction]
+  (let [player-entities (e/get-all-entities-with-component system Player)]
+    (reduce #(move-player %1 %2 direction)
+            system player-entities)))
 
 (defn process-one-game-tick
   "Handle player movement..."
@@ -33,15 +35,15 @@
   (cond
 
     (key-pressed? :dpad-up)
-    (move-player system :up)
+    (move-player-components system :up)
 
     (key-pressed? :dpad-down)
-    (move-player system :down)
+    (move-player-components system :down)
 
     (key-pressed? :dpad-left)
-    (move-player system :left)
+    (move-player-components system :left)
 
     (key-pressed? :dpad-right)
-    (move-player system :right)
+    (move-player-components system :right)
 
     :else system))
