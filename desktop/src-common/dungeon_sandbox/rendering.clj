@@ -24,11 +24,15 @@
                            (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
     (c/->SpriteRenderer texture-region)))
 
-(defn- create-camera []
-  (let [camera (orthographic)
-        width (/ (.getWidth Gdx/graphics) pixels-per-unit)
+(defn- update-camera-projection [camera]
+  (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
         height (/ (.getHeight Gdx/graphics) pixels-per-unit)]
-    (.setToOrtho camera false width height)
+    (.setToOrtho camera false width height)))
+
+
+(defn- create-camera []
+  (let [camera (orthographic)]
+    (update-camera-projection camera)
     (.update camera)
     camera))
 
@@ -37,6 +41,12 @@
   [system]
   (assoc system :renderer {:sprite-batch (SpriteBatch.)
                            :camera (create-camera)}))
+
+(defn on-viewport-resize
+  "Handler for when viewport is resized. Should update camera projection"
+  [system]
+  (let [camera (:camera (:renderer system))]
+    (update-camera-projection camera)))
 
 (defn- render-maps
   "Render any tiled map renderer components"

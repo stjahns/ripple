@@ -55,7 +55,7 @@
 
   :on-resize
   (fn [screen entities]
-    (height! screen 10)
+    (rendering/on-viewport-resize @sys)
     nil))
 
 (defscreen blank-screen
