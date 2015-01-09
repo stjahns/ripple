@@ -12,6 +12,7 @@
             [dungeon-sandbox.rendering :as rendering]
             [dungeon-sandbox.components :as c]
             [dungeon-sandbox.input :as input]
+            [dungeon-sandbox.asset-database :as asset-db]
             [brute.entity :as e]
             [brute.system :as s]))
 
@@ -72,6 +73,7 @@
   "Register all the system functions"
   [system]
   (-> system
+      (asset-db/start)
       (rendering/start)
       (assoc :tiled-map (load-map-file "platform.tmx"))
       (s/add-system-fn rendering/process-one-game-tick)
