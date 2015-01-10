@@ -17,22 +17,30 @@
             [brute.entity :as e]
             [brute.system :as s]))
 
+(def asset-defs (atom {}))
 
+(defn get-asset-def [asset-symbol]
+  (get @asset-defs asset-symbol))
 
-;; TODO - memoize for shared assets somehow...
+(defn remove-asset-def [asset-symbol]
+  (swap! asset-defs dissoc asset-symbol))
+
+(defn register-asset-def [asset-symbol create-fn]
+  (swap! asset-defs assoc asset-symbol create-fn))
+
 (defn get-asset [system asset-name]
   "Get an asset by name and instantiate it"
   (let [asset-db (:asset-db system)
         asset (get asset-db asset-name)
-        create-fn (ns-resolve 'dungeon-sandbox.asset-database
-                              (symbol (str (:asset asset) "-create")))]
-    (create-fn asset-db asset)))
+        create-fn (-> (symbol asset-name)
+                      (get-asset-def)
+                      (:create))]
+    (create-fn system asset)))
 
 (defmacro defasset
   [n & options]
-  `(->> (for [[k# v#] ~(apply hash-map options)]
-          [k# (intern *ns* (symbol (str '~n "-" (name k#))) v#)])
-        (into {})))
+  `(let [options# ~(apply hash-map options)]
+     (register-asset-def '~n options#)))
 
 ;; Core asset definitions
 
@@ -60,6 +68,32 @@
           key-frames (map #(TextureRegion. texture %1 %2 frame-width frame-height)
                           (:frames params))]
       (Animation. frame-duration key-frames))))
+
+
+(defn create-component [type params]
+  "Given a component type and some params, instantiate the component data"
+  (let [record-constructor (-> (apply str ["c/->" type]) ;; ghettoooo
+                               (symbol)
+                               (resolve))]
+    (apply record-constructor params)))
+
+(defn create-entity-from-prefab [system prefab-name params]
+  (let [prefab (-> (:asset-db system)
+                      (get prefab-name))
+           entity (e/create-entity system)
+           components (:components prefab)
+           system-with-entity (e/add-entity system entity)]
+    (reduce (fn [system component] (e/add-component system component))
+            system components)
+    system))
+
+;; (defasset prefab
+;;   :create
+;;   (fn [system params]
+;;     (let [entity (e/create-entity system)
+;;           components (:components prefab)])
+;;     ))
+
 
 ;; DUMB PLAN
 ;; Read every .yaml file in the resources directory tree
@@ -131,7 +165,7 @@
 
 (defn start
   "Start this system"
-  [system]
+  [system asset-file]
   (let [asset-db (init-asset-db)
-        parsed-assets (load-asset-file "resources/animations.yaml")]
+        parsed-assets (load-asset-file asset-file)]
     (assoc system :asset-db (reduce load-asset asset-db parsed-assets))))

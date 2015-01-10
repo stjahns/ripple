@@ -67,6 +67,8 @@
     (-> system
         (create-entities-in-map (:tiled-map system))
         (create-player 0 0)
+        (assoc :test-texture (asset-db/get-asset system "PlayerSpriteSheet"))
+        (assoc :anim (asset-db/get-asset system "PlayerWalk"))
         (e/add-component tile-map (rendering/create-tiled-map-component "platform.tmx" (/ 1 32))))))
 
 (defn- create-systems

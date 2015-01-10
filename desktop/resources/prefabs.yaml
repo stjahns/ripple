@@ -1,4 +1,4 @@
-  - asset: Prefab
+  - asset: prefab
     name: Player
     components:
       - type: Player
@@ -12,7 +12,7 @@
           tile-size: [32, 32]
           tile-indices: [0, 0]
 
-  - asset: Prefab
+  - asset: prefab
     name: Wall
     components:
       - type: Position

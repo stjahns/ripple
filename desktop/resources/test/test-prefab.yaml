@@ -1,0 +1,12 @@
+  - asset: test-asset
+    name: TestAsset
+    stuff: thing
+
+  - asset: prefab
+    name: TestPrefab
+    components:
+      - type: TestComponent
+        params:
+          x: 5
+          y: 3
+          stuff: TestAsset
