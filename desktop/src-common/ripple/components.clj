@@ -4,14 +4,6 @@
   (:import
    [clojure.lang PersistentArrayMap]))
 
-;; TODO remove
-(defrecord Player [])
-(defrecord TiledMapRendererComponent [tiled-map-renderer])
-(defrecord SpriteRenderer [texture])
-(defrecord Position [x y])
-
-
-
 (defmethod get-component-type PersistentArrayMap
   [component]
   (:type component))
@@ -39,10 +31,6 @@
   (-> (get-component-def component-symbol)
       (get :create-component)
       (apply [system params])))
-
-(defcomponent TiledMapRendererComponent
-  :create
-  (fn [system params]))
 
 (defcomponent Position
   :create

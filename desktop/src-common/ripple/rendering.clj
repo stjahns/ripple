@@ -19,29 +19,34 @@
 ;; TODO
 (c/defcomponent AnimatedSpriteRenderer
   :create
+  (fn [system params]
+    {:animation (asset-db/get-asset system (:animation params))}))
+
+;; TODO
+(c/defcomponent TiledMapRendererComponent
+  :create
   (fn [system params]))
 
 (def pixels-per-unit 32)
 
-(defn create-tiled-map-component
-  [path unit]
-  (let [renderer (orthogonal-tiled-map path unit)]
-    (assoc (c/->TiledMapRendererComponent renderer)
-           :type 'TiledMapRendererComponent)))
+;; (defn create-tiled-map-component
+;;   [path unit]
+;;   (let [renderer (orthogonal-tiled-map path unit)]
+;;     (assoc (c/->TiledMapRendererComponent renderer)
+;;            :type 'TiledMapRendererComponent)))
 
-(defn create-sprite-renderer
-  [texture-path tile-coord-x tile-coord-y tile-size-x tile-size-y]
-  (let [texture-region (-> (or (u/load-asset texture-path Texture)
-                               (Texture. texture-path))
-                           (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
-    {:type 'SpriteRenderer
-     :texture texture-region}))
+;; (defn create-sprite-renderer
+;;   [texture-path tile-coord-x tile-coord-y tile-size-x tile-size-y]
+;;   (let [texture-region (-> (or (u/load-asset texture-path Texture)
+;;                                (Texture. texture-path))
+;;                            (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
+;;     {:type 'SpriteRenderer
+;;      :texture texture-region}))
 
 (defn- update-camera-projection [camera]
   (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
         height (/ (.getHeight Gdx/graphics) pixels-per-unit)]
     (.setToOrtho camera false width height)))
-
 
 (defn- create-camera []
   (let [camera (orthographic)]
@@ -65,7 +70,6 @@
   "Render any tiled map renderer components"
   [system]
   (doseq [entity (e/get-all-entities-with-component system 'TiledMapRendererComponent)]
-    (println "??")
     (let [tiled-map-component (e/get-component system entity 'TiledMapRendererComponent)
           tiled-map-renderer (:tiled-map-renderer tiled-map-component)
           camera (:camera (:renderer system))]
@@ -84,6 +88,26 @@
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             position (e/get-component system entity 'Position)
             texture (:texture sprite-renderer)
+            x (float (/ (:x position) pixels-per-unit))
+            y (float (/ (:y position) pixels-per-unit))]
+        (.draw sprite-batch texture x y (float 1) (float 1))))
+    (.end sprite-batch)))
+
+(defn- render-animated-sprites
+  "Render sprites for each SpriteRenderer component"
+  [system]
+  (let [sprite-batch (:sprite-batch (:renderer system))
+        camera (:camera (:renderer system))
+        ]
+    (.setProjectionMatrix sprite-batch (.combined camera))
+    (.begin sprite-batch)
+    (doseq [entity (e/get-all-entities-with-component system 'AnimatedSpriteRenderer)]
+      (let [sprite-renderer (e/get-component system entity 'AnimatedSpriteRenderer)
+            position (e/get-component system entity 'Position)
+            animation (:animation sprite-renderer)
+            time (mod (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
+                      (count (.getAnimationDuration animation)))
+            texture (.getKeyFrame animation (float time) true)
             x (float (/ (:x position) pixels-per-unit))
             y (float (/ (:y position) pixels-per-unit))]
         (.draw sprite-batch texture x y (float 1) (float 1))))
@@ -113,5 +137,6 @@
 
     ;(render-maps system)
     (render-sprites system)
+    (render-animated-sprites system)
     )
   system)

@@ -7,7 +7,6 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.move-target :as move-target]
             [ripple.components :as c]
             [clj-yaml.core :as yaml]
             [brute.entity :as e]
@@ -71,9 +70,14 @@
           frame-width (:tile-width params)
           frame-height (:tile-height params)
           texture (get-asset system (:texture params))
-          key-frames (map #(TextureRegion. texture %1 %2 frame-width frame-height)
+          key-frames (map #(TextureRegion. texture
+                                           (* frame-width (first %))
+                                           (* frame-height (second %))
+                                           frame-width
+                                           frame-height)
                           (:frames params))]
-      (Animation. frame-duration key-frames))))
+      (Animation. (float frame-duration)
+                  (u/gdx-array key-frames)))))
 
 
 (defn create-component [type params]

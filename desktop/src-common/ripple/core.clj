@@ -19,59 +19,12 @@
 
 (def sys (atom 0))
 
-(defn- load-map-file
-  "Return a TiledMap instance for the given path"
-  [path]
-  (let [map-loader (TmxMapLoader.)]
-   (.load map-loader path)))
-
-(defn- get-object-layers
-  [tiled-map]
-  (filter (fn [layer] (= (type layer) MapLayer))
-   (.getLayers tiled-map)))
-
-(defn- create-player
-  [system x y]
-  (let [player (e/create-entity)]
-    (-> system
-        (e/add-entity player)
-        (e/add-component player {:type 'Player})
-        (e/add-component player {:type 'Position
-                                 :x x
-                                 :y y})
-        (e/add-component player (rendering/create-sprite-renderer "sprites/PlayerV2.png" 0 0 32 32)))))
-
-(defn- get-map-objects [tiled-map]
-  (let [object-layer (first (get-object-layers tiled-map))]
-    (.getObjects object-layer)))
-
-(defn- create-entity-from-map-object
-  "For the given map object, create and add an entity with the required components
-  (if appropriate) to the ES system"
-  [system map-object]
-  (let [ellipse (.getEllipse map-object)
-        x (.x ellipse)
-        y (.y ellipse)]
-    ;; TODO remove
-    (if (= (.getName map-object) "PlayerSpawn")
-      system
-      system)))
-
-(defn- create-entities-in-map
-  [system tiled-map]
-  (let [map-objects (get-map-objects tiled-map)]
-    (reduce (fn [system map-object]
-              (create-entity-from-map-object system map-object))
-            system map-objects)))
-
 (defn- start
   "Create all the initial entities with their components"
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (create-entities-in-map (:tiled-map system))
-        (prefab/instantiate "Player" {:position {:x 200 :y 400}})
-        (e/add-component tile-map (rendering/create-tiled-map-component "platform.tmx" (/ 1 32))))))
+        (prefab/instantiate "Player" {:position {:x 200 :y 400}}))))
 
 (defn- create-systems
   "Register all the system functions"
@@ -79,7 +32,6 @@
   (-> system
       (asset-db/start ["resources/example.yaml"])
       (rendering/start)
-      (assoc :tiled-map (load-map-file "platform.tmx"))
       (s/add-system-fn rendering/process-one-game-tick)
       (s/add-system-fn input/process-one-game-tick)))
 
