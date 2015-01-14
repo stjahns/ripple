@@ -40,17 +40,7 @@
       (get :create-component)
       (apply [system params])))
 
-;; CORE COMPONENT DEFS - probably move elsewhere...
-
-(defcomponent Player
-  :create
-  (fn [system params]))
-
 (defcomponent TiledMapRendererComponent
-  :create
-  (fn [system params]))
-
-(defcomponent SpriteRenderer
   :create
   (fn [system params]))
 

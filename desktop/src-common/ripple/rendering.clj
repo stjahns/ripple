@@ -3,12 +3,23 @@
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
             [ripple.components :as c]
+            [ripple.asset-database :as asset-db]
             [brute.entity :as e]
             [brute.system :as s])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx Gdx]
            [ripple.components Position SpriteRenderer TiledMapRendererComponent]))
+
+(c/defcomponent SpriteRenderer
+  :create
+  (fn [system params]
+    {:texture (asset-db/get-asset system (:texture params))}))
+
+;; TODO
+(c/defcomponent AnimatedSpriteRenderer
+  :create
+  (fn [system params]))
 
 (def pixels-per-unit 32)
 
@@ -100,6 +111,7 @@
     ;;   (.translate camera 01 0)
     ;;   (.update camera))
 
-    (render-maps system)
-    (render-sprites system))
+    ;(render-maps system)
+    (render-sprites system)
+    )
   system)

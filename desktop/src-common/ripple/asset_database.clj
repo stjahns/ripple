@@ -8,10 +8,7 @@
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
             [ripple.move-target :as move-target]
-            [ripple.player :as player]
-            [ripple.rendering :as rendering]
             [ripple.components :as c]
-            [ripple.input :as input]
             [clj-yaml.core :as yaml]
             [brute.entity :as e]
             [brute.system :as s]))
@@ -47,6 +44,16 @@
   :create
   (fn [system params]
     (Texture. (:path params))))
+
+(defasset texture-region
+  :create
+  (fn [system params]
+    (let [texture (get-asset system (:texture params))
+          x (first (:tile-indices params))
+          y (second (:tile-indices params))
+          width (first (:tile-size params))
+          height (second (:tile-size params))]
+      (TextureRegion. texture x y width height))))
 
 ;;
 ;; Animation
@@ -166,5 +173,5 @@
   "Start this system"
   [system asset-files]
   (let [asset-db (init-asset-db)
-        parsed-assets (into [] (map load-asset-file asset-files))]
+        parsed-assets (flatten (map load-asset-file asset-files))]
     (assoc system :asset-db (reduce load-asset asset-db parsed-assets))))

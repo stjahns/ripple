@@ -1,6 +1,11 @@
 (ns ripple.player
   (:require [play-clj.core :refer :all]
-            [play-clj.g2d :refer :all]))
+            [play-clj.g2d :refer :all]
+            [ripple.components :refer :all]))
+
+(defcomponent Player
+  :create
+  (fn [system params]))
 
 (defn make [x y]
   (let [player-sheet (texture "sprites/player.png")
@@ -17,3 +22,4 @@
   (first (filter player? entities)))
 
 ;; ABOVE - DEPRECATED...
+

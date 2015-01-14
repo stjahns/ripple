@@ -4,6 +4,15 @@
    [ripple.asset-database :as asset-db]
    [ripple.components :as components]))
 
+(defn override-prefab-params [asset options]
+  (let [components (:components asset)]
+    (assoc asset :components (map (fn [component]
+                                    (let [component-type (keyword (clojure.string/lower-case (:type component)))
+                                          component-options (get options component-type)]
+                                      (assoc component :params (merge (:params component)
+                                                                      component-options))))
+                                  components))))
+
 (asset-db/defasset prefab
   :instantiate
   (fn [system params]
@@ -24,5 +33,5 @@
         asset (get asset-db asset-name)
         inst-fn (-> (symbol (:asset asset))
                     (asset-db/get-asset-def)
-                    (:instantiate))]
-    (inst-fn system asset)))
+                    (get :instantiate))]
+    (inst-fn system (override-prefab-params asset options))))

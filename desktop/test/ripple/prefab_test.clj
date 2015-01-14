@@ -5,6 +5,29 @@
             [ripple.asset-database :as asset-db]
             [ripple.components :as components]))
 
+(deftest override-prefab-params
+  (testing "should merge prefab params with options"
+    (let [asset {:asset "prefab"
+                 :name "prefab1"
+                 :components [{:type "Player"
+                               :params {:x 1
+                                        :y 5}}
+                              {:type "Stuff"
+                               :params {:a 4
+                                        :b 9}}]}
+          options {:player {:x 25}
+                   :stuff {:b 2}}]
+
+      (is (= (prefab/override-prefab-params asset options)
+             {:asset "prefab"
+              :name "prefab1"
+              :components [{:type "Player"
+                            :params {:x 25 
+                                     :y 5}}
+                           {:type "Stuff"
+                            :params {:a 4
+                                     :b 2}}]})))))
+
 (deftest prefab
 
   (components/defcomponent TestComponent
@@ -23,7 +46,7 @@
 
     ;; TODO - test prefabs that refer to other assets
 
-    (let [system (asset-db/start {} "resources/test/test-prefab.yaml")]
+    (let [system (asset-db/start {} ["resources/test/test-prefab.yaml"])]
       (let [system-with-instance (prefab/instantiate system "TestPrefab" {})
             entity (first (e/get-all-entities system-with-instance))
             component (e/get-component system-with-instance entity 'TestComponent)]

@@ -13,6 +13,7 @@
             [ripple.components :as c]
             [ripple.input :as input]
             [ripple.asset-database :as asset-db]
+            [ripple.prefab :as prefab]
             [brute.entity :as e]
             [brute.system :as s]))
 
@@ -51,8 +52,9 @@
   (let [ellipse (.getEllipse map-object)
         x (.x ellipse)
         y (.y ellipse)]
+    ;; TODO remove
     (if (= (.getName map-object) "PlayerSpawn")
-      (create-player system x y)
+      system
       system)))
 
 (defn- create-entities-in-map
@@ -68,15 +70,14 @@
   (let [tile-map (e/create-entity)]
     (-> system
         (create-entities-in-map (:tiled-map system))
-        (create-player 0 0)
+        (prefab/instantiate "Player" {:position {:x 200 :y 400}})
         (e/add-component tile-map (rendering/create-tiled-map-component "platform.tmx" (/ 1 32))))))
 
 (defn- create-systems
   "Register all the system functions"
   [system]
   (-> system
-      (asset-db/start ["resources/prefabs.yaml"
-                       "resources/animations.yaml"])
+      (asset-db/start ["resources/example.yaml"])
       (rendering/start)
       (assoc :tiled-map (load-map-file "platform.tmx"))
       (s/add-system-fn rendering/process-one-game-tick)
