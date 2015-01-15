@@ -43,11 +43,9 @@
         params:
           x: 200
           y: 200
-      - type: AnimatedSpriteRenderer
+      - type: AnimationController
+      - type: SpriteRenderer
         params:
-          animation: PlayerWalk
-      # - type: SpriteRenderer
-      #   params:
-      #     texture: PlayerSprite1
-      #     tile-size: [32, 32]
-      #     tile-indices: [0, 0]
+          texture: PlayerSprite1
+          tile-size: [32, 32]
+          tile-indices: [0, 0]

@@ -2,7 +2,8 @@
   (:require [play-clj.core :refer :all]
             [ripple.components :as c]
             [brute.entity :as e]
-            [brute.system :as s])
+            [brute.system :as s]
+            [ripple.asset-database :as asset-db])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
            [ripple.components Player Position]))
@@ -29,6 +30,17 @@
     (reduce #(move-player %1 %2 direction)
             system player-entities)))
 
+(defn play-animation [system entity animation]
+  (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
+                                                                       :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
+                                                                       :playing true))))
+
+(defn- play-anim-on-all-controllers [system anim-name]
+  (let [anim-controller-entities (e/get-all-entities-with-component system 'AnimationController)
+        animation (asset-db/get-asset system anim-name)]
+    (reduce #(play-animation %1 %2 animation)
+            system anim-controller-entities)))
+
 (defn process-one-game-tick
   "Handle player movement..."
   [system delta]
@@ -45,5 +57,8 @@
 
     (key-pressed? :dpad-right)
     (move-player-components system :right)
+
+    (key-pressed? :p)
+    (play-anim-on-all-controllers system "PlayerWalk")
 
     :else system))

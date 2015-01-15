@@ -16,32 +16,14 @@
   (fn [system params]
     {:texture (asset-db/get-asset system (:texture params))}))
 
-;; TODO
-(c/defcomponent AnimatedSpriteRenderer
+(c/defcomponent AnimationController
   :create
   (fn [system params]
-    {:animation (asset-db/get-asset system (:animation params))}))
-
-;; TODO
-(c/defcomponent TiledMapRendererComponent
-  :create
-  (fn [system params]))
+    { :animation nil
+      :playing false
+      :start-time nil }))
 
 (def pixels-per-unit 32)
-
-;; (defn create-tiled-map-component
-;;   [path unit]
-;;   (let [renderer (orthogonal-tiled-map path unit)]
-;;     (assoc (c/->TiledMapRendererComponent renderer)
-;;            :type 'TiledMapRendererComponent)))
-
-;; (defn create-sprite-renderer
-;;   [texture-path tile-coord-x tile-coord-y tile-size-x tile-size-y]
-;;   (let [texture-region (-> (or (u/load-asset texture-path Texture)
-;;                                (Texture. texture-path))
-;;                            (TextureRegion. tile-coord-x tile-coord-y tile-size-x tile-size-y))]
-;;     {:type 'SpriteRenderer
-;;      :texture texture-region}))
 
 (defn- update-camera-projection [camera]
   (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
@@ -66,16 +48,6 @@
   (let [camera (:camera (:renderer system))]
     (update-camera-projection camera)))
 
-(defn- render-maps
-  "Render any tiled map renderer components"
-  [system]
-  (doseq [entity (e/get-all-entities-with-component system 'TiledMapRendererComponent)]
-    (let [tiled-map-component (e/get-component system entity 'TiledMapRendererComponent)
-          tiled-map-renderer (:tiled-map-renderer tiled-map-component)
-          camera (:camera (:renderer system))]
-      (.setView tiled-map-renderer camera)
-      (.render tiled-map-renderer))))
-
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system]
@@ -91,52 +63,33 @@
             x (float (/ (:x position) pixels-per-unit))
             y (float (/ (:y position) pixels-per-unit))]
         (.draw sprite-batch texture x y (float 1) (float 1))))
-    (.end sprite-batch)))
+    (.end sprite-batch)
+    system))
 
-(defn- render-animated-sprites
-  "Render sprites for each SpriteRenderer component"
+;;
+;; Not a huge fan of this, would be nicer if you could somehow 'plug in' an AnimationController to a SpriteRenderer
+;; so the SpriteRenderer can just query the controller for a texture region as necessary
+;;
+(defn- update-animation-controller
+  [system entity]
+  (let [animation-controller (e/get-component system entity 'AnimationController)
+        sprite-renderer (e/get-component system entity 'SpriteRenderer)]
+    (if-let [animation (:animation animation-controller)]
+      (let [anim-time (- (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
+                         (:start-time animation-controller))
+            anim-frame (.getKeyFrame animation (float anim-time) true)]
+        (e/update-component system entity 'SpriteRenderer #(-> % (assoc :texture anim-frame))))
+      system)))
+
+(defn- update-animation-controllers
   [system]
-  (let [sprite-batch (:sprite-batch (:renderer system))
-        camera (:camera (:renderer system))
-        ]
-    (.setProjectionMatrix sprite-batch (.combined camera))
-    (.begin sprite-batch)
-    (doseq [entity (e/get-all-entities-with-component system 'AnimatedSpriteRenderer)]
-      (let [sprite-renderer (e/get-component system entity 'AnimatedSpriteRenderer)
-            position (e/get-component system entity 'Position)
-            animation (:animation sprite-renderer)
-            time (mod (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
-                      (count (.getAnimationDuration animation)))
-            texture (.getKeyFrame animation (float time) true)
-            x (float (/ (:x position) pixels-per-unit))
-            y (float (/ (:y position) pixels-per-unit))]
-        (.draw sprite-batch texture x y (float 1) (float 1))))
-    (.end sprite-batch)))
+  (let [entities (e/get-all-entities-with-component system 'AnimationController)]
+    (reduce update-animation-controller
+            system entities)))
 
 (defn process-one-game-tick
   "Render stuff"
   [system _]
-  (let [camera (:camera (:renderer system))]
-
-    ;; Temp..
-    ;; (when (key-pressed? :w)
-    ;;   (.translate camera 0 1)
-    ;;   (.update camera))
-
-    ;; (when (key-pressed? :s)
-    ;;   (.translate camera 0 -1)
-    ;;   (.update camera))
-
-    ;; (when (key-pressed? :a)
-    ;;   (.translate camera -1 0)
-    ;;   (.update camera))
-
-    ;; (when (key-pressed? :d)
-    ;;   (.translate camera 01 0)
-    ;;   (.update camera))
-
-    ;(render-maps system)
-    (render-sprites system)
-    (render-animated-sprites system)
-    )
-  system)
+  (-> system
+      (update-animation-controllers)
+      (render-sprites)))
