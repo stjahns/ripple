@@ -24,7 +24,7 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "Player" {:position {:x 200 :y 400}}))))
+        (prefab/instantiate "Player" {:position {:x 200 :y 200}}))))
 
 (defn- create-systems
   "Register all the system functions"
@@ -72,7 +72,7 @@
                        (try (screen-fn)
                          (catch Exception e
                            (.printStackTrace e)
-                           (set-screen! main-screen blank-screen)))))
+                           (set-screen! ripple blank-screen)))))
 
 (defn reload []
   (on-gl (set-screen! ripple main-screen)))

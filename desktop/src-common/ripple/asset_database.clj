@@ -54,14 +54,6 @@
           height (second (:tile-size params))]
       (TextureRegion. texture x y width height))))
 
-;;
-;; Animation
-;; texture -
-;; tile-width -
-;; tile-height -
-;; frame-speed -
-;; frames - vector of 2 element vectors corresponding to tile indices
-;;
 (defasset animation
   :create
   (fn [system params]
@@ -97,37 +89,6 @@
             system components)
     system))
 
-;; (defasset prefab
-;;   :create
-;;   (fn [system params]
-;;     (let [entity (e/create-entity system)
-;;           components (:components prefab)])
-;;     ))
-
-
-;; DUMB PLAN
-;; Read every .yaml file in the resources directory tree
-
-(defn- load-map-file
-  "Return a TiledMap instance for the given path"
-  [path]
-  (let [map-loader (TmxMapLoader.)]
-   (.load map-loader path)))
-
-;; probably move to a 'level' module?
-
-(defn- get-object-layers
-  [tiled-map]
-  (filter (fn [layer] (= (type layer) MapLayer))
-   (.getLayers tiled-map)))
-
-(defn- get-map-objects [tiled-map]
-  (let [object-layer (first (get-object-layers tiled-map))]
-    (.getObjects object-layer)))
-
-;; TODO howto nice error checking, if-let?
-
-
 (defn create-component [type params]
   "Given a component type and some params, instantiate the component data"
   (let [record-constructor (-> (apply str ["c/->" type]) ;; ghettoooo
@@ -144,25 +105,6 @@
     (reduce (fn [system component] (e/add-component system component))
             system components)
     system))
-
-(defn- create-entity-from-map-object
-  "For the given map object, create and add an entity with the required components
-  (if appropriate) to the ES system"
-  [system map-object]
-  (let [ellipse (.getEllipse map-object)
-        x (.x ellipse)
-        y (.y ellipse)]
-    (if (= (.getName map-object) "PlayerSpawn")
-      nil ;;(create-player system x y)
-      system)))
-
-
-(defn- create-entities-in-map
-  [system tiled-map]
-  (let [map-objects (get-map-objects tiled-map)]
-    (reduce (fn [system map-object]
-              (create-entity-from-map-object system map-object))
-            system map-objects)))
 
 (defn- load-asset-file [path]
   (yaml/parse-string
