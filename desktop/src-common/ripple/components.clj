@@ -4,6 +4,10 @@
   (:import
    [clojure.lang PersistentArrayMap]))
 
+;;
+;; Tell brute.entity to use value for :type in a component map
+;; to differentiate component types
+;;
 (defmethod get-component-type PersistentArrayMap
   [component]
   (:type component))
@@ -34,6 +38,5 @@
 
 (defcomponent Position
   :create
-  (fn [system params]
-    {:x (:x params)
-     :y (:y params)}))
+  (fn [system {:keys [x y]}]
+    {:x x :y y})) 

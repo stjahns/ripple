@@ -1,9 +1,15 @@
 (ns ripple.tiled-map
-  (:require [])
-  (:import []))
+  (:require [ripple.asset-database :as a])
+  (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]))
 
-;; TiledMap related stuff
-;; TODO
+;;
+;; Representation of a LibGDX TiledMap
+;;
+(a/defasset tiled-map
+  :create
+  (fn [system {:keys [path]}]
+    (-> (TmxMapLoader.)
+        (.load path))))
 
 ;; (c/defcomponent TiledMapRendererComponent
 ;;   :create

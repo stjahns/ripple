@@ -1,13 +1,7 @@
 (ns ripple.core
-  (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite]
-           [com.badlogic.gdx.graphics Texture]
-           [com.badlogic.gdx.maps MapLayer]
-           [com.badlogic.gdx.maps.tiled TmxMapLoader]
-           )
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.move-target :as move-target]
             [ripple.player :as player]
             [ripple.rendering :as rendering]
             [ripple.components :as c]
@@ -30,7 +24,7 @@
   "Register all the system functions"
   [system]
   (-> system
-      (asset-db/start ["resources/example.yaml"])
+      (asset-db/start ["resources/assets.yaml"])
       (rendering/start)
       (s/add-system-fn rendering/process-one-game-tick)
       (s/add-system-fn input/process-one-game-tick)))
@@ -43,7 +37,7 @@
         (create-systems)
         (start)
         (as-> s (reset! sys s)))
-    (update! screen :renderer (stage) :camera (orthographic)) ;; not actually used at all ...
+    (update! screen :renderer (stage) :camera (orthographic))
     nil)
 
   :on-render

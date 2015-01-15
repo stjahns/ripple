@@ -25,8 +25,6 @@
       (reduce (fn [system component] (e/add-component system entity component))
               system components))))
 
-;; Should this go in asset?
-
 (defn instantiate [system asset-name options]
   "Get a prefab by name and instantiate it in the ES system"
   (let [asset-db (:asset-db system)

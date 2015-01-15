@@ -41,70 +41,32 @@
 
 (defasset texture
   :create
-  (fn [system params]
-    (Texture. (:path params))))
+  (fn [system {:keys [path]}]
+    (Texture. path)))
 
 (defasset texture-region
   :create
-  (fn [system params]
-    (let [texture (get-asset system (:texture params))
-          x (first (:tile-indices params))
-          y (second (:tile-indices params))
-          width (first (:tile-size params))
-          height (second (:tile-size params))]
+  (fn [system {texture-id :texture
+               [x y] :tile-indices
+               [width height] :tile-size}]
+    (let [texture (get-asset system texture-id)]
       (TextureRegion. texture x y width height))))
 
 (defasset animation
   :create
-  (fn [system params]
-    ;; create a LibGDX animation using the asset params
-    (let [frame-duration (:frame-speed params)
-          frame-width (:tile-width params)
-          frame-height (:tile-height params)
-          texture (get-asset system (:texture params))
+  (fn [system {:keys [frame-duration
+                      texture
+                      frames] ; frames should be a list of [x, y] pairs
+               [frame-width frame-height] :frame-size}]
+    (let [texture (get-asset system texture)
           key-frames (map #(TextureRegion. texture
                                            (* frame-width (first %))
                                            (* frame-height (second %))
                                            frame-width
                                            frame-height)
-                          (:frames params))]
+                          frames)]
       (Animation. (float frame-duration)
                   (u/gdx-array key-frames)))))
-
-
-(defn create-component [type params]
-  "Given a component type and some params, instantiate the component data"
-  (let [record-constructor (-> (apply str ["c/->" type]) ;; ghettoooo
-                               (symbol)
-                               (resolve))]
-    (apply record-constructor params)))
-
-(defn create-entity-from-prefab [system prefab-name params]
-  (let [prefab (-> (:asset-db system)
-                      (get prefab-name))
-           entity (e/create-entity system)
-           components (:components prefab)
-           system-with-entity (e/add-entity system entity)]
-    (reduce (fn [system component] (e/add-component system component))
-            system components)
-    system))
-
-(defn create-component [type params]
-  "Given a component type and some params, instantiate the component data"
-  (let [record-constructor (-> (apply str ["c/->" type]) ;; ghettoooo
-                               (symbol)
-                               (resolve))]
-    (apply record-constructor params)))
-
-(defn create-entity-from-prefab [system prefab-name params]
-  (let [prefab (-> (:asset-db system)
-                      (get prefab-name))
-           entity (e/create-entity system)
-           components (:components prefab)
-           system-with-entity (e/add-entity system entity)]
-    (reduce (fn [system component] (e/add-component system component))
-            system components)
-    system))
 
 (defn- load-asset-file [path]
   (yaml/parse-string

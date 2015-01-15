@@ -8,12 +8,17 @@
     tile-size: [32, 32]
     tile-indices: [0, 0]
 
+  - asset: tiled-map 
+    name: PlatformMap
+    path: resources/platform.tmx
+    tile-size: [32, 32]
+    tile-indices: [0, 0]
+
   - asset: animation
     name: PlayerIdle
     texture: PlayerSpriteSheet
-    tile-width: 32
-    tile-height: 32
-    frame-speed: 1.0
+    frame-size: [32, 32]
+    frame-duration: 1.0
     frames:
       - [0, 0]
       - [1, 0]
@@ -23,9 +28,8 @@
   - asset: animation
     name: PlayerWalk
     texture: PlayerSpriteSheet
-    tile-width: 32
-    tile-height: 32
-    frame-speed: 0.1
+    frame-size: [32, 32]
+    frame-duration: 0.1
     frames:
       - [0, 0]
       - [1, 0]
