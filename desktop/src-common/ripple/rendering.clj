@@ -5,7 +5,8 @@
             [ripple.components :as c]
             [ripple.asset-database :as asset-db]
             [brute.entity :as e]
-            [brute.system :as s])
+            [brute.system :as s]
+            [ripple.tiled-map :as tiled-map])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx Gdx]
@@ -92,4 +93,5 @@
   [system _]
   (-> system
       (update-animation-controllers)
+      (tiled-map/render-maps) ;; TODO - figure out some system to register callbacks or something
       (render-sprites)))

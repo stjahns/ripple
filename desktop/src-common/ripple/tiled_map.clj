@@ -1,6 +1,10 @@
 (ns ripple.tiled-map
-  (:require [ripple.asset-database :as a])
-  (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]))
+  (:require [ripple.asset-database :as a]
+            [ripple.components :as c]
+            [brute.entity :as e])
+  (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]
+           [com.badlogic.gdx.maps MapLayer]
+           [com.badlogic.gdx.maps.tiled.renderers OrthogonalTiledMapRenderer]))
 
 ;;
 ;; Representation of a LibGDX TiledMap
@@ -11,42 +15,31 @@
     (-> (TmxMapLoader.)
         (.load path))))
 
-;; (c/defcomponent TiledMapRendererComponent
-;;   :create
-;;   (fn [system params]))
+(c/defcomponent OrthogonalTiledMapRenderer
+  :create
+  (fn [system {:keys [tiled-map unit]}]
+    (let [tiled-map (a/get-asset system tiled-map)]
+      {:renderer (OrthogonalTiledMapRenderer. tiled-map (float unit))})))
 
-;; (defn create-tiled-map-component
-;;   [path unit]
-;;   (let [renderer (orthogonal-tiled-map path unit)]
-;;     (assoc (c/->TiledMapRendererComponent renderer)
-;;            :type 'TiledMapRendererComponent)))
+(defn- get-object-layers
+  [tiled-map]
+  (filter (fn [layer] (= (type layer) MapLayer))
+   (.getLayers tiled-map)))
 
-;; (defn- render-maps
-;;   "Render any tiled map renderer components"
-;;   [system]
-;;   (doseq [entity (e/get-all-entities-with-component system 'TiledMapRendererComponent)]
-;;     (let [tiled-map-component (e/get-component system entity 'TiledMapRendererComponent)
-;;           tiled-map-renderer (:tiled-map-renderer tiled-map-component)
-;;           camera (:camera (:renderer system))]
-;;       (.setView tiled-map-renderer camera)
-;;       (.render tiled-map-renderer))))
+(defn- get-map-objects [tiled-map]
+  (let [object-layer (first (get-object-layers tiled-map))]
+    (.getObjects object-layer)))
 
-;; (defn- load-map-file
-;;   "Return a TiledMap instance for the given path"
-;;   [path]
-;;   (let [map-loader (TmxMapLoader.)]
-;;    (.load map-loader path)))
-
-;; ;; probably move to a 'level' module?
-
-;; (defn- get-object-layers
-;;   [tiled-map]
-;;   (filter (fn [layer] (= (type layer) MapLayer))
-;;    (.getLayers tiled-map)))
-
-;; (defn- get-map-objects [tiled-map]
-;;   (let [object-layer (first (get-object-layers tiled-map))]
-;;     (.getObjects object-layer)))
+(defn render-maps
+  "Render any tiled map renderer components"
+  [system]
+  (doseq [entity (e/get-all-entities-with-component system 'OrthogonalTiledMapRenderer)]
+    (let [tiled-map-component (e/get-component system entity 'OrthogonalTiledMapRenderer)
+          tiled-map-renderer (:renderer tiled-map-component)
+          camera (:camera (:renderer system))]
+      (.setView tiled-map-renderer camera)
+      (.render tiled-map-renderer)))
+  system)
 
 ;; (defn- create-entity-from-map-object
 ;;   "For the given map object, create and add an entity with the required components

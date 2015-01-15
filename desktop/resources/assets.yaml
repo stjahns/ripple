@@ -11,8 +11,14 @@
   - asset: tiled-map 
     name: PlatformMap
     path: resources/platform.tmx
-    tile-size: [32, 32]
-    tile-indices: [0, 0]
+
+  - asset: prefab
+    name: PlatformLevel
+    components:
+      - type: OrthogonalTiledMapRenderer
+        params:
+          tiled-map: PlatformMap
+          unit: 1
 
   - asset: animation
     name: PlayerIdle

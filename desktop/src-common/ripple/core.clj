@@ -8,6 +8,7 @@
             [ripple.input :as input]
             [ripple.asset-database :as asset-db]
             [ripple.prefab :as prefab]
+            [ripple.tiled-map :as tiled-map]
             [brute.entity :as e]
             [brute.system :as s]))
 
@@ -18,6 +19,7 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
+        (prefab/instantiate "PlatformLevel" {})
         (prefab/instantiate "Player" {:position {:x 200 :y 200}}))))
 
 (defn- create-systems
