@@ -5,8 +5,7 @@
             [brute.system :as s]
             [ripple.asset-database :as asset-db])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
-           [com.badlogic.gdx.graphics Texture]
-           [ripple.components Player Position]))
+           [com.badlogic.gdx.graphics Texture]))
 
 (defn get-movement-position
   [position direction]

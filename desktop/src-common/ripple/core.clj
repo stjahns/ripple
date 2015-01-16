@@ -4,9 +4,11 @@
             [play-clj.utils :as u]
             [ripple.player :as player]
             [ripple.rendering :as rendering]
+            [ripple.sprites :as sprites]
             [ripple.components :as c]
             [ripple.input :as input]
             [ripple.asset-database :as asset-db]
+            [ripple.subsystem :as subsystem]
             [ripple.prefab :as prefab]
             [ripple.tiled-map :as tiled-map]
             [brute.entity :as e]
@@ -27,8 +29,6 @@
   [system]
   (-> system
       (asset-db/start ["resources/assets.yaml"])
-      (rendering/start)
-      (s/add-system-fn rendering/process-one-game-tick)
       (s/add-system-fn input/process-one-game-tick)))
 
 (defscreen main-screen
@@ -36,6 +36,7 @@
   (fn [screen entities]
     (println "Started")
     (-> (e/create-system)
+        (subsystem/on-show)
         (create-systems)
         (start)
         (as-> s (reset! sys s)))
@@ -45,13 +46,14 @@
   :on-render
   (fn [screen entities]
     (clear!)
+    (reset! sys (subsystem/on-render @sys))
     (reset! sys (s/process-one-game-tick @sys (graphics! :get-delta-time)))
     (render! screen)
     nil)
 
   :on-resize
   (fn [screen entities]
-    (rendering/on-viewport-resize @sys)
+    (subsystem/on-resize @sys)
     nil))
 
 (defscreen blank-screen

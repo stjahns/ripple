@@ -2,8 +2,7 @@
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite Animation]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx.maps MapLayer]
-           [com.badlogic.gdx.maps.tiled TmxMapLoader]
-           [ripple.components Position SpriteRenderer TiledMapRendererComponent Player])
+           [com.badlogic.gdx.maps.tiled TmxMapLoader])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
