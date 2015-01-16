@@ -1,15 +1,13 @@
 (ns ripple.assets
-  (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite Animation]
-           [com.badlogic.gdx.graphics Texture]
-           [com.badlogic.gdx.maps MapLayer]
-           [com.badlogic.gdx.maps.tiled TmxMapLoader])
+  (:import [com.badlogic.gdx.graphics.g2d TextureRegion Animation]
+           [com.badlogic.gdx.graphics Texture])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
             [ripple.components :as c]
+            [ripple.subsystem :as s]
             [clj-yaml.core :as yaml]
-            [brute.entity :as e]
-            [brute.system :as s]))
+            [brute.entity :as e]))
 
 (def asset-defs (atom {}))
 
@@ -76,9 +74,10 @@
 (defn load-asset [asset-db asset]
   (assoc asset-db (:name asset) asset))
 
-(defn start
-  "Start this system"
-  [system asset-files]
-  (let [asset-db (init-asset-db)
-        parsed-assets (flatten (map load-asset-file asset-files))]
-    (assoc system :asset-db (reduce load-asset asset-db parsed-assets))))
+(s/defsubsystem asset-db
+  :on-show
+  (fn [system]
+    (let [asset-db (init-asset-db)
+          asset-files ["resources/assets.yaml"]
+          parsed-assets (flatten (map load-asset-file asset-files))]
+      (assoc system :asset-db (reduce load-asset asset-db parsed-assets)))))

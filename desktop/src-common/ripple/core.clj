@@ -6,7 +6,7 @@
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.components :as c]
-            [ripple.assets :as asset-db]
+            [ripple.assets :as a]
             [ripple.subsystem :as subsystem]
             [ripple.prefab :as prefab]
             [ripple.tiled-map :as tiled-map]
@@ -23,19 +23,11 @@
         (prefab/instantiate "PlatformLevel" {})
         (prefab/instantiate "Player" {:position {:x 200 :y 200}}))))
 
-(defn- create-systems
-  "Register all the system functions"
-  [system]
-  (-> system
-      (asset-db/start ["resources/assets.yaml"])))
-
 (defscreen main-screen
   :on-show
   (fn [screen entities]
-    (println "Started")
     (-> (e/create-system)
         (subsystem/on-show)
-        (create-systems)
         (start)
         (as-> s (reset! sys s)))
     (update! screen :renderer (stage) :camera (orthographic))
@@ -45,7 +37,6 @@
   (fn [screen entities]
     (clear!)
     (reset! sys (subsystem/on-render @sys))
-    (reset! sys (s/process-one-game-tick @sys (graphics! :get-delta-time)))
     (render! screen)
     nil)
 
