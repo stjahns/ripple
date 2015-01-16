@@ -17,6 +17,11 @@
      :playing false
      :start-time nil}))
 
+(defn play-animation [system entity animation]
+  (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
+                                                                       :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
+                                                                       :playing true))))
+
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system]

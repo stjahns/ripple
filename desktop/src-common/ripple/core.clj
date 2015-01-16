@@ -6,7 +6,6 @@
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.components :as c]
-            [ripple.input :as input]
             [ripple.asset-database :as asset-db]
             [ripple.subsystem :as subsystem]
             [ripple.prefab :as prefab]
@@ -28,8 +27,7 @@
   "Register all the system functions"
   [system]
   (-> system
-      (asset-db/start ["resources/assets.yaml"])
-      (s/add-system-fn input/process-one-game-tick)))
+      (asset-db/start ["resources/assets.yaml"])))
 
 (defscreen main-screen
   :on-show
