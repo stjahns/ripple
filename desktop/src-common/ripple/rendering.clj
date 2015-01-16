@@ -39,4 +39,8 @@
         (assoc-in [:renderer :pixels-per-unit] pixels-per-unit)))
 
   :on-resize on-viewport-resize
-  :on-render identity)
+
+  :on-pre-render
+  (fn [system]
+    (clear!)
+    system))

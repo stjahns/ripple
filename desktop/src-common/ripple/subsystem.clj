@@ -19,6 +19,13 @@
               system))
           system (vals @subsystems))) ;; prefer this not to be global... :/
 
+(defn on-pre-render [system]
+  (reduce (fn [system {subsystem-fn :on-pre-render}]
+            (if subsystem-fn
+              (subsystem-fn system)
+              system))
+          system (vals @subsystems))) ;; prefer this not to be global... :/
+
 (defn on-render [system]
   (reduce (fn [system {subsystem-fn :on-render}]
             (if subsystem-fn

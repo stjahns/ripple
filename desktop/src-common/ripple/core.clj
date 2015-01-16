@@ -35,9 +35,9 @@
 
   :on-render
   (fn [screen entities]
-    (clear!)
-    (reset! sys (subsystem/on-render @sys))
-    (render! screen)
+    (reset! sys (-> @sys
+                    (subsystem/on-pre-render)
+                    (subsystem/on-render)))
     nil)
 
   :on-resize
