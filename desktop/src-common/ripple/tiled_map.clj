@@ -1,6 +1,8 @@
 (ns ripple.tiled-map
   (:require [ripple.assets :as a]
             [ripple.components :as c]
+            [ripple.subsystem :as s]
+            [ripple.rendering :as r]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]
            [com.badlogic.gdx.maps MapLayer]
@@ -40,6 +42,11 @@
       (.setView tiled-map-renderer camera)
       (.render tiled-map-renderer)))
   system)
+
+(s/defsubsystem level
+  :on-show
+  (fn [system]
+    (r/register-render-callback system render-maps 0)))
 
 ;; (defn- create-entity-from-map-object
 ;;   "For the given map object, create and add an entity with the required components

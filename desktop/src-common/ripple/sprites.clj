@@ -1,6 +1,7 @@
 (ns ripple.sprites
   (require [ripple.subsystem :as s]
            [ripple.components :as c]
+           [ripple.rendering :as r]
            [brute.entity :as e]
            [ripple.assets :as a])
   (import [com.badlogic.gdx.graphics.g2d SpriteBatch]))
@@ -65,10 +66,11 @@
 
   :on-show
   (fn [system]
-    (assoc-in system [:sprites :sprite-batch] (SpriteBatch.)))
+    (-> system
+        (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
+        (r/register-render-callback render-sprites 1))) ;; TODO - be able to specify order for each SpriteRenderer component
 
-  :on-render
+  :on-pre-render
   (fn [system]
     (-> system
-        (update-animation-controllers)
-        (render-sprites))))
+        (update-animation-controllers))))

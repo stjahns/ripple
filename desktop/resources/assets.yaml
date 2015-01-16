@@ -12,13 +12,25 @@
     name: PlatformMap
     path: resources/platform.tmx
 
+  - asset: tiled-map 
+    name: DungeonMap
+    path: resources/dungeon.tmx
+
+  - asset: prefab
+    name: DungeonLevel
+    components:
+      - type: OrthogonalTiledMapRenderer
+        params:
+          tiled-map: DungeonMap
+          unit: 0.03125 # 1 / 32
+
   - asset: prefab
     name: PlatformLevel
     components:
       - type: OrthogonalTiledMapRenderer
         params:
           tiled-map: PlatformMap
-          unit: 1
+          unit: 0.03125 # 1 / 32
 
   - asset: animation
     name: PlayerIdle

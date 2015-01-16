@@ -5,8 +5,7 @@
             [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.assets :as asset-db]
-            [brute.entity :as e]
-            [ripple.tiled-map :as tiled-map])
+            [brute.entity :as e])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx Gdx]))
@@ -30,8 +29,22 @@
   (let [camera (:camera (:renderer system))]
     (update-camera-projection camera)))
 
-(s/defsubsystem rendering
+(defn render
+  [system]
+  "Invokes all registered render callbacks in increasing order"
+  (let [render-callbacks (get-in system [:renderer :render-callbacks])]
+    (reduce (fn [system [_ callback]] (callback system))
+            system render-callbacks)))
 
+(defn register-render-callback [system render-fn order]
+  "Register a render callback, where callbacks will be called in increasing order"
+  (let [render-callbacks (get-in system [:renderer :render-callbacks])
+        new-callback [order render-fn]]
+    (assoc-in system [:renderer :render-callbacks]
+              (sort #(< (first %1) (first %2))
+                    (conj render-callbacks new-callback)))))
+
+(s/defsubsystem rendering
   :on-show
   (fn [system]
     (-> system
@@ -43,4 +56,6 @@
   :on-pre-render
   (fn [system]
     (clear!)
-    system))
+    system)
+
+  :on-render render)

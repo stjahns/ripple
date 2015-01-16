@@ -20,7 +20,7 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "PlatformLevel" {})
+        (prefab/instantiate "DungeonLevel" {})
         (prefab/instantiate "Player" {:position {:x 200 :y 200}}))))
 
 (defscreen main-screen
