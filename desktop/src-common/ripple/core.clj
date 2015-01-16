@@ -6,7 +6,7 @@
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.components :as c]
-            [ripple.asset-database :as asset-db]
+            [ripple.assets :as asset-db]
             [ripple.subsystem :as subsystem]
             [ripple.prefab :as prefab]
             [ripple.tiled-map :as tiled-map]

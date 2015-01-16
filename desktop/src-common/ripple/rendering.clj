@@ -4,7 +4,7 @@
             [play-clj.utils :as u]
             [ripple.subsystem :as s]
             [ripple.components :as c]
-            [ripple.asset-database :as asset-db]
+            [ripple.assets :as asset-db]
             [brute.entity :as e]
             [ripple.tiled-map :as tiled-map])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]

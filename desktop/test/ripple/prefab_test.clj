@@ -2,7 +2,7 @@
   (:use [clojure.test])
   (:require [ripple.prefab :as prefab]
             [brute.entity :as e]
-            [ripple.asset-database :as asset-db]
+            [ripple.assets :as asset-db]
             [ripple.components :as components]))
 
 (deftest override-prefab-params
@@ -22,7 +22,7 @@
              {:asset "prefab"
               :name "prefab1"
               :components [{:type "Player"
-                            :params {:x 25 
+                            :params {:x 25
                                      :y 5}}
                            {:type "Stuff"
                             :params {:a 4

@@ -1,4 +1,4 @@
-(ns ripple.asset-database
+(ns ripple.assets
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion Sprite Animation]
            [com.badlogic.gdx.graphics Texture]
            [com.badlogic.gdx.maps MapLayer]

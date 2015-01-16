@@ -1,5 +1,5 @@
 (ns ripple.tiled-map
-  (:require [ripple.asset-database :as a]
+  (:require [ripple.assets :as a]
             [ripple.components :as c]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]

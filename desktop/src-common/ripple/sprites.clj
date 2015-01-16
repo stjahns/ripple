@@ -2,7 +2,7 @@
   (require [ripple.subsystem :as s]
            [ripple.components :as c]
            [brute.entity :as e]
-           [ripple.asset-database :as a])
+           [ripple.assets :as a])
   (import [com.badlogic.gdx.graphics.g2d SpriteBatch]))
 
 (c/defcomponent SpriteRenderer

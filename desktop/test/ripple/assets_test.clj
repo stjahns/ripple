@@ -1,6 +1,6 @@
-(ns ripple.asset-database-test
+(ns ripple.assets-test
   (:use [clojure.test])
-  (:require [ripple.asset-database :as asset-db]))
+  (:require [ripple.assets :as asset-db]))
 
 (deftest load-asset-file
 

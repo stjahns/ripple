@@ -1,7 +1,7 @@
 (ns ripple.prefab
   (:require
    [brute.entity :as e]
-   [ripple.asset-database :as asset-db]
+   [ripple.assets :as asset-db]
    [ripple.components :as components]))
 
 (defn override-prefab-params [asset options]
