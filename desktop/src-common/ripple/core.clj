@@ -15,13 +15,19 @@
 
 (def sys (atom 0))
 
+;; temp - for testing physics
+(defn- spawn-blocks [system]
+  (reduce #(prefab/instantiate %1 "BlockPrefab" {:position {:x (+ %2 200) :y 200}})
+          system (range 0 256 32)))
+
 (defn- start
   "Create all the initial entities with their components"
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "DungeonLevel" {})
-        (prefab/instantiate "Player" {:position {:x 200 :y 200}}))))
+        ;;(prefab/instantiate "DungeonLevel" {})
+        (prefab/instantiate "Player" {:position {:x 200 :y 232}})
+        (spawn-blocks))))
 
 (defscreen main-screen
   :on-show

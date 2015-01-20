@@ -71,3 +71,20 @@
           texture: PlayerSprite1
           tile-size: [32, 32]
           tile-indices: [0, 0]
+
+# Block
+
+  - asset: texture
+    name: BlockSprite
+    path: sprites/Block.png
+
+  - asset: prefab
+    name: BlockPrefab
+    components:
+      - type: SpriteRenderer
+        params:
+          texture: BlockSprite
+          tile-size: [32, 32]
+          tile-indices: [0, 0]
+      - type: Position
+
