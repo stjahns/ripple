@@ -87,4 +87,9 @@
           tile-size: [32, 32]
           tile-indices: [0, 0]
       - type: Position
-
+      - type: BoxFixture
+        params:
+          body-type: static
+          width: 32
+          height: 32
+          density: 1

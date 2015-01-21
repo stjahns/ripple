@@ -5,6 +5,7 @@
             [ripple.player :as player]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
+            [ripple.physics :as physics]
             [ripple.components :as c]
             [ripple.assets :as a]
             [ripple.subsystem :as subsystem]
@@ -17,7 +18,8 @@
 
 ;; temp - for testing physics
 (defn- spawn-blocks [system]
-  (reduce #(prefab/instantiate %1 "BlockPrefab" {:position {:x (+ %2 200) :y 200}})
+  (reduce #(prefab/instantiate %1 "BlockPrefab" {:position {:x (+ %2 200) :y 200}
+                                                 :boxfixture {:x (+ %2 200) :y 200}})
           system (range 0 256 32)))
 
 (defn- start
