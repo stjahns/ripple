@@ -39,7 +39,7 @@
        :fixture fixture})))
 
 (defn- create-world []
-  (let [gravity (Vector2. 0 -98)
+  (let [gravity (Vector2. 0 -9.8)
         do-sleep true]
     (World. gravity do-sleep)))
 

@@ -1,54 +1,53 @@
 (ns ripple.player
-  (:require
-   [play-clj.core :refer :all]
-   [brute.entity :as e]
-   [ripple.components :refer :all]
-   [ripple.subsystem :as s]))
+  (:require [play-clj.core :refer :all]
+            [brute.entity :as e]
+            [ripple.components :refer :all]
+            [ripple.subsystem :as s])
+  (:import [com.badlogic.gdx.math Vector2]
+           [com.badlogic.gdx Input$Keys]
+           [com.badlogic.gdx Gdx]
+           ))
 
-;; An example Player component that handles movement with arrow keys
-
-(defn get-movement-position
-  [position direction]
-  (case direction
-    :up [(:x position) (inc (:y position))]
-    :down [(:x position) (dec (:y position))]
-    :left [(dec (:x position)) (:y position)]
-    :right [(inc (:x position)) (:y position)]
-    nil))
-
-(defn- move-player
-  [system entity direction]
-  (let [player-position (e/get-component system entity 'Position)
-        [new-x new-y] (get-movement-position player-position direction)]
-    (e/update-component system entity 'Position #(-> % (assoc :x new-x
-                                                              :y new-y)))))
-
-(defn- move-player-components
-  [system direction]
-  (let [player-entities (e/get-all-entities-with-component system 'Player)]
-    (reduce #(move-player %1 %2 direction)
-            system player-entities)))
+;; An example Player component that handles physics-based movement with arrow keys
 
 (defcomponent Player
   :create
   (fn [system params]))
 
-(defn- get-player-input [system]
-  (cond
+(defn- get-move-direction []
+  "Return normalized movement direction for whatever movement keys are currently depressed"
+  (let [keys-to-direction {Input$Keys/DPAD_UP (Vector2. 0 1)
+                           Input$Keys/DPAD_DOWN (Vector2. 0 -1)
+                           Input$Keys/DPAD_LEFT (Vector2. -1 0)
+                           Input$Keys/DPAD_RIGHT (Vector2. 1 0)}]
+    (-> (reduce (fn [move-direction [keycode direction]]
+                  (if (.isKeyPressed Gdx/input keycode)
+                    (.add move-direction direction)
+                    move-direction))
+                (Vector2. 0 0) keys-to-direction)
+        (.nor))))
 
-    (key-pressed? :dpad-up)
-    (move-player-components system :up)
+(defn- apply-movement-force
+  [system entity direction]
+  (let [body (-> (e/get-component system entity 'BoxFixture)
+                 (:body))
+        force (float 1000000.0) ;; TODO - fix horrible problem with world scale
+        force (.scl direction force)]
+    (println force)
+    (.applyForceToCenter body force true)))
 
-    (key-pressed? :dpad-down)
-    (move-player-components system :down)
+(defn- update-player
+  [system entity]
+  (let [direction (get-move-direction)]
+    (when (> (.len2 direction) 0)
+      (apply-movement-force system entity direction))
+    system))
 
-    (key-pressed? :dpad-left)
-    (move-player-components system :left)
+(defn- update-player-components
+  [system]
+  (let [player-entities (e/get-all-entities-with-component system 'Player)]
+    (reduce update-player system player-entities)))
 
-    (key-pressed? :dpad-right)
-    (move-player-components system :right)
+(s/defsubsystem player
+  :on-render update-player-components)
 
-    :else system))
-
-(s/defsubsystem player-input
-  :on-render get-player-input)
