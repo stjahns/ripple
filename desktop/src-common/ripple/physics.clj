@@ -4,9 +4,16 @@
             [play-clj.utils :as u]
             [ripple.subsystem :as s]
             [ripple.components :as c]
+            [ripple.rendering :as r]
             [ripple.assets :as asset-db]
             [brute.entity :as e])
-  (:import [com.badlogic.gdx.physics.box2d World BodyDef BodyDef$BodyType PolygonShape FixtureDef]
+  (:import [com.badlogic.gdx.physics.box2d
+            World
+            BodyDef
+            BodyDef$BodyType
+            PolygonShape
+            FixtureDef
+            Box2DDebugRenderer]
            [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Gdx]))
 
@@ -22,7 +29,7 @@
                      (-> .type (set! body-type))
                      (-> .position (.set x y)))
           shape-def (doto (PolygonShape.)
-                      (.setAsBox width height))
+                      (.setAsBox (/ width 2) (/ height 2))) ;;  setAsBox takes half-width and half-height
           fixture-def (doto (FixtureDef.)
                         (-> .shape (set! shape-def))
                         (-> .density (set! density)))
@@ -52,11 +59,28 @@
     (reduce update-box-fixture
             system entities)))
 
+(defn- debug-render*
+  [system]
+  (let [debug-renderer (get-in system [:physics :debug-renderer])
+        world (get-in system [:physics :world])
+        camera (get-in system [:renderer :camera])
+        pixels-per-unit (get-in system [:renderer :pixels-per-unit])
+        projection-matrix (.scale (.cpy (.combined camera))
+                                  (/ 1 pixels-per-unit) (/ 1 pixels-per-unit) 1)]
+    (.render debug-renderer world projection-matrix))
+  system)
+
+(defn- debug-render [system] (debug-render* system) system)
+
 (s/defsubsystem physics
+
   :on-show
   (fn [system]
     (-> system
-        (assoc-in [:physics :world] (create-world))))
+        (assoc-in [:physics :world] (create-world))
+        (assoc-in [:physics :debug-renderer] (Box2DDebugRenderer.))
+        (r/register-render-callback debug-render 2)))
+
   :on-pre-render
   (fn [system]
     (let [world (get-in system [:physics :world])]

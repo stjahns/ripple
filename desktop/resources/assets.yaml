@@ -66,6 +66,12 @@
           x: 200
           y: 200
       - type: AnimationController
+      - type: BoxFixture
+        params:
+          body-type: dynamic
+          width: 32
+          height: 32
+          density: 1
       - type: SpriteRenderer
         params:
           texture: PlayerSprite1

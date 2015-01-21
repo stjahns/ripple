@@ -27,8 +27,8 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        ;;(prefab/instantiate "DungeonLevel" {})
-        (prefab/instantiate "Player" {:position {:x 200 :y 232}})
+        (prefab/instantiate "Player" {:position {:x 200 :y 264}
+                                      :boxfixture {:x 200 :y 264}})
         (spawn-blocks))))
 
 (defscreen main-screen
