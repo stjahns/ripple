@@ -4,7 +4,8 @@
            [ripple.rendering :as r]
            [brute.entity :as e]
            [ripple.assets :as a])
-  (import [com.badlogic.gdx.graphics.g2d SpriteBatch]))
+  (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion]
+          [com.badlogic.gdx.graphics Texture ]))
 
 (c/defcomponent SpriteRenderer
   :create
@@ -23,6 +24,16 @@
                                                                        :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                                                                        :playing true))))
 
+(defmulti get-sprite-size class)
+
+(defmethod get-sprite-size com.badlogic.gdx.graphics.Texture
+  [texture]
+  [(.getWidth texture) (.getHeight texture)])
+
+(defmethod get-sprite-size com.badlogic.gdx.graphics.g2d.TextureRegion
+  [texture]
+  [(.getRegionWidth texture) (.getRegionHeight texture)])
+
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system]
@@ -35,8 +46,13 @@
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             position (e/get-component system entity 'Position)
             texture (:texture sprite-renderer)
-            x (float (/ (:x position) pixels-per-unit))
-            y (float (/ (:y position) pixels-per-unit))]
+            [width height] (get-sprite-size texture)
+            x (float (/ (- (:x position)
+                             (/ width 2))
+                          pixels-per-unit))
+            y (float (/ (- (:y position)
+                              (/ height 2))
+                           pixels-per-unit))]
         (.draw sprite-batch texture x y (float 1) (float 1))))
     (.end sprite-batch)
     system))
