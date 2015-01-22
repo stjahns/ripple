@@ -35,6 +35,32 @@
   [texture]
   [(.getRegionWidth texture) (.getRegionHeight texture)])
 
+;; TODO - maybe it would simplify things if we convert everything to TextureRegions
+
+(defmulti draw-sprite (fn [sprite-batch texture & args] (class texture)))
+
+(defmethod draw-sprite com.badlogic.gdx.graphics.g2d.TextureRegion
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation]
+  (.draw sprite-batch texture
+         (float (- x (/ width 2))) (float (- y (/ height 2)))
+         (/ width 2) (/ height 2)
+         (float width) (float height)
+         scale-x scale-y
+         rotation))
+
+(defmethod draw-sprite com.badlogic.gdx.graphics.Texture
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation]
+  (let [[srcWidth srcHeight] (get-sprite-size texture)]
+    (.draw sprite-batch texture
+           (float (- x (/ width 2))) (float (- y (/ height 2)))
+           (/ width 2) (/ height 2)
+           (float width) (float height)
+           (float scale-x) (float scale-y)
+           (float rotation)
+           0 0
+           srcWidth srcHeight
+           false false)))
+
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system]
@@ -44,14 +70,20 @@
     (.begin sprite-batch)
     (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
-            [x y] (:position (e/get-component system entity 'Transform))
+            transform (e/get-component system entity 'Transform)
+            [x y] (:position transform)
+            [sx sy] (:scale transform)
+            r (:rotation transform)
             pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
             [width height] (map #(/ % pixels-per-unit)
-                                (get-sprite-size texture))
-            x (float (- x (/ width 2)))
-            y (float (- y (/ height 2)))]
-        (.draw sprite-batch texture x y (float width) (float height))))
+                                (get-sprite-size texture))]
+        (draw-sprite sprite-batch
+                     texture
+                     (:position transform)
+                     [width height]
+                     (:scale transform)
+                     (:rotation transform))))
     (.end sprite-batch)
     system))
 

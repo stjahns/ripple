@@ -61,14 +61,16 @@
     (World. gravity do-sleep)))
 
 (defn- update-physics-body
-  "Updates the Position component on the entity with the current position of the Box2D body"
+  "Updates the Transform component on the entity with the current position and rotation of the Box2D body"
   [system entity]
-  (let [body-position (-> (e/get-component system entity 'PhysicsBody)
-                          (:body)
-                          (.getPosition))
+  (let [body (-> (e/get-component system entity 'PhysicsBody)
+                 (:body))
+        body-position (.getPosition body)
         x (.x body-position)
-        y (.y body-position)]
-    (e/update-component system entity 'Transform #(assoc % :position [x y]))))
+        y (.y body-position)
+        rotation (-> (.getAngle body)
+                     (Math/toDegrees))]
+    (e/update-component system entity 'Transform #(assoc % :position [x y] :rotation rotation))))
 
 (defn- update-physics-bodies
   [system]

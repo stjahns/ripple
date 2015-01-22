@@ -38,7 +38,9 @@
 
 (defcomponent Transform
   :create
-  (fn [system {:keys [:position :rotation :scale]
+  (fn [system {position :position
+               rotation :rotation
+               scale :scale
                :or {position [0 0]
                     rotation 0
                     scale [1 1]}}]

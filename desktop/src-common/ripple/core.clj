@@ -18,8 +18,8 @@
 
 ;; temp - for testing physics
 (defn- spawn-blocks [system]
-  (reduce #(prefab/instantiate %1 "BlockPrefab" {:transform {:position [(+ %2 2) 2]}
-                                                 :physicsbody {:x (+ %2 2) :y 2}})
+  (reduce #(prefab/instantiate %1 "BlockPrefab" {:physicsbody {:x (+ %2 2) :y 2}
+                                                 :transform {:scale [-1 1]}})
           system (range 0 10 1)))
 
 (defn- start
@@ -27,7 +27,7 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "Player" {:transform {:position [4 6]}
+        (prefab/instantiate "Player" {:transform {:scale [-1 1]}
                                       :physicsbody {:x 4 :y 6}})
         (spawn-blocks))))
 
