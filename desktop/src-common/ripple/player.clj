@@ -14,8 +14,10 @@
 
 (defcomponent Player
   :create
-  (fn [system {:keys [move-force]}]
+  (fn [system {:keys [move-force walk-animation idle-animation]}]
     {:state :standing
+     :walk-animation (a/get-asset system walk-animation)
+     :idle-animation (a/get-asset system idle-animation)
      :move-force move-force}))
 
 (defn- get-move-direction []
@@ -44,11 +46,13 @@
 
 (defmethod enter-state :walking
   [system entity state]
-  (sprites/play-animation system entity (a/get-asset system "PlayerWalk")))
+  (let [anim (:walk-animation (e/get-component system entity 'Player))]
+    (sprites/play-animation system entity anim)))
 
 (defmethod enter-state :standing
   [system entity state]
-  (sprites/play-animation system entity (a/get-asset system "PlayerIdle")))
+  (let [anim (:idle-animation (e/get-component system entity 'Player))]
+    (sprites/play-animation system entity anim)))
 
 (defn- update-state [system entity]
   (let [player (e/get-component system entity 'Player)

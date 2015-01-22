@@ -57,8 +57,8 @@
       - type: Player
         params:
           move-force: 15
-          idle-animation: PlayerWalk
-          walk-animation: PlayerIdle
+          idle-animation: PlayerIdle
+          walk-animation: PlayerWalk
       - type: Position
         params:
           x: 200
