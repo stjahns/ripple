@@ -41,6 +41,38 @@
       - [0, 0]
 
   - asset: animation
+    name: PlayerIdleAimUp
+    texture: PlayerSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 1.0
+    frames:
+      - [0, 1]
+
+  - asset: animation
+    name: PlayerIdleAimUpForward
+    texture: PlayerSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 1.0
+    frames:
+      - [0, 2]
+
+  - asset: animation
+    name: PlayerIdleAimDownForward
+    texture: PlayerSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 1.0
+    frames:
+      - [0, 3]
+
+  - asset: animation
+    name: PlayerIdleAimDown
+    texture: PlayerSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 1.0
+    frames:
+      - [0, 4]
+
+  - asset: animation
     name: PlayerWalk
     texture: PlayerSpriteSheet
     frame-size: [32, 32]

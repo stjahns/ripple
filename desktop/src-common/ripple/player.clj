@@ -25,7 +25,11 @@
   (let [keys-to-direction {Input$Keys/DPAD_UP (Vector2. 0 1)
                            Input$Keys/DPAD_DOWN (Vector2. 0 -1)
                            Input$Keys/DPAD_LEFT (Vector2. -1 0)
-                           Input$Keys/DPAD_RIGHT (Vector2. 1 0)}]
+                           Input$Keys/DPAD_RIGHT (Vector2. 1 0)
+                           Input$Keys/W (Vector2. 0 1)
+                           Input$Keys/S (Vector2. 0 -1)
+                           Input$Keys/A (Vector2. -1 0)
+                           Input$Keys/D (Vector2. 1 0)}]
     (-> (reduce (fn [move-direction [keycode direction]]
                   (if (.isKeyPressed Gdx/input keycode)
                     (.add move-direction direction)
@@ -75,11 +79,63 @@
       (apply-movement-force system entity direction))
     system))
 
+;; TODO - this will need to be smarter with movable camera... cant assume bottom left is 0,0
+
+(defn- screen-to-world
+  [system screen-x screen-y]
+  (let [pixels-per-unit (get-in system [:renderer :pixels-per-unit])
+        camera (get-in system [:renderer :camera])
+        screen-width (.getWidth Gdx/graphics)
+        screen-height (.getHeight Gdx/graphics)
+        screen-y (- screen-height screen-y) ;; relative to bottom-left
+        world-x (/ screen-x pixels-per-unit)
+        world-y (/ screen-y pixels-per-unit)]
+    [(float world-x) (float world-y)]))
+
+(def cardinal-directions-to-anims
+  (map (fn [[dir anim]] [(.nor dir) anim])
+       [[(Vector2. 0 1) "PlayerIdleAimUp"]
+        [(Vector2. 1 1) "PlayerIdleAimUpForward"]
+        [(Vector2. 1 0) "PlayerIdle"]
+        [(Vector2. 1 -1)  "PlayerIdleAimDownForward"]
+        [(Vector2. 0 -1) "PlayerIdleAimDown"]
+        [(Vector2. -1 -1) "PlayerIdleAimDownForward"]
+        [(Vector2. -1 0) "PlayerIdle"]
+        [(Vector2. -1 1) "PlayerIdleAimUpForward"]]))
+
+(defn- get-anim-for-direction
+  "Sorts cardinal directions by distance from direction, and
+  returns the animation for the closest direction"
+  [direction]
+  (let [sorted-directions-to-anims (->> cardinal-directions-to-anims
+                                        (map (fn [[dir anim]]
+                                               [(-> (.sub (.cpy dir) direction)
+                                                    (.len2))
+                                                anim]))
+                                        (sort-by first))]
+    (-> sorted-directions-to-anims
+        (first)
+        (second))))
+
+(defn- update-player-aim
+  [system entity]
+  (let [[mouse-x mouse-y] (screen-to-world system (.getX Gdx/input) (.getY Gdx/input))
+        [player-x player-y] (:position (e/get-component system entity 'Transform))
+        player-to-mouse (Vector2. (- mouse-x player-x)
+                                  (- mouse-y player-y))
+        aim-anim (get-anim-for-direction player-to-mouse)
+        x-scale (if (< (- mouse-x player-x) 0)
+                  -1 1)]
+    (-> system
+        (sprites/play-animation entity (a/get-asset system aim-anim))
+        (e/update-component entity 'Transform #(assoc % :scale [x-scale 1])))))
+
 (defn- update-player
   [system entity]
   (let [player (e/get-component system entity 'Player)]
     (-> system
         (update-state entity)
+        (update-player-aim entity)
         (update-player-movement entity))))
 
 (defn- update-player-components
