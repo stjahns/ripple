@@ -36,7 +36,12 @@
       (get :create-component)
       (apply [system params])))
 
-(defcomponent Position
+(defcomponent Transform
   :create
-  (fn [system {:keys [x y]}]
-    {:x x :y y})) 
+  (fn [system {:keys [:position :rotation :scale]
+               :or {position [0 0]
+                    rotation 0
+                    scale [1 1]}}]
+    {:position position
+     :rotation rotation
+     :scale scale})) 

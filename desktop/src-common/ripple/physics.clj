@@ -68,7 +68,7 @@
                           (.getPosition))
         x (.x body-position)
         y (.y body-position)]
-    (e/update-component system entity 'Position #(-> % (assoc :x x :y y)))))
+    (e/update-component system entity 'Transform #(assoc % :position [x y]))))
 
 (defn- update-physics-bodies
   [system]

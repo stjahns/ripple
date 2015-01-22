@@ -44,13 +44,13 @@
     (.begin sprite-batch)
     (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
-            position (e/get-component system entity 'Position)
+            [x y] (:position (e/get-component system entity 'Transform))
             pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
             [width height] (map #(/ % pixels-per-unit)
                                 (get-sprite-size texture))
-            x (float (- (:x position) (/ width 2)))
-            y (float (- (:y position) (/ height 2)))]
+            x (float (- x (/ width 2)))
+            y (float (- y (/ height 2)))]
         (.draw sprite-batch texture x y (float width) (float height))))
     (.end sprite-batch)
     system))

@@ -59,10 +59,7 @@
           move-force: 15
           idle-animation: PlayerIdle
           walk-animation: PlayerWalk
-      - type: Position
-        params:
-          x: 200
-          y: 200
+      - type: Transform
       - type: AnimationController
       - type: PhysicsBody
         params:
@@ -93,7 +90,7 @@
           texture: BlockSprite
           tile-size: [32, 32]
           tile-indices: [0, 0]
-      - type: Position
+      - type: Transform
       - type: PhysicsBody
         params:
           body-type: static
