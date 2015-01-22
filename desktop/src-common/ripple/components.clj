@@ -2,13 +2,20 @@
   (:require
    [brute.entity :refer :all])
   (:import
-   [clojure.lang PersistentArrayMap]))
+   [clojure.lang PersistentArrayMap PersistentHashMap]))
 
 ;;
 ;; Tell brute.entity to use value for :type in a component map
 ;; to differentiate component types
 ;;
 (defmethod get-component-type PersistentArrayMap
+  [component]
+  (:type component))
+
+;;
+;; Apparently a Clojure map with more than 8 elements is a PersistentHashMap
+;;
+(defmethod get-component-type PersistentHashMap
   [component]
   (:type component))
 
