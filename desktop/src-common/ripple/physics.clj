@@ -12,41 +12,58 @@
             BodyDef
             BodyDef$BodyType
             PolygonShape
+            CircleShape
             FixtureDef
             Box2DDebugRenderer]
            [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Gdx]))
 
-(c/defcomponent BoxFixture
+(defmulti get-shape-def (fn [{:keys [shape]}] shape))
+
+(defmethod get-shape-def "circle"
+  [{:keys [radius]}]
+  (doto (CircleShape.)
+    (.setRadius radius)))
+
+(defmethod get-shape-def "box"
+  [{:keys [width height]}]
+  (doto (PolygonShape.)
+    (.setAsBox (/ width 2) (/ height 2))))
+
+(defn- get-fixture-def
+  [{:keys [shape density friction] :as params}]
+  (let [shape-def (get-shape-def params)]
+    (doto (FixtureDef.)
+      (-> .shape (set! shape-def))
+      (-> .density (set! density))
+      (-> .friction (set! friction)))))
+
+(c/defcomponent PhysicsBody
   :create
-  (fn [system {:keys [x y width height density body-type]}]
+  (fn [system {:keys [x y fixtures body-type fixed-rotation]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
                       "dynamic" BodyDef$BodyType/DynamicBody
                       "kinematic" BodyDef$BodyType/KinematicBody
                       "static" BodyDef$BodyType/StaticBody)
+          fixed-rotation (Boolean/valueOf fixed-rotation)
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
-                     (-> .position (.set x y)))
-          shape-def (doto (PolygonShape.)
-                      (.setAsBox (/ width 2) (/ height 2))) ;;  setAsBox takes half-width and half-height
-          fixture-def (doto (FixtureDef.)
-                        (-> .shape (set! shape-def))
-                        (-> .density (set! density)))
-          body (.createBody world body-def)
-          fixture (.createFixture body fixture-def)]
-      {:body body
-       :fixture fixture})))
+                     (-> .position (.set x y))
+                     (-> .fixedRotation (set! fixed-rotation)))
+          body (.createBody world body-def)]
+      {:body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
+                     body fixtures)})))
 
 (defn- create-world []
   (let [gravity (Vector2. 0 -9.8)
         do-sleep true]
     (World. gravity do-sleep)))
 
-(defn- update-box-fixture
+(defn- update-physics-body
   "Updates the Position component on the entity with the current position of the Box2D body"
   [system entity]
-  (let [body-position (-> (e/get-component system entity 'BoxFixture)
+  (let [body-position (-> (e/get-component system entity 'PhysicsBody)
                           (:body)
                           (.getPosition))
         x (.x body-position)
@@ -55,19 +72,20 @@
 
 (defn- update-physics-bodies
   [system]
-  (let [entities (e/get-all-entities-with-component system 'BoxFixture)]
-    (reduce update-box-fixture
+  (let [entities (e/get-all-entities-with-component system 'PhysicsBody)]
+    (reduce update-physics-body
             system entities)))
+
+(def debug-render? false)
 
 (defn- debug-render*
   [system]
-  (let [debug-renderer (get-in system [:physics :debug-renderer])
-        world (get-in system [:physics :world])
-        camera (get-in system [:renderer :camera])
-        pixels-per-unit (get-in system [:renderer :pixels-per-unit])
-        projection-matrix (.scale (.cpy (.combined camera))
-                                  (/ 1 pixels-per-unit) (/ 1 pixels-per-unit) 1)]
-    (.render debug-renderer world projection-matrix))
+  (when debug-render?
+    (let [debug-renderer (get-in system [:physics :debug-renderer])
+          world (get-in system [:physics :world])
+          camera (get-in system [:renderer :camera])
+          projection-matrix (.combined camera)]
+      (.render debug-renderer world projection-matrix)))
   system)
 
 (defn- debug-render [system] (debug-render* system) system)

@@ -18,17 +18,17 @@
 
 ;; temp - for testing physics
 (defn- spawn-blocks [system]
-  (reduce #(prefab/instantiate %1 "BlockPrefab" {:position {:x (+ %2 200) :y 200}
-                                                 :boxfixture {:x (+ %2 200) :y 200}})
-          system (range 0 256 32)))
+  (reduce #(prefab/instantiate %1 "BlockPrefab" {:position {:x (+ %2 2) :y 2}
+                                                 :physicsbody {:x (+ %2 2) :y 2}})
+          system (range 0 10 1)))
 
 (defn- start
   "Create all the initial entities with their components"
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "Player" {:position {:x 200 :y 264}
-                                      :boxfixture {:x 200 :y 264}})
+        (prefab/instantiate "Player" {:position {:x 4 :y 6}
+                                      :physicsbody {:x 4 :y 6}})
         (spawn-blocks))))
 
 (defscreen main-screen

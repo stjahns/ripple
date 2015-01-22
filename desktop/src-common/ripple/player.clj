@@ -2,6 +2,8 @@
   (:require [play-clj.core :refer :all]
             [brute.entity :as e]
             [ripple.components :refer :all]
+            [ripple.sprites :as sprites]
+            [ripple.assets :as a]
             [ripple.subsystem :as s])
   (:import [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Input$Keys]
@@ -12,7 +14,9 @@
 
 (defcomponent Player
   :create
-  (fn [system params]))
+  (fn [system {:keys [move-force]}]
+    {:state :standing
+     :move-force move-force}))
 
 (defn- get-move-direction []
   "Return normalized movement direction for whatever movement keys are currently depressed"
@@ -29,19 +33,50 @@
 
 (defn- apply-movement-force
   [system entity direction]
-  (let [body (-> (e/get-component system entity 'BoxFixture)
+  (let [body (-> (e/get-component system entity 'PhysicsBody)
                  (:body))
-        force (float 1000000.0) ;; TODO - fix horrible problem with world scale
-        force (.scl direction force)]
-    (println force)
+        force (-> (e/get-component system entity 'Player)
+                  (:move-force))
+        force (.scl direction (float force))]
     (.applyForceToCenter body force true)))
 
-(defn- update-player
+(defmulti enter-state (fn [_ _ state] state))
+
+(defmethod enter-state :walking
+  [system entity state]
+  (sprites/play-animation system entity (a/get-asset system "PlayerWalk")))
+
+(defmethod enter-state :standing
+  [system entity state]
+  (sprites/play-animation system entity (a/get-asset system "PlayerIdle")))
+
+(defn- update-state [system entity]
+  (let [player (e/get-component system entity 'Player)
+        v2 (-> (e/get-component system entity 'PhysicsBody)
+               (:body)
+               (.getLinearVelocity)
+               (.len2))
+        old-state (:state player)
+        new-state (if (> v2 0.1) :walking :standing)]
+    (if (not (= old-state new-state))
+      (-> system
+          (enter-state entity new-state)
+          (e/update-component entity 'Player #(-> % (assoc :state new-state))))
+      system)))
+
+(defn- update-player-movement
   [system entity]
   (let [direction (get-move-direction)]
     (when (> (.len2 direction) 0)
       (apply-movement-force system entity direction))
     system))
+
+(defn- update-player
+  [system entity]
+  (let [player (e/get-component system entity 'Player)]
+    (-> system
+        (update-state entity)
+        (update-player-movement entity))))
 
 (defn- update-player-components
   [system]
@@ -50,4 +85,3 @@
 
 (s/defsubsystem player
   :on-render update-player-components)
-

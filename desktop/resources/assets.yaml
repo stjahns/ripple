@@ -8,11 +8,11 @@
     tile-size: [32, 32]
     tile-indices: [0, 0]
 
-  - asset: tiled-map 
+  - asset: tiled-map
     name: PlatformMap
     path: resources/platform.tmx
 
-  - asset: tiled-map 
+  - asset: tiled-map
     name: DungeonMap
     path: resources/dungeon.tmx
 
@@ -39,9 +39,6 @@
     frame-duration: 1.0
     frames:
       - [0, 0]
-      - [1, 0]
-      - [2, 0]
-      - [3, 0]
 
   - asset: animation
     name: PlayerWalk
@@ -59,19 +56,23 @@
     components:
       - type: Player
         params:
-          idle-animation: PlayerWalk # Use hash of asset name as UUID, access via asset DB
+          move-force: 15
+          idle-animation: PlayerWalk
           walk-animation: PlayerIdle
       - type: Position
         params:
           x: 200
           y: 200
       - type: AnimationController
-      - type: BoxFixture
+      - type: PhysicsBody
         params:
           body-type: dynamic
-          width: 32
-          height: 32
-          density: 1
+          fixed-rotation: true
+          fixtures:
+            - shape: circle
+              radius: 0.5
+              density: 1
+              friction: 0.7
       - type: SpriteRenderer
         params:
           texture: PlayerSprite1
@@ -93,9 +94,12 @@
           tile-size: [32, 32]
           tile-indices: [0, 0]
       - type: Position
-      - type: BoxFixture
+      - type: PhysicsBody
         params:
           body-type: static
-          width: 32
-          height: 32
-          density: 1
+          fixtures:
+            - shape: box
+              width: 1
+              height: 1
+              density: 1
+              friction: 0.7

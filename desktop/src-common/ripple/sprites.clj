@@ -24,6 +24,7 @@
                                                                        :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                                                                        :playing true))))
 
+
 (defmulti get-sprite-size class)
 
 (defmethod get-sprite-size com.badlogic.gdx.graphics.Texture
@@ -38,22 +39,19 @@
   "Render sprites for each SpriteRenderer component"
   [system]
   (let [sprite-batch (get-in system [:sprites :sprite-batch])
-        camera (get-in system [:renderer :camera])
-        pixels-per-unit (get-in system [:renderer :pixels-per-unit])]
+        camera (get-in system [:renderer :camera])]
     (.setProjectionMatrix sprite-batch (.combined camera))
     (.begin sprite-batch)
     (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             position (e/get-component system entity 'Position)
+            pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
-            [width height] (get-sprite-size texture)
-            x (float (/ (- (:x position)
-                             (/ width 2))
-                          pixels-per-unit))
-            y (float (/ (- (:y position)
-                              (/ height 2))
-                           pixels-per-unit))]
-        (.draw sprite-batch texture x y (float 1) (float 1))))
+            [width height] (map #(/ % pixels-per-unit)
+                                (get-sprite-size texture))
+            x (float (- (:x position) (/ width 2)))
+            y (float (- (:y position) (/ height 2)))]
+        (.draw sprite-batch texture x y (float width) (float height))))
     (.end sprite-batch)
     system))
 
