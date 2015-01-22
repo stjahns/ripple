@@ -40,6 +40,14 @@
               system))
           system (vals @subsystems))) ;; prefer this not to be global... :/
 
+(defn on-touch-down [system]
+  (reduce (fn [system {subsystem-fn :on-touch-down}]
+            (if subsystem-fn
+              (subsystem-fn system)
+              system))
+          system (vals @subsystems))) ;; prefer this not to be global... :/
+
+
 (defmacro defsubsystem
   [n & options]
   `(let [options# ~(apply hash-map options)]

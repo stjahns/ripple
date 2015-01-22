@@ -40,7 +40,7 @@
 
 (c/defcomponent PhysicsBody
   :create
-  (fn [system {:keys [x y fixtures body-type fixed-rotation]}]
+  (fn [system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
                       "dynamic" BodyDef$BodyType/DynamicBody
@@ -51,7 +51,8 @@
                      (-> .type (set! body-type))
                      (-> .position (.set x y))
                      (-> .fixedRotation (set! fixed-rotation)))
-          body (.createBody world body-def)]
+          body (doto (.createBody world body-def)
+                 (.setLinearVelocity velocity-x velocity-y))]
       {:body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
                      body fixtures)})))
 
@@ -78,7 +79,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? false)
+(def debug-render? true)
 
 (defn- debug-render*
   [system]

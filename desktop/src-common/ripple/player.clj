@@ -3,6 +3,7 @@
             [brute.entity :as e]
             [ripple.components :refer :all]
             [ripple.sprites :as sprites]
+            [ripple.prefab :as prefab]
             [ripple.assets :as a]
             [ripple.subsystem :as s])
   (:import [com.badlogic.gdx.math Vector2]
@@ -14,6 +15,11 @@
 (defcomponent Player
   :create
   (fn [system {:keys [move-force
+
+                      bullet-prefab
+                      bullet-speed
+                      bullet-offset
+
                       walk-animation
                       idle-animation
                       idle-down-forward-animation
@@ -26,6 +32,10 @@
                       walking-up-forward-animation]
                :as params}]
     {:move-force move-force
+
+     :bullet-prefab bullet-prefab
+     :bullet-speed bullet-speed
+     :bullet-offset bullet-offset
 
      :state [:walking :aim-forward]
 
@@ -87,6 +97,22 @@
                                   (- mouse-y player-y))]
     (get-aim-state-for-direction player-to-mouse)))
 
+(defn- get-player-aim-direction
+  [system entity]
+  (let [[mouse-x mouse-y] (screen-to-world system (.getX Gdx/input) (.getY Gdx/input))
+        [player-x player-y] (:position (e/get-component system entity 'Transform))
+        player-to-mouse (Vector2. (- mouse-x player-x)
+                                  (- mouse-y player-y))]
+    (.nor player-to-mouse)))
+
+(defn- get-player-walk-state
+  [system entity]
+  (let [player (e/get-component system entity 'Player)
+        v2 (-> (e/get-component system entity 'PhysicsBody)
+               (:body)
+               (.getLinearVelocity)
+               (.len2))]        
+    (if (> v2 0.1) :walking :standing)))
 
 (def state-to-anim
   {[:standing :aim-forward] :idle-animation
@@ -104,16 +130,10 @@
   [system entity state]
   (let [anim-ref (get state-to-anim state)
         anim (get (e/get-component system entity 'Player) anim-ref)]
-    (println anim-ref)
     (sprites/play-animation system entity anim)))
 
 (defn- get-player-state [system entity]
-  (let [player (e/get-component system entity 'Player)
-        v2 (-> (e/get-component system entity 'PhysicsBody)
-               (:body)
-               (.getLinearVelocity)
-               (.len2))
-        walk-state (if (> v2 0.1) :walking :standing)
+  (let [walk-state (get-player-walk-state system entity)
         aim-state (get-player-aim-state system entity)]
     [walk-state aim-state]))
 
@@ -173,7 +193,28 @@
       (apply-movement-force system entity direction))
     system))
 
+(defn- player-fire
+  [system entity]
+  (let [player (e/get-component system entity 'Player)
+        bullet-prefab (:bullet-prefab player)
+        aim-direction (get-player-aim-direction system entity)
+        bullet-offset (float (:bullet-offset player))
+        bullet-speed (float (:bullet-speed player))
+        [x y] (:position (e/get-component system entity 'Transform))
+        bullet-origin (.add (Vector2. x y)
+                            (.scl (.cpy aim-direction) bullet-offset))
+        bullet-velocity (.scl aim-direction bullet-speed)]
+    (prefab/instantiate system bullet-prefab {:physicsbody {:x (.x bullet-origin)
+                                                            :y (.y bullet-origin)
+                                                            :velocity-x (.x bullet-velocity)
+                                                            :velocity-y (.y bullet-velocity)}})))
+
 ;; Player Update
+(defn- handle-mouse-input
+  [system]
+  (let [entity (-> (e/get-all-entities-with-component system 'Player)
+                   (first))]
+    (player-fire system entity)))
 
 (defn- update-player
   [system entity]
@@ -189,4 +230,5 @@
     (reduce update-player system player-entities)))
 
 (s/defsubsystem player
-  :on-render update-player-components)
+  :on-render update-player-components
+  :on-touch-down handle-mouse-input)

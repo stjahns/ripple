@@ -41,6 +41,11 @@
     (update! screen :renderer (stage) :camera (orthographic))
     nil)
 
+  :on-touch-down
+  (fn [screen entities]
+    (reset! sys (-> @sys (subsystem/on-touch-down)))
+    nil)
+
   :on-render
   (fn [screen entities]
     (reset! sys (-> @sys

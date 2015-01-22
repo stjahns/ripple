@@ -128,11 +128,30 @@
       - [3, 0]
 
   - asset: prefab
+    name: BulletPrefab
+    components:
+      - type: Transform
+      - type: PhysicsBody
+        params:
+          body-type: dynamic
+          fixed-rotation: false
+          velocity-x: 0
+          velocity-y: 0
+          fixtures:
+            - shape: circle
+              radius: 0.1
+              density: 1
+              friction: 0.7
+
+  - asset: prefab
     name: Player
     components:
       - type: Player
         params:
           move-force: 15
+          bullet-prefab: BulletPrefab
+          bullet-speed: 50
+          bullet-offset: 0.6
           idle-animation: PlayerIdle
           idle-up-animation: PlayerIdleAimUp
           idle-down-animation: PlayerIdleAimDown
@@ -148,6 +167,8 @@
       - type: PhysicsBody
         params:
           body-type: dynamic
+          velocity-x: 0
+          velocity-y: 0
           fixed-rotation: true
           fixtures:
             - shape: circle
@@ -178,6 +199,8 @@
       - type: PhysicsBody
         params:
           body-type: static
+          velocity-x: 0
+          velocity-y: 0
           fixtures:
             - shape: box
               width: 1
