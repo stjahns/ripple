@@ -2,6 +2,7 @@
   (:require [play-clj.core :refer :all]
             [brute.entity :as e]
             [ripple.components :refer :all]
+            [ripple.rendering :as r]
             [ripple.sprites :as sprites]
             [ripple.prefab :as prefab]
             [ripple.assets :as a]
@@ -51,17 +52,22 @@
      :walking-down-forward-animation (a/get-asset system walking-down-forward-animation)
      :walking-down-animation (a/get-asset system walking-down-animation)}))
 
-;; TODO - this will need to be smarter with movable camera... cant assume bottom left is 0,0
-
 (defn- screen-to-world
   [system screen-x screen-y]
   (let [pixels-per-unit (get-in system [:renderer :pixels-per-unit])
-        camera (get-in system [:renderer :camera])
+
         screen-width (.getWidth Gdx/graphics)
         screen-height (.getHeight Gdx/graphics)
-        screen-y (- screen-height screen-y) ;; relative to bottom-left
-        world-x (/ screen-x pixels-per-unit)
-        world-y (/ screen-y pixels-per-unit)]
+
+        screen-x (- screen-x (/ screen-width 2))
+        screen-y (- (/ screen-height 2) screen-y) ;; pixels relative to screen center 
+
+        camera (get-in system [:renderer :camera])
+        camera-x (-> camera .position .x)
+        camera-y (-> camera .position .y) ;; world space of screen center
+
+        world-x (+ (/ screen-x pixels-per-unit) camera-x) 
+        world-y (+ (/ screen-y pixels-per-unit) camera-y)]
     [(float world-x) (float world-y)]))
 
 (def cardinal-directions-to-aim-states
@@ -216,13 +222,22 @@
                    (first))]
     (player-fire system entity)))
 
+(defn- update-camera-target
+  [system entity]
+  (let [[x y] (:position (e/get-component system entity 'Transform))
+        camera (get-in system [:renderer :camera])]
+    (r/update-camera-position camera x y))
+  system)
+
+
 (defn- update-player
   [system entity]
   (let [player (e/get-component system entity 'Player)]
     (-> system
         (update-state entity)
         (update-player-aim entity)
-        (update-player-movement entity))))
+        (update-player-movement entity)
+        (update-camera-target entity))))
 
 (defn- update-player-components
   [system]
@@ -230,5 +245,5 @@
     (reduce update-player system player-entities)))
 
 (s/defsubsystem player
-  :on-render update-player-components
+  :on-pre-render update-player-components
   :on-touch-down handle-mouse-input)

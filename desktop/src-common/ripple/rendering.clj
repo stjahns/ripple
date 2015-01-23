@@ -12,6 +12,12 @@
 
 (def pixels-per-unit 32)
 
+(defn update-camera-position [camera x y]
+  (let [position (.position camera)]
+    (doto position
+      (-> .x (set! x))
+      (-> .y (set! y)))))
+
 (defn- update-camera-projection [camera]
   (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
         height (/ (.getHeight Gdx/graphics) pixels-per-unit)]
@@ -32,7 +38,9 @@
 (defn render
   [system]
   "Invokes all registered render callbacks in increasing order"
-  (let [render-callbacks (get-in system [:renderer :render-callbacks])]
+  (let [camera (get-in system [:renderer :camera])
+        render-callbacks (get-in system [:renderer :render-callbacks])]
+    (.update camera)
     (reduce (fn [system [_ callback]] (callback system))
             system render-callbacks)))
 
