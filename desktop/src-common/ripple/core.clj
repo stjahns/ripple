@@ -6,6 +6,7 @@
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]
+            [ripple.audio :as audio]
             [ripple.components :as c]
             [ripple.assets :as a]
             [ripple.subsystem :as subsystem]

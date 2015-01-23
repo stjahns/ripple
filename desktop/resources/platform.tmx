@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="2">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="13">
  <tileset firstgid="1" name="ShipTiles" tilewidth="32" tileheight="32">
   <image source="sprites/ShipTiles.png" width="160" height="224"/>
  </tileset>
@@ -17,7 +17,10 @@
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="1" name="Player" type="Player" x="336.828" y="656.955">
+  <object id="1" name="Player" type="prefab" x="336.828" y="656.955">
+   <ellipse/>
+  </object>
+  <object id="5" name="MusicPlayer" type="prefab" x="154.133" y="67.6134" width="103" height="28">
    <ellipse/>
   </object>
  </objectgroup>

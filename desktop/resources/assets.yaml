@@ -147,6 +147,10 @@
               density: 1
               friction: 0.7
 
+  - asset: sound
+    name: FireSound
+    path: "resources/audio/Shoot.wav"
+      
   - asset: prefab
     name: Player
     components:
@@ -166,6 +170,7 @@
           walking-up-forward-animation: PlayerWalkingAimUpForward
           walking-down-forward-animation: PlayerWalkingAimDownForward
           walk-animation: PlayerWalk
+          fire-sound: FireSound
       - type: Transform
       - type: AnimationController
       - type: PhysicsBody
@@ -228,3 +233,16 @@
               height: 1
               density: 1
               friction: 0.7
+
+# Music
+
+  - asset: music
+    name: SpaceRoachesMusic
+    path: "resources/audio/space_roaches.ogg"
+
+  - asset: prefab
+    name: MusicPlayer
+    components:
+      - type: AudioPlayer
+        params:
+          audio-asset: SpaceRoachesMusic

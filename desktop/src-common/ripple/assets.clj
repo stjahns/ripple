@@ -23,9 +23,10 @@
   "Get an asset by name and instantiate it"
   (let [asset-db (:asset-db system)
         asset (get asset-db asset-name)
-        create-fn (-> (symbol (:asset asset))
-                      (get-asset-def)
-                      (:create))]
+        asset-def (-> (symbol (:asset asset))
+                      (get-asset-def))
+        create-fn (:create asset-def)]
+    (when (not asset-def) (throw (Exception. (str "Asset not defined: " (:asset asset)))))
     (create-fn system asset)))
 
 (defmacro defasset

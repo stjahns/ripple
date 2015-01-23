@@ -15,9 +15,13 @@
 
 (defcomponent Player
   :fields [:move-force {:default 100}
+
            :bullet-prefab nil
            :bullet-speed {:default 100}
            :bullet-offset {:default 1}
+
+           :fire-sound {:asset true}
+
            :walk-animation {:asset true}
            :idle-animation {:asset true}
            :idle-down-forward-animation {:asset true}
@@ -180,6 +184,7 @@
   [system entity]
   (let [player (e/get-component system entity 'Player)
         bullet-prefab (:bullet-prefab player)
+        fire-sound (:fire-sound player)
         aim-direction (get-player-aim-direction system entity)
         bullet-offset (float (:bullet-offset player))
         bullet-speed (float (:bullet-speed player))
@@ -187,6 +192,7 @@
         bullet-origin (.add (Vector2. x y)
                             (.scl (.cpy aim-direction) bullet-offset))
         bullet-velocity (.scl aim-direction bullet-speed)]
+    (.play fire-sound)
     (prefab/instantiate system bullet-prefab {:physicsbody {:x (.x bullet-origin)
                                                             :y (.y bullet-origin)
                                                             :velocity-x (.x bullet-velocity)
