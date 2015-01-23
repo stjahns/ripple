@@ -8,16 +8,12 @@
           [com.badlogic.gdx.graphics Texture ]))
 
 (c/defcomponent SpriteRenderer
-  :create
-  (fn [system params]
-    {:texture (a/get-asset system (:texture params))}))
+  :fields [:texture {:asset true}])
 
 (c/defcomponent AnimationController
-  :create
-  (fn [system params]
-    {:animation nil
-     :playing false
-     :start-time nil}))
+  :fields [:animation {:asset true}
+           :playing {:default false}
+           :start-time 0])
 
 (defn play-animation [system entity animation]
   (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation

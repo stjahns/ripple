@@ -4,7 +4,6 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.components :as c]
             [ripple.subsystem :as s]
             [clj-yaml.core :as yaml]
             [brute.entity :as e]))

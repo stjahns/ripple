@@ -1,6 +1,7 @@
 (ns ripple.components
   (:require
-   [brute.entity :refer :all])
+   [brute.entity :refer :all]
+   [ripple.assets :as a])
   (:import
    [clojure.lang PersistentArrayMap PersistentHashMap]))
 
@@ -30,13 +31,31 @@
 (defn register-component-def [component-symbol create-fn]
   (swap! component-defs assoc component-symbol create-fn))
 
+(defn- init-component-fields
+  [system params component fields]
+  (reduce (fn [component [field-name field-options]]
+            (let [is-asset (:asset field-options)
+                  field-param (get params field-name)
+                  default-value (:default field-options)
+                  field-value (if (and is-asset field-param)
+                                (a/get-asset system field-param)
+                                field-param)
+                  field-value (or field-value default-value)]
+              (assoc component field-name field-value)))
+          component fields))
+
 (defmacro defcomponent
   [n & options]
   `(let [options# ~(apply hash-map options)
-         create-fn# (:create options#)]
+         fields# (apply hash-map (:fields options#))
+         init-fn# (or (:init options#) (fn [c# _# _#] c#))]
      (register-component-def '~n (assoc options#
-                                        :create-component #(assoc (create-fn# %1 %2)
-                                                                  :type '~n)))))
+                                        :create-component (fn [system# params#]
+                                                            (-> (#'ripple.components/init-component-fields system#
+                                                                                       params#
+                                                                                       {:type '~n}
+                                                                                       fields# )
+                                                                (init-fn# system# params#)))))))
 
 (defn create-component [system component-symbol params]
   (-> (get-component-def component-symbol)
@@ -44,13 +63,6 @@
       (apply [system params])))
 
 (defcomponent Transform
-  :create
-  (fn [system {position :position
-               rotation :rotation
-               scale :scale
-               :or {position [0 0]
-                    rotation 0
-                    scale [1 1]}}]
-    {:position position
-     :rotation rotation
-     :scale scale})) 
+  :fields [:position {:default [0 0]} 
+           :rotation {:default 0}
+           :scale {:default [0 0]}])

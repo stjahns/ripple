@@ -20,10 +20,10 @@
         (.load path))))
 
 (c/defcomponent OrthogonalTiledMapRenderer
-  :create
-  (fn [system {:keys [tiled-map pixels-per-unit]}]
+  :init
+  (fn [component system {:keys [tiled-map pixels-per-unit]}]
     (let [tiled-map (a/get-asset system tiled-map)]
-      {:renderer (OrthogonalTiledMapRenderer. tiled-map (float (/ 1 pixels-per-unit)))})))
+      (assoc component :renderer (OrthogonalTiledMapRenderer. tiled-map (float (/ 1 pixels-per-unit)))))))
 
 (defn render-maps
   "Render any tiled map renderer components"
@@ -37,17 +37,13 @@
   system)
 
 (c/defcomponent TiledMapSpawner
-  :create
-  (fn [system {:keys [tiled-map pixels-per-unit]}]
-    (let [tiled-map (a/get-asset system tiled-map)]
-      {:tiled-map tiled-map
-       :pixels-per-unit pixels-per-unit})))
+  :fields [:tiled-map {:asset true}
+           :pixels-per-unit {:default 32}])
 
 (defn- get-object-layers
   [tiled-map]
   (filter (fn [layer] (= (type layer) MapLayer))
    (.getLayers tiled-map)))
-
 
 (defn- get-map-objects [tiled-map]
   (let [object-layer (first (get-object-layers tiled-map))]

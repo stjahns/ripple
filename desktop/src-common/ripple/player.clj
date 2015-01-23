@@ -14,43 +14,20 @@
 ;; An example Player component that handles physics-based movement with arrow keys
 
 (defcomponent Player
-  :create
-  (fn [system {:keys [move-force
-
-                      bullet-prefab
-                      bullet-speed
-                      bullet-offset
-
-                      walk-animation
-                      idle-animation
-                      idle-down-forward-animation
-                      idle-down-animation
-                      idle-up-animation
-                      idle-up-forward-animation
-                      walking-down-forward-animation
-                      walking-down-animation
-                      walking-up-animation
-                      walking-up-forward-animation]
-               :as params}]
-    {:move-force move-force
-
-     :bullet-prefab bullet-prefab
-     :bullet-speed bullet-speed
-     :bullet-offset bullet-offset
-
-     :state [:walking :aim-forward]
-
-     :walk-animation (a/get-asset system walk-animation)
-     :idle-animation (a/get-asset system idle-animation)
-     :idle-up-forward-animation (a/get-asset system idle-up-forward-animation)
-     :idle-up-animation (a/get-asset system idle-up-animation)
-     :idle-down-forward-animation (a/get-asset system idle-down-forward-animation)
-     :idle-down-animation (a/get-asset system idle-down-animation)
-
-     :walking-up-forward-animation (a/get-asset system walking-up-forward-animation)
-     :walking-up-animation (a/get-asset system walking-up-animation)
-     :walking-down-forward-animation (a/get-asset system walking-down-forward-animation)
-     :walking-down-animation (a/get-asset system walking-down-animation)}))
+  :fields [:move-force {:default 100}
+           :bullet-prefab nil
+           :bullet-speed {:default 100}
+           :bullet-offset {:default 1}
+           :walk-animation {:asset true}
+           :idle-animation {:asset true}
+           :idle-down-forward-animation {:asset true}
+           :idle-down-animation {:asset true}
+           :idle-up-animation {:asset true}
+           :idle-up-forward-animation {:asset true}
+           :walking-down-forward-animation {:asset true}
+           :walking-down-animation {:asset true}
+           :walking-up-animation {:asset true}
+           :walking-up-forward-animation {:asset true}])
 
 (defn- screen-to-world
   [system screen-x screen-y]
