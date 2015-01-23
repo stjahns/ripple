@@ -22,7 +22,7 @@
       - type: OrthogonalTiledMapRenderer
         params:
           tiled-map: DungeonMap
-          unit: 0.03125 # 1 / 32
+          pixels-per-unit: 32
 
   - asset: prefab
     name: PlatformLevel
@@ -30,7 +30,11 @@
       - type: OrthogonalTiledMapRenderer
         params:
           tiled-map: PlatformMap
-          unit: 0.03125 # 1 / 32
+          pixels-per-unit: 32
+      - type: TiledMapSpawner
+        params:
+          tiled-map: PlatformMap
+          pixels-per-unit: 32
 
   - asset: animation
     name: PlayerIdle
@@ -129,7 +133,7 @@
 
   - asset: prefab
     name: BulletPrefab
-    components:
+    components: # TODO - need some kind of 'Projectile' component to handle removing old projectiles..
       - type: Transform
       - type: PhysicsBody
         params:
@@ -195,6 +199,23 @@
           texture: BlockSprite
           tile-size: [32, 32]
           tile-indices: [0, 0]
+      - type: Transform
+      - type: PhysicsBody
+        params:
+          body-type: static
+          velocity-x: 0
+          velocity-y: 0
+          fixtures:
+            - shape: box
+              width: 1
+              height: 1
+              density: 1
+              friction: 0.7
+
+  - asset: prefab
+    name: BlockTilePrefab
+    components:
+      # Needs no SpriteRenderer as it is intended to be rendered by TiledMapRenderer
       - type: Transform
       - type: PhysicsBody
         params:

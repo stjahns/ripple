@@ -79,7 +79,7 @@
   "Sorts cardinal directions by distance from direction, and
   returns the aim state for the closest direction"
   [direction]
-  (let [sorted-directions-to-anims (->> cardinal-directions-to-anims
+  (let [sorted-directions-to-anims (->> cardinal-directions-to-aim-states
                                         (map (fn [[dir anim]]
                                                [(-> (.sub (.cpy dir) direction)
                                                     (.len2))

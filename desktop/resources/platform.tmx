@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="2">
  <tileset firstgid="1" name="ShipTiles" tilewidth="32" tileheight="32">
   <image source="sprites/ShipTiles.png" width="160" height="224"/>
  </tileset>
+ <tileset firstgid="36" name="simple-tiles" tilewidth="32" tileheight="32">
+  <image source="sprites/simple-tileset.png" width="64" height="64"/>
+  <tile id="0">
+   <properties>
+    <property name="prefab" value="BlockTilePrefab"/>
+   </properties>
+  </tile>
+ </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJztzcEJwCAQRFEb0IAIKiT2X6bbgAc3q4j8B/84jHMAAOA0XgrKHoP/+GOb+Df/f6VvUNvwP+OG/ywVZdXgHwBW6ePTBC0=
+   eJztlEEOABAMBD3G/9/o6ELt0pbITuKiZZJmKUWITk1aln+2h5yzeizH635kbqueXb838nM173cW4UfuRv1ojkf33cg/4j/5/zz8qOM0Zy/M3zv/rJ/p/8WPzDwq/yzy27WMJYS4TwNmWhfp
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object name="PlayerSpawn" type="PlayerSpawn" x="336.828" y="656.955">
+  <object id="1" name="Player" type="Player" x="336.828" y="656.955">
    <ellipse/>
   </object>
  </objectgroup>

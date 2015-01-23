@@ -16,20 +16,12 @@
 
 (def sys (atom 0))
 
-;; temp - for testing physics
-(defn- spawn-blocks [system]
-  (reduce #(prefab/instantiate %1 "BlockPrefab" {:physicsbody {:x (+ %2 2) :y 2}
-                                                 :transform {:scale [-1 1]}})
-          system (range 0 10 1)))
-
 (defn- start
   "Create all the initial entities with their components"
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "Player" {:transform {:scale [-1 1]}
-                                      :physicsbody {:x 4 :y 6}})
-        (spawn-blocks))))
+        (prefab/instantiate "PlatformLevel" {}))))
 
 (defscreen main-screen
   :on-show

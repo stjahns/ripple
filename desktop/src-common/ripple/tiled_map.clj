@@ -2,10 +2,12 @@
   (:require [ripple.assets :as a]
             [ripple.components :as c]
             [ripple.subsystem :as s]
+            [ripple.prefab :as prefab]
             [ripple.rendering :as r]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]
            [com.badlogic.gdx.maps MapLayer]
+           [com.badlogic.gdx.maps.tiled TiledMapTileLayer]
            [com.badlogic.gdx.maps.tiled.renderers OrthogonalTiledMapRenderer]))
 
 ;;
@@ -19,18 +21,9 @@
 
 (c/defcomponent OrthogonalTiledMapRenderer
   :create
-  (fn [system {:keys [tiled-map unit]}]
+  (fn [system {:keys [tiled-map pixels-per-unit]}]
     (let [tiled-map (a/get-asset system tiled-map)]
-      {:renderer (OrthogonalTiledMapRenderer. tiled-map (float unit))})))
-
-(defn- get-object-layers
-  [tiled-map]
-  (filter (fn [layer] (= (type layer) MapLayer))
-   (.getLayers tiled-map)))
-
-(defn- get-map-objects [tiled-map]
-  (let [object-layer (first (get-object-layers tiled-map))]
-    (.getObjects object-layer)))
+      {:renderer (OrthogonalTiledMapRenderer. tiled-map (float (/ 1 pixels-per-unit)))})))
 
 (defn render-maps
   "Render any tiled map renderer components"
@@ -43,25 +36,98 @@
       (.render tiled-map-renderer)))
   system)
 
+(c/defcomponent TiledMapSpawner
+  :create
+  (fn [system {:keys [tiled-map pixels-per-unit]}]
+    (let [tiled-map (a/get-asset system tiled-map)]
+      {:tiled-map tiled-map
+       :pixels-per-unit pixels-per-unit})))
+
+(defn- get-object-layers
+  [tiled-map]
+  (filter (fn [layer] (= (type layer) MapLayer))
+   (.getLayers tiled-map)))
+
+
+(defn- get-map-objects [tiled-map]
+  (let [object-layer (first (get-object-layers tiled-map))]
+    (.getObjects object-layer)))
+
+(defn- get-tile-layers
+  [tiled-map]
+  (filter (fn [layer] (= (type layer) TiledMapTileLayer))
+   (.getLayers tiled-map)))
+
+(defn- get-tile-cells
+  "Lazy seq of all available tile cells for all tile layers for a given tiled-map
+   TODO - handle multiple tile layers"
+  [tiled-map]
+  (let [tile-layer (first (get-tile-layers tiled-map))
+        height (.getHeight tile-layer)
+        width (.getWidth tile-layer)]
+    (for [x (range width)
+          y (range height)
+          :let [tile-cell (.getCell tile-layer x y)]
+          :when tile-cell]
+      {:tile-cell tile-cell
+       :x (+ x 0.5)  ;; TODO - don't assume 1 tile == 1 world unit?
+       :y (+ y 0.5)})))
+
+(defn- create-entity-from-map-object
+  "For the given map object, create and add an entity with the required components
+  (if appropriate) to the ES system"
+  [system map-object pixels-per-unit]
+  (let [ellipse (.getEllipse map-object)
+        x (/ (.x ellipse) pixels-per-unit)
+        y (/ (.y ellipse) pixels-per-unit)]
+    (prefab/instantiate system
+                        (.getName map-object)
+                        {:transform {:position [x y]}
+                         :physicsbody {:x x :y y}})))
+
+(defn- create-entities-for-map-objects
+  [system tiled-map pixels-per-unit]
+  (let [map-objects (get-map-objects tiled-map)]
+    (reduce (fn [system map-object]
+              (create-entity-from-map-object system map-object pixels-per-unit))
+            system map-objects)))
+
+(defn- spawn-prefab-for-tile-cell [system tile-cell x y]
+  (let [prefab-name (-> tile-cell (.getTile) (.getProperties) (.get "prefab"))]
+    (prefab/instantiate system
+                        prefab-name
+                        {:transform {:position [x y]}
+                         :physicsbody {:x x :y y}})))
+
+(defn- create-entities-for-map-tiles
+  [system tiled-map pixels-per-unit]
+  (let [tile-cells (get-tile-cells tiled-map)]
+    (reduce (fn [system {:keys [tile-cell x y]}]
+              (spawn-prefab-for-tile-cell system tile-cell x y))
+            system tile-cells)))
+
+(defn init-map-spawner
+  [system entity]
+  (let [spawner (e/get-component system entity 'TiledMapSpawner)
+        tiled-map (:tiled-map spawner)
+        pixels-per-unit (:pixels-per-unit spawner)]
+    (if (not (:initialized spawner))
+      (-> system
+          ;; TODO intantiate prefabs for tiles..
+          (e/update-component entity 'TiledMapSpawner #(assoc % :initialized true))
+          (create-entities-for-map-tiles tiled-map pixels-per-unit)
+          (create-entities-for-map-objects tiled-map pixels-per-unit))
+      system)))
+
+(defn init-map-spawner-components
+  [system]
+  (reduce init-map-spawner
+          system (e/get-all-entities-with-component system 'TiledMapSpawner)))
+
 (s/defsubsystem level
+  :on-pre-render init-map-spawner-components
   :on-show
   (fn [system]
-    (r/register-render-callback system render-maps 0)))
+    (-> system
+        (r/register-render-callback render-maps 0))))
 
-;; (defn- create-entity-from-map-object
-;;   "For the given map object, create and add an entity with the required components
-;;   (if appropriate) to the ES system"
-;;   [system map-object]
-;;   (let [ellipse (.getEllipse map-object)
-;;         x (.x ellipse)
-;;         y (.y ellipse)]
-;;     (if (= (.getName map-object) "PlayerSpawn")
-;;       nil ;;(create-player system x y)
-;;       system)))
-
-;; (defn- create-entities-in-map
-;;   [system tiled-map]
-;;   (let [map-objects (get-map-objects tiled-map)]
-;;     (reduce (fn [system map-object]
-;;               (create-entity-from-map-object system map-object))
-;;             system map-objects)))
