@@ -4,21 +4,25 @@
             [ripple.components :as c]
             [ripple.assets :as a]))
 
+(def instances (atom []))
+
 (a/defasset sound
   :create
   (fn [system {:keys [path]}]
-    (-> (Gdx/audio)
-        (.newSound (-> (Gdx/files)
-                       (.internal path))))))
+    (let [instance (-> (Gdx/audio)
+                       (.newSound (-> (Gdx/files)
+                                      (.internal path))))]
+      (swap! instances #(conj % instance))
+      instance)))
 
 (a/defasset music
   :create
   (fn [system {:keys [path]}]
-    (-> (Gdx/audio)
-        (.newMusic (-> (Gdx/files)
-                       (.internal path))))))
-
-;; FIXME -- need to stop all audio players when we reload....
+    (let [instance (-> (Gdx/audio)
+                       (.newMusic (-> (Gdx/files)
+                                      (.internal path))))]
+      (swap! instances #(conj % instance))
+      instance)))
 
 (c/defcomponent AudioPlayer
   :fields [:audio-asset {:asset true}
@@ -31,3 +35,15 @@
             (.setPan (:pan component) (:volume component))
             (.play))
           component))
+
+(defn on-shutdown
+  "Stop all sounds and release all resources"
+  [system]
+  (println "Shutting down audio...")
+  (doseq [instance @instances]
+    (.stop instance)
+    (.dispose instance))
+  (reset! instances []))
+
+(s/defsubsystem audio
+  :on-shutdown on-shutdown)

@@ -33,6 +33,13 @@
               system))
           system (vals @subsystems))) ;; prefer this not to be global... :/
 
+(defn on-shutdown [system]
+  (reduce (fn [system {subsystem-fn :on-shutdown}]
+            (if subsystem-fn
+              (subsystem-fn system)
+              system))
+          system (vals @subsystems))) ;; prefer this not to be global... :/
+
 (defn on-resize [system]
   (reduce (fn [system {subsystem-fn :on-resize}]
             (if subsystem-fn

@@ -68,4 +68,5 @@
                            (set-screen! ripple blank-screen)))))
 
 (defn reload []
+  (subsystem/on-shutdown @sys)
   (on-gl (set-screen! ripple main-screen)))
