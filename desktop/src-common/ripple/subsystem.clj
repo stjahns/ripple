@@ -1,6 +1,7 @@
 (ns ripple.subsystem)
 
 ;; TODO - rather have subsystems registered into system, instead of stored globally like this..
+
 (def subsystems (atom {}))
 
 (defn get-subsystem [system-id]
@@ -12,48 +13,12 @@
 (defn register-subsystem [system-id subsystem]
   (swap! subsystems assoc system-id subsystem))
 
-(defn on-show [system]
-  (reduce (fn [system {subsystem-fn :on-show}]
-            (if subsystem-fn
-              (subsystem-fn system)
+(defn on-system-event [system event-name]
+  (reduce (fn [system subsystem]
+            (if-let [event-handler (get subsystem event-name)]
+              (event-handler system)
               system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
-(defn on-pre-render [system]
-  (reduce (fn [system {subsystem-fn :on-pre-render}]
-            (if subsystem-fn
-              (subsystem-fn system)
-              system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
-(defn on-render [system]
-  (reduce (fn [system {subsystem-fn :on-render}]
-            (if subsystem-fn
-              (subsystem-fn system)
-              system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
-(defn on-shutdown [system]
-  (reduce (fn [system {subsystem-fn :on-shutdown}]
-            (if subsystem-fn
-              (subsystem-fn system)
-              system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
-(defn on-resize [system]
-  (reduce (fn [system {subsystem-fn :on-resize}]
-            (if subsystem-fn
-              (subsystem-fn system)
-              system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
-(defn on-touch-down [system]
-  (reduce (fn [system {subsystem-fn :on-touch-down}]
-            (if subsystem-fn
-              (subsystem-fn system)
-              system))
-          system (vals @subsystems))) ;; prefer this not to be global... :/
-
+          system (vals @subsystems)))
 
 (defmacro defsubsystem
   [n & options]

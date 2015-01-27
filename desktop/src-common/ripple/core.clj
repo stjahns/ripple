@@ -28,7 +28,7 @@
   :on-show
   (fn [screen entities]
     (-> (e/create-system)
-        (subsystem/on-show)
+        (subsystem/on-system-event :on-show)
         (start)
         (as-> s (reset! sys s)))
     (update! screen :renderer (stage) :camera (orthographic))
@@ -36,19 +36,19 @@
 
   :on-touch-down
   (fn [screen entities]
-    (reset! sys (-> @sys (subsystem/on-touch-down)))
+    (reset! sys (-> @sys (subsystem/on-system-event :on-touch-down)))
     nil)
 
   :on-render
   (fn [screen entities]
     (reset! sys (-> @sys
-                    (subsystem/on-pre-render)
-                    (subsystem/on-render)))
+                    (subsystem/on-system-event :on-pre-render)
+                    (subsystem/on-system-event :on-render)))
     nil)
 
   :on-resize
   (fn [screen entities]
-    (subsystem/on-resize @sys)
+    (subsystem/on-system-event :on-resize @sys)
     nil))
 
 (defscreen blank-screen
@@ -68,5 +68,5 @@
                            (set-screen! ripple blank-screen)))))
 
 (defn reload []
-  (subsystem/on-shutdown @sys)
+  (subsystem/on-system-event @sys :on-shutdown)
   (on-gl (set-screen! ripple main-screen)))
