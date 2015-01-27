@@ -150,7 +150,7 @@
   - asset: sound
     name: FireSound
     path: "resources/audio/Shoot.wav"
-      
+
   - asset: prefab
     name: Player
     components:
@@ -189,6 +189,12 @@
           texture: PlayerSprite1
           tile-size: [32, 32]
           tile-indices: [0, 0]
+
+  - asset: prefab
+    name: AreaTrigger
+    components:
+      - type: Transform
+      - type: AreaTrigger
 
 # Block
 

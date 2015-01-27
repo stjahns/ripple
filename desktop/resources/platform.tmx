@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="13">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" backgroundcolor="#000000" nextobjectid="18">
  <tileset firstgid="1" name="ShipTiles" tilewidth="32" tileheight="32">
   <image source="sprites/ShipTiles.png" width="160" height="224"/>
  </tileset>
@@ -13,15 +13,14 @@
  </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <data encoding="base64" compression="zlib">
-   eJztlEEOABAMBD3G/9/o6ELt0pbITuKiZZJmKUWITk1aln+2h5yzeizH635kbqueXb838nM173cW4UfuRv1ojkf33cg/4j/5/zz8qOM0Zy/M3zv/rJ/p/8WPzDwq/yzy27WMJYS4TwNmWhfp
+   eJztlEEOABAMBD3G/9/o6ELt0pbETtIL1UlkKUWITk0qyz9bQ85ZPZbjdT9yb6ueXb838nN73u8swo/MRv1ojkfzbuQf8Z/8fx5+1HGasxfu3zv/rJ/p/8UfmX8W+e29jBJC3KcBywwXoQ==
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="1" name="Player" type="prefab" x="336.828" y="656.955">
+  <object id="1" name="Player" x="336.828" y="656.955">
    <ellipse/>
   </object>
-  <object id="5" name="MusicPlayer" type="prefab" x="154.133" y="67.6134" width="103" height="28">
-   <ellipse/>
-  </object>
+  <object id="13" name="AreaTrigger" x="512" y="686.832" width="192" height="64"/>
+  <object id="15" name="AreaTrigger" x="576" y="576" width="64" height="96"/>
  </objectgroup>
 </map>

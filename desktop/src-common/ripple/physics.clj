@@ -31,22 +31,38 @@
     (.setAsBox (/ width 2) (/ height 2))))
 
 (defn- get-fixture-def
-  [{:keys [shape density friction] :as params}]
+  [{:keys [shape density friction is-sensor] :as params}]
   (let [shape-def (get-shape-def params)]
     (doto (FixtureDef.)
       (-> .shape (set! shape-def))
-      (-> .density (set! density))
-      (-> .friction (set! friction)))))
+      (-> .density (set! (or density 1)))
+      (-> .friction (set! (or friction 1)))
+      (-> .isSensor (set! (or is-sensor false))))))
+
+(defn- set-fixture-width-height
+  "Modifies the 'fixtures' list so the first fixture uses the specified width
+  and height (if both non-nil).
+  Used by spawners that need to specify custom width + height"
+  [fixtures width height]
+  (if (and width height)
+    (let [first-fixture (assoc (first fixtures)
+                               :width width
+                               :height height)
+          rest (subvec (vec fixtures) 1)]
+      (into [first-fixture] rest))
+    fixtures))
 
 (c/defcomponent PhysicsBody
   :init
-  (fn [component system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y]}]
+  (fn [component system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
+                                width height]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
                       "dynamic" BodyDef$BodyType/DynamicBody
                       "kinematic" BodyDef$BodyType/KinematicBody
                       "static" BodyDef$BodyType/StaticBody)
           fixed-rotation (Boolean/valueOf fixed-rotation)
+          ;fixtures (set-fixture-width-height fixtures width height)
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
                      (-> .position (.set x y))
@@ -56,10 +72,27 @@
       (assoc component :body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
                                      body fixtures)))))
 
+;;
+;; TODO - more general way of queuing events :)
+;;
+(def begin-contact-events (atom []))
+(def end-contact-events (atom []))
+
 (defn- create-world []
   (let [gravity (Vector2. 0 -9.8)
         do-sleep true]
-    (World. gravity do-sleep)))
+    (doto (World. gravity do-sleep)
+      (.setContactListener (reify com.badlogic.gdx.physics.box2d.ContactListener
+                             (beginContact [this contact]
+                               ;; The contact event objects appear to get recycled,
+                               ;; so need to copy any data we might care about...
+                               (swap! begin-contact-events #(conj % {:fixture-a (.getFixtureA contact)
+                                                                     :fixture-b (.getFixtureB contact)})))
+                             (endContact [this contact]
+                               (swap! end-contact-events #(conj % {:fixture-a (.getFixtureA contact)
+                                                                     :fixture-b (.getFixtureB contact)})))
+                             (preSolve [this contact oldManifold])
+                             (postSolve [this contact impulse]))))))
 
 (defn- update-physics-body
   "Updates the Transform component on the entity with the current position and rotation of the Box2D body"
@@ -79,6 +112,7 @@
     (reduce update-physics-body
             system entities)))
 
+
 (def debug-render? true)
 
 (defn- debug-render*
@@ -92,6 +126,45 @@
   system)
 
 (defn- debug-render [system] (debug-render* system) system)
+
+(c/defcomponent AreaTrigger
+  :init ;; This needs to happen in add-component so we can get a guid..
+  (fn [component system {:keys [x y width height]}]
+    (let [world (get-in system [:physics :world])
+          body-def (doto (BodyDef.)
+                     (-> .type (set! BodyDef$BodyType/StaticBody))
+                     (-> .position (.set x y)))
+          body (.createBody world body-def)
+          fixture (doto (.createFixture body (get-fixture-def {:width width
+                                                               :height height
+                                                               :is-sensor true
+                                                               :shape "box"}))
+                    (.setUserData {:entity "SOME UUID"
+                                   :on-begin-contact (fn [system other]
+                                                       (println "TRIGGER ENTERED"))
+                                   :on-end-contact (fn [system other]
+                                                     (println "TRIGGER EXITED"))}))]
+      (assoc component :body body))))
+
+(defn- handle-contact-events
+  [system]
+
+  (let [contact-events @begin-contact-events]
+    (reset! begin-contact-events [])
+    (doseq [{:keys [fixture-a fixture-b]} contact-events]
+      (if-let [data (.getUserData fixture-a)]
+        ((:on-begin-contact data) system {}))
+      (if-let [data (.getUserData fixture-b)]
+        ((:on-begin-contact data) system {}))))
+
+  (let [contact-events @end-contact-events]
+    (reset! end-contact-events [])
+    (doseq [{:keys [fixture-a fixture-b]} contact-events]
+      (if-let [data (.getUserData fixture-a)]
+        ((:on-end-contact data) system {}))
+      (if-let [data (.getUserData fixture-b)]
+        ((:on-end-contact data) system {}))))
+  system)
 
 (s/defsubsystem physics
 
@@ -107,6 +180,7 @@
     (let [world (get-in system [:physics :world])]
       (.step world (.getDeltaTime Gdx/graphics) 6 2)) ;; TODO - want fixed physics update
     (-> system
-        (update-physics-bodies))))
+        (update-physics-bodies)
+        (handle-contact-events))))
 
 ;; TODO - how much should we be cleaning up? (.dispose world) etc..

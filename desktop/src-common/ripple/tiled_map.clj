@@ -69,10 +69,30 @@
        :x (+ x 0.5)  ;; TODO - don't assume 1 tile == 1 world unit?
        :y (+ y 0.5)})))
 
-(defn- create-entity-from-map-object
+(defmulti create-entity-from-map-object (fn [_ map-object _] (class map-object)))
+
+(defmethod create-entity-from-map-object com.badlogic.gdx.maps.objects.RectangleMapObject
+  [system map-object pixels-per-unit]
   "For the given map object, create and add an entity with the required components
   (if appropriate) to the ES system"
+  (let [rectangle (.getRectangle map-object)
+        width (/ (.width rectangle) pixels-per-unit)
+        height (/ (.height rectangle) pixels-per-unit)
+        x (+ (/ (.x rectangle) pixels-per-unit)
+             (/ width 2))
+        y (+ (/ (.y rectangle) pixels-per-unit)
+             (/ height 2))]
+    (prefab/instantiate system
+                        (.getName map-object)
+                        ;; TODO - more extendable way of instantiation params
+                        {:transform {:position [x y]}
+                         :areatrigger {:x x :y y :width width :height height}
+                         :physicsbody {:x x :y y}})))
+
+(defmethod create-entity-from-map-object com.badlogic.gdx.maps.objects.EllipseMapObject
   [system map-object pixels-per-unit]
+  "For the given map object, create and add an entity with the required components
+  (if appropriate) to the ES system"
   (let [ellipse (.getEllipse map-object)
         x (/ (.x ellipse) pixels-per-unit)
         y (/ (.y ellipse) pixels-per-unit)]
@@ -126,4 +146,3 @@
   (fn [system]
     (-> system
         (r/register-render-callback render-maps 0))))
-
