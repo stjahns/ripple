@@ -14,7 +14,8 @@
                  [org.clojure/clojure "1.6.0"]
                  [circleci/clj-yaml "0.5.3"]
                  [play-clj "0.3.6"]
-                 [brute "0.3.0"]]
+                 [brute "0.3.0"]
+                 [aprint "0.1.3"]]
 
   :source-paths ["src" "src-common"]
   :resource-paths ["resources"]

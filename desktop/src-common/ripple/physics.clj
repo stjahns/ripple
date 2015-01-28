@@ -166,6 +166,13 @@
         ((:on-end-contact data) system {}))))
   system)
 
+(defn on-shutdown
+  "Dispose of Box2D world"
+  [system]
+  (println "Shutting down physics...")
+  (if-let [world (get-in system [:physics :world])]
+    (.dispose world)))
+
 (s/defsubsystem physics
 
   :on-show
@@ -175,9 +182,11 @@
         (assoc-in [:physics :debug-renderer] (Box2DDebugRenderer.))
         (r/register-render-callback debug-render 2)))
 
+  :on-shutdown on-shutdown
+
   :on-pre-render
   (fn [system]
-    (let [world (get-in system [:physics :world])]
+    (if-let [world (get-in system [:physics :world])]
       (.step world (.getDeltaTime Gdx/graphics) 6 2)) ;; TODO - want fixed physics update
     (-> system
         (update-physics-bodies)

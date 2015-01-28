@@ -48,25 +48,10 @@
 
   :on-resize
   (fn [screen entities]
-    (subsystem/on-system-event :on-resize @sys)
+    (subsystem/on-system-event  @sys :on-resize)
     nil))
-
-(defscreen blank-screen
-  :on-render
-  (fn [screen entities]
-    (clear!)))
 
 (defgame ripple
   :on-create
   (fn [this]
     (set-screen! this main-screen)))
-
-(set-screen-wrapper! (fn [screen screen-fn]
-                       (try (screen-fn)
-                         (catch Exception e
-                           (.printStackTrace e)
-                           (set-screen! ripple blank-screen)))))
-
-(defn reload []
-  (subsystem/on-system-event @sys :on-shutdown)
-  (on-gl (set-screen! ripple main-screen)))

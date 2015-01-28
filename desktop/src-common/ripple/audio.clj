@@ -4,6 +4,9 @@
             [ripple.components :as c]
             [ripple.assets :as a]))
 
+;; Hack -- seems to force this to reload :/
+(println "Reloading Audio")
+
 (def instances (atom []))
 
 (a/defasset sound

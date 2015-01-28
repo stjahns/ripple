@@ -10,6 +10,9 @@
            [com.badlogic.gdx.maps.tiled TiledMapTileLayer]
            [com.badlogic.gdx.maps.tiled.renderers OrthogonalTiledMapRenderer]))
 
+;; Hack -- seems to force this to reload :/
+(println "Reloading tiled-map")
+
 ;;
 ;; Representation of a LibGDX TiledMap
 ;;

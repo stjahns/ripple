@@ -8,7 +8,7 @@
             [clj-yaml.core :as yaml]
             [brute.entity :as e]))
 
-(def asset-defs (atom {}))
+(defonce asset-defs (atom {}))
 
 (defn get-asset-def [asset-symbol]
   (get @asset-defs asset-symbol))
