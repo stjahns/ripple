@@ -105,7 +105,9 @@
   [system tiled-map pixels-per-unit]
   (let [map-objects (get-map-objects tiled-map)]
     (reduce (fn [system map-object]
-              (create-entity-from-map-object system map-object pixels-per-unit))
+              (if (.isVisible map-object)
+                (create-entity-from-map-object system map-object pixels-per-unit)
+                system))
             system map-objects)))
 
 (defn- spawn-prefab-for-tile-cell [system tile-cell x y]
