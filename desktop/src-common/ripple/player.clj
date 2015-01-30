@@ -1,7 +1,7 @@
 (ns ripple.player
   (:require [play-clj.core :refer :all]
             [brute.entity :as e]
-            [ripple.components :refer :all]
+            [ripple.components :as c]
             [ripple.rendering :as r]
             [ripple.sprites :as sprites]
             [ripple.prefab :as prefab]
@@ -13,7 +13,7 @@
 
 ;; An example Player component that handles physics-based movement with arrow keys
 
-(defcomponent Player
+(c/defcomponent Player
   :fields [:move-force {:default 100}
 
            :bullet-prefab nil
@@ -41,13 +41,13 @@
         screen-height (.getHeight Gdx/graphics)
 
         screen-x (- screen-x (/ screen-width 2))
-        screen-y (- (/ screen-height 2) screen-y) ;; pixels relative to screen center 
+        screen-y (- (/ screen-height 2) screen-y) ;; pixels relative to screen center
 
         camera (get-in system [:renderer :camera])
         camera-x (-> camera .position .x)
         camera-y (-> camera .position .y) ;; world space of screen center
 
-        world-x (+ (/ screen-x pixels-per-unit) camera-x) 
+        world-x (+ (/ screen-x pixels-per-unit) camera-x)
         world-y (+ (/ screen-y pixels-per-unit) camera-y)]
     [(float world-x) (float world-y)]))
 
@@ -98,7 +98,7 @@
         v2 (-> (e/get-component system entity 'PhysicsBody)
                (:body)
                (.getLinearVelocity)
-               (.len2))]        
+               (.len2))]
     (if (> v2 0.1) :walking :standing)))
 
 (def state-to-anim
@@ -111,9 +111,9 @@
    [:walking :aim-up-forward] :walking-up-forward-animation
    [:walking :aim-up] :walking-up-animation
    [:walking :aim-down-forward] :walking-down-forward-animation
-   [:walking :aim-down] :walking-down-animation}) 
+   [:walking :aim-down] :walking-down-animation})
 
-(defn enter-state 
+(defn enter-state
   [system entity state]
   (let [anim-ref (get state-to-anim state)
         anim (get (e/get-component system entity 'Player) anim-ref)]

@@ -32,7 +32,7 @@
            :looping {:default true}
            :pan {:default 0}
            :volume {:default 1}]
-  :init (fn [component system params]
+  :init (fn [component entity system params]
           (doto (:audio-asset component)
             (.setLooping (:looping component))
             (.setPan (:pan component) (:volume component))

@@ -54,7 +54,7 @@
 
 (c/defcomponent PhysicsBody
   :init
-  (fn [component system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
+  (fn init-physics-body [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
                                 width height]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
@@ -129,7 +129,7 @@
 
 (c/defcomponent AreaTrigger
   :init ;; This needs to happen in add-component so we can get a guid..
-  (fn [component system {:keys [x y width height]}]
+  (fn [component entity system {:keys [x y width height]}]
     (let [world (get-in system [:physics :world])
           body-def (doto (BodyDef.)
                      (-> .type (set! BodyDef$BodyType/StaticBody))
@@ -139,11 +139,11 @@
                                                                :height height
                                                                :is-sensor true
                                                                :shape "box"}))
-                    (.setUserData {:entity "SOME UUID"
+                    (.setUserData {:entity entity
                                    :on-begin-contact (fn [system other]
-                                                       (println "TRIGGER ENTERED"))
+                                                       (println "TRIGGER ENTERED: " entity))
                                    :on-end-contact (fn [system other]
-                                                     (println "TRIGGER EXITED"))}))]
+                                                     (println "TRIGGER EXITED:" entity))}))]
       (assoc component :body body))))
 
 (defn- handle-contact-events

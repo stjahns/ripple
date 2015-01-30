@@ -48,21 +48,21 @@
   [n & options]
   `(let [options# ~(apply hash-map options)
          fields# (apply hash-map (:fields options#))
-         init-fn# (or (:init options#) (fn [c# _# _#] c#))]
+         init-fn# (or (:init options#) (fn [c# _# _# _#] c#))]
      (register-component-def '~n (assoc options#
-                                        :create-component (fn [system# params#]
+                                        :create-component (fn [entity# system# params#]
                                                             (-> (#'ripple.components/init-component-fields system#
-                                                                                       params#
-                                                                                       {:type '~n}
-                                                                                       fields# )
-                                                                (init-fn# system# params#)))))))
+                                                                                                           params#
+                                                                                                           {:type '~n}
+                                                                                                           fields# )
+                                                                (init-fn# entity# system# params#)))))))
 
-(defn create-component [system component-symbol params]
+(defn create-component [system entity component-symbol params]
   (-> (get-component-def component-symbol)
       (get :create-component)
-      (apply [system params])))
+      (apply [entity system params])))
 
 (defcomponent Transform
-  :fields [:position {:default [0 0]} 
+  :fields [:position {:default [0 0]}
            :rotation {:default 0}
            :scale {:default [0 0]}])

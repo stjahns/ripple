@@ -24,7 +24,7 @@
 
 (c/defcomponent OrthogonalTiledMapRenderer
   :init
-  (fn [component system {:keys [tiled-map pixels-per-unit]}]
+  (fn [component entity system {:keys [tiled-map pixels-per-unit]}]
     (let [tiled-map (a/get-asset system tiled-map)]
       (assoc component :renderer (OrthogonalTiledMapRenderer. tiled-map (float (/ 1 pixels-per-unit)))))))
 

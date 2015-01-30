@@ -19,6 +19,7 @@
     (let [entity (e/create-entity)
           system (e/add-entity system entity)
           components (map #(components/create-component system
+                                                        entity
                                                         (symbol (:type %))
                                                         (:params %))
                           (:components params))]
