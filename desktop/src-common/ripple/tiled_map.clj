@@ -83,7 +83,7 @@
         y (+ (/ (.y rectangle) pixels-per-unit)
              (/ height 2))]
     (prefab/instantiate system
-                        (.getName map-object)
+                        (-> map-object (.getProperties) (.get "type"))
                         ;; TODO - more extendable way of instantiation params
                         {:transform {:position [x y]}
                          :areatrigger {:x x :y y :width width :height height}
@@ -97,7 +97,7 @@
         x (/ (.x ellipse) pixels-per-unit)
         y (/ (.y ellipse) pixels-per-unit)]
     (prefab/instantiate system
-                        (.getName map-object)
+                        (-> map-object (.getProperties) (.get "type"))
                         {:transform {:position [x y]}
                          :physicsbody {:x x :y y}})))
 
