@@ -52,7 +52,11 @@
 (defn shutdown []
   (println "Shutting down...")
   (set-screen! ripple blank-screen)
+  (Thread/sleep 100)
   (subsystem/on-system-event @sys :on-shutdown))
+
+(defn resume []
+  (on-gl (set-screen! ripple main-screen)))
 
 (defn reload-and-require-all []
   (shutdown)
