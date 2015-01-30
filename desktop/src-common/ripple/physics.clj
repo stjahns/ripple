@@ -176,6 +176,8 @@
 
   :on-show
   (fn [system]
+    (c/register-component-def 'AreaTrigger AreaTrigger)
+    (c/register-component-def 'PhysicsBody PhysicsBody)
     (-> system
         (assoc-in [:physics :world] (create-world))
         (assoc-in [:physics :debug-renderer] (Box2DDebugRenderer.))

@@ -1,7 +1,8 @@
 (ns ripple.components
   (:require
    [brute.entity :refer :all]
-   [ripple.assets :as a])
+   [ripple.assets :as a]
+   [ripple.subsystem :as s])
   (:import
    [clojure.lang PersistentArrayMap PersistentHashMap]))
 
@@ -20,15 +21,14 @@
   [component]
   (:type component))
 
-(def component-defs (atom {}))
+(defonce component-defs (atom {}))
 
-(defn get-component-def [component-symbol]
+(defn get-component-def
+  [component-symbol]
   (get @component-defs component-symbol))
 
-(defn remove-component-def [component-symbol]
-  (swap! component-defs dissoc component-symbol))
-
-(defn register-component-def [component-symbol create-fn]
+(defn register-component-def
+  [component-symbol create-fn]
   (swap! component-defs assoc component-symbol create-fn))
 
 (defn- init-component-fields
@@ -49,20 +49,35 @@
   `(let [options# ~(apply hash-map options)
          fields# (apply hash-map (:fields options#))
          init-fn# (or (:init options#) (fn [c# _# _# _#] c#))]
-     (register-component-def '~n (assoc options#
-                                        :create-component (fn [entity# system# params#]
-                                                            (-> (#'ripple.components/init-component-fields system#
-                                                                                                           params#
-                                                                                                           {:type '~n}
-                                                                                                           fields# )
-                                                                (init-fn# entity# system# params#)))))))
+     (intern *ns*  '~n (assoc options#
+                              :create-component (fn [entity# system# params#]
+                                                  (-> (#'ripple.components/init-component-fields system#
+                                                                                                 params#
+                                                                                                 {:type '~n}
+                                                                                                 fields# )
+                                                      (init-fn# entity# system# params#)))))))
 
 (defn create-component [system entity component-symbol params]
-  (-> (get-component-def component-symbol)
-      (get :create-component)
-      (apply [entity system params])))
+  (if-let [component-def (get-component-def component-symbol)]
+    (-> component-def
+        (get :create-component)
+        (apply [entity system params]))
+    (throw (Exception. (str "Component not defined: " component-symbol)))))
 
 (defcomponent Transform
   :fields [:position {:default [0 0]}
            :rotation {:default 0}
            :scale {:default [0 0]}])
+
+(defn init-component-manager
+  "Clear any old component definitions, "
+  [system]
+  (reset! component-defs {})
+  system)
+
+(s/defsubsystem components
+  ;;:asset-defs [:texture :texture-region :animation] ;; TODO handle with macro
+  :on-show
+  (fn [system]
+    (register-component-def 'Transform Transform)
+    system))

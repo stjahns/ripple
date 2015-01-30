@@ -4,9 +4,6 @@
             [ripple.components :as c]
             [ripple.assets :as a]))
 
-;; Hack -- seems to force this to reload :/
-(println "Reloading Audio")
-
 (def instances (atom []))
 
 (a/defasset sound
@@ -27,8 +24,9 @@
       (swap! instances #(conj % instance))
       instance)))
 
-(c/defcomponent AudioPlayer
+(c/defcomponent MusicPlayer
   :fields [:audio-asset {:asset true}
+           :play-on-start {:default false}
            :looping {:default true}
            :pan {:default 0}
            :volume {:default 1}]
@@ -38,6 +36,15 @@
             (.setPan (:pan component) (:volume component))
             (.play))
           component))
+
+(c/defcomponent SoundPlayer
+  :fields [:audio-asset {:asset true}
+           :play-on-start {:default false}
+           :looping {:default true}
+           :pan {:default 0}
+           :volume {:default 1}]
+  :init (fn [component entity system params]
+          (assoc component :params params)))
 
 (defn on-shutdown
   "Stop all sounds and release all resources"
@@ -52,5 +59,7 @@
   :on-show (fn [system]
              (a/register-asset-def :music music-asset-def)
              (a/register-asset-def :sound sound-asset-def)
+             (c/register-component-def 'SoundPlayer SoundPlayer)
+             (c/register-component-def 'MusicPlayer MusicPlayer)
              system)
   :on-shutdown on-shutdown)

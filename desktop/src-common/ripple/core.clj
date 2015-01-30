@@ -30,8 +30,10 @@
   (-> (e/create-system)
 
       (a/init-asset-manager) ;; clears any existing asset defs
+      (c/init-component-manager) ;; clears any existing component defs
 
       (subsystem/register-subsystem a/assets)
+      (subsystem/register-subsystem c/components)
       (subsystem/register-subsystem rendering/rendering)
       (subsystem/register-subsystem physics/physics)
       (subsystem/register-subsystem prefab/prefabs)

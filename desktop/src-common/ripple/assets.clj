@@ -102,7 +102,7 @@
                       {} instance-defs))))
 
 (defn init-asset-manager
-  "Clear any old asset definitions, and loads all asset instance definitions from yaml source files"
+  "Clear any old asset definitions"
   [system]
   (reset! asset-defs {})
   system)
