@@ -74,15 +74,12 @@
 (defn ra [] (reload-all))
 
 (defn aps []
-  (aprint (:asset-db @sys))
+  (aprint (:assets @sys))
   (aprint (:physics @sys))
   (aprint (:renderer @sys)))
 
 (defn apc []
   (aprint (:entity-components @sys)))
-
-(defn p-subsystem-hooks []
-  (aprint @ripple.subsystem/subsystems))
 
 (defn p-asset-defs []
   (aprint @ripple.assets/asset-defs))

@@ -8,33 +8,52 @@
             [clj-yaml.core :as yaml]
             [brute.entity :as e]))
 
-(defonce asset-defs (atom {}))
+;; Asset manager module
+;;
+;; Terminology:
+;;
+;; asset-def - Definition of a type of asset, eg a sprite, audio file, etc.
+;; References a constructor fn to instantiate the asset given some options
+;;
+;; asset-instance-def - Definition of an instance of an asset, eg a sprite for "player.png"
+;; that is parsed from an asset yaml file
+;;
+;; asset-instance - the created instance of a particular asset instance definition
 
-(defn get-asset-def [asset-symbol]
-  (get @asset-defs asset-symbol))
+(defonce asset-defs
+  ;; Mapping of keywords to asset definitions
+  ;; TODO keep in system..?
+  (atom {}))
 
-(defn remove-asset-def [asset-symbol]
-  (swap! asset-defs dissoc asset-symbol))
+(defn get-asset-def
+  "Returns the asset definition for the given key
+  Asset definitions should be maps of the form {:create fn} or {:instantiate fn} depending on whether
+  it should be instantiated into the system or not'" ;; TODO needlessly complicated?
+  [key]
+  (get @asset-defs key))
 
-(defn register-asset-def [asset-symbol create-fn]
-  (swap! asset-defs assoc asset-symbol create-fn))
+(defn register-asset-def
+  "Register the given asset definition with the given key"
+  [key asset-def]
+  (swap! asset-defs assoc key asset-def))
 
 (defn get-asset [system asset-name]
-  "Get an asset by name and instantiate it"
-  (let [asset-db (:asset-db system)
-        asset (get asset-db asset-name)
-        asset-def (-> (symbol (:asset asset))
-                      (get-asset-def))
+  "Get an asset instance definition by name and instantiate it"
+  (let [instance-def (get-in system [:assets :instance-defs asset-name])
+        asset-def (get-asset-def (keyword (:asset instance-def)))
         create-fn (:create asset-def)]
-    (when (not asset-def) (throw (Exception. (str "Asset not defined: " (:asset asset)))))
-    (create-fn system asset)))
+    (when (not asset-def) (throw (Exception. (str "Asset definition does not exist: " (:asset instance-def)))))
+    (create-fn system instance-def)))
 
 (defmacro defasset
+  "Interns a symbol '{name}-asset-name in the current namespace bound to the
+  enclosed asset definition. The asset def should be registered with asset manager
+  during subsystem initialization"
   [n & options]
   `(let [options# ~(apply hash-map options)]
-     (register-asset-def '~n options#)))
+     (intern *ns* (symbol (str '~n "-asset-def")) options#)))
 
-;; Core asset definitions
+;; TODO move these to the proper modules...
 
 (defasset texture
   :create
@@ -65,19 +84,34 @@
       (Animation. (float frame-duration)
                   (u/gdx-array key-frames)))))
 
-(defn- load-asset-file [path]
+(defn- parse-asset-file
+  "Parse the asset source file for the given path"
+  [path]
   (yaml/parse-string
    (slurp path)))
 
-(defn init-asset-db [] {})
+(defn load-asset-instance-defs
+  "Parses asset source files into instance definitions
+   and stores them in the system indexed by keyword corresponding to the asset instance name.
+  This can happen at any time."
+  [system]
+  (let [asset-files ["resources/assets.yaml"]
+        instance-defs (flatten (map parse-asset-file asset-files))]
+    (assoc-in system [:assets :instance-defs]
+              (reduce #(assoc % (:name %2) %2)
+                      {} instance-defs))))
 
-(defn load-asset [asset-db asset]
-  (assoc asset-db (:name asset) asset))
+(defn init-asset-manager
+  "Clear any old asset definitions, and loads all asset instance definitions from yaml source files"
+  [system]
+  (reset! asset-defs {})
+  system)
 
-(s/defsubsystem asset-db
+(s/defsubsystem assets
+  ;;:asset-defs [:texture :texture-region :animation] ;; TODO handle with macro
   :on-show
   (fn [system]
-    (let [asset-db (init-asset-db)
-          asset-files ["resources/assets.yaml"]
-          parsed-assets (flatten (map load-asset-file asset-files))]
-      (assoc system :asset-db (reduce load-asset asset-db parsed-assets)))))
+    (register-asset-def :texture texture-asset-def)
+    (register-asset-def :texture-region texture-region-asset-def)
+    (register-asset-def :animation animation-asset-def)
+    (load-asset-instance-defs system)))

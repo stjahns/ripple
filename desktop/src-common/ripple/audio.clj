@@ -49,4 +49,8 @@
   (reset! instances []))
 
 (s/defsubsystem audio
+  :on-show (fn [system]
+             (a/register-asset-def :music music-asset-def)
+             (a/register-asset-def :sound sound-asset-def)
+             system)
   :on-shutdown on-shutdown)

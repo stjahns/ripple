@@ -5,7 +5,6 @@
             [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.rendering :as r]
-            [ripple.assets :as asset-db]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.physics.box2d
             World

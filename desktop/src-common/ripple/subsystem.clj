@@ -1,26 +1,20 @@
 (ns ripple.subsystem)
 
-;; TODO - rather have subsystems registered into system, instead of stored globally like this..
-
-(def subsystems (atom {}))
-
-(defn get-subsystem [system-id]
-  (get @subsystems system-id))
-
-(defn remove-subsystem [system-id]
-  (swap! subsystems dissoc system-id))
-
-(defn register-subsystem [system-id subsystem]
-  (swap! subsystems assoc system-id subsystem))
+(defn register-subsystem [system subsystem]
+  (if-let [subsystems (:subsystems system)]
+    (assoc system :subsystems (conj subsystems subsystem))
+    (assoc system :subsystems [subsystem])))
 
 (defn on-system-event [system event-name]
   (reduce (fn [system subsystem]
             (if-let [event-handler (get subsystem event-name)]
               (event-handler system)
               system))
-          system (vals @subsystems)))
+          system (:subsystems system)))
 
 (defmacro defsubsystem
+  "Interns a symbol 'n in the current namespace bound to the
+  enclosed subsystem definition."
   [n & options]
   `(let [options# ~(apply hash-map options)]
-     (register-subsystem (keyword '~n) options#)))
+     (intern *ns* '~n options#)))

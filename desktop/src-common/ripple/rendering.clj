@@ -4,7 +4,6 @@
             [play-clj.utils :as u]
             [ripple.subsystem :as s]
             [ripple.components :as c]
-            [ripple.assets :as asset-db]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.graphics.g2d TextureRegion SpriteBatch]
            [com.badlogic.gdx.graphics Texture]

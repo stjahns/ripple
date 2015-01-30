@@ -149,5 +149,6 @@
   :on-pre-render init-map-spawner-components
   :on-show
   (fn [system]
+    (a/register-asset-def :tiled-map tiled-map-asset-def)
     (-> system
         (r/register-render-callback render-maps 0))))
