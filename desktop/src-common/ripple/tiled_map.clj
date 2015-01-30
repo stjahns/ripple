@@ -10,9 +10,6 @@
            [com.badlogic.gdx.maps.tiled TiledMapTileLayer]
            [com.badlogic.gdx.maps.tiled.renderers OrthogonalTiledMapRenderer]))
 
-;; Hack -- seems to force this to reload :/
-(println "Reloading tiled-map")
-
 ;;
 ;; Representation of a LibGDX TiledMap
 ;;
@@ -22,7 +19,7 @@
     (-> (TmxMapLoader.)
         (.load path))))
 
-(c/defcomponent OrthogonalTiledMapRenderer
+(c/defcomponent OrthogonalTiledMapRendererComponent
   :init
   (fn [component entity system {:keys [tiled-map pixels-per-unit]}]
     (let [tiled-map (a/get-asset system tiled-map)]
@@ -31,8 +28,8 @@
 (defn render-maps
   "Render any tiled map renderer components"
   [system]
-  (doseq [entity (e/get-all-entities-with-component system 'OrthogonalTiledMapRenderer)]
-    (let [tiled-map-component (e/get-component system entity 'OrthogonalTiledMapRenderer)
+  (doseq [entity (e/get-all-entities-with-component system 'OrthogonalTiledMapRendererComponent)]
+    (let [tiled-map-component (e/get-component system entity 'OrthogonalTiledMapRendererComponent)
           tiled-map-renderer (:renderer tiled-map-component)
           camera (:camera (:renderer system))]
       (.setView tiled-map-renderer camera)
@@ -149,5 +146,8 @@
   :on-pre-render init-map-spawner-components
   :on-show
   (fn [system]
+    (c/register-component-def 'OrthogonalTiledMapRendererComponent OrthogonalTiledMapRendererComponent)
+    (c/register-component-def 'TiledMapSpawner TiledMapSpawner)
+    (a/register-asset-def :tiled-map tiled-map-asset-def)
     (-> system
         (r/register-render-callback render-maps 0))))

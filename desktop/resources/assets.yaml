@@ -19,7 +19,7 @@
   - asset: prefab
     name: DungeonLevel
     components:
-      - type: OrthogonalTiledMapRenderer
+      - type: OrthogonalTiledMapRendererComponent
         params:
           tiled-map: DungeonMap
           pixels-per-unit: 32
@@ -27,7 +27,7 @@
   - asset: prefab
     name: PlatformLevel
     components:
-      - type: OrthogonalTiledMapRenderer
+      - type: OrthogonalTiledMapRendererComponent
         params:
           tiled-map: PlatformMap
           pixels-per-unit: 32
@@ -246,9 +246,20 @@
     name: SpaceRoachesMusic
     path: "resources/audio/space_roaches.ogg"
 
+  - asset: sound
+    name: SpaceRoachDeathSound
+    path: "resources/audio/RoachDeath.wav"
+
   - asset: prefab
     name: MusicPlayer
     components:
-      - type: AudioPlayer
+      - type: MusicPlayer
         params:
           audio-asset: SpaceRoachesMusic
+
+  - asset: prefab
+    name: RoachSoundPlayer
+    components:
+      - type: SoundPlayer
+        params:
+          audio-asset: SpaceRoachDeathSound

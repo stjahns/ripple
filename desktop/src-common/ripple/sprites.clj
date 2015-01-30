@@ -108,6 +108,8 @@
 
   :on-show
   (fn [system]
+    (c/register-component-def 'SpriteRenderer SpriteRenderer)
+    (c/register-component-def 'AnimationController AnimationController)
     (-> system
         (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
         (r/register-render-callback render-sprites 1))) ;; TODO - be able to specify order for each SpriteRenderer component

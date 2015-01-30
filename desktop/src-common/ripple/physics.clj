@@ -5,7 +5,6 @@
             [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.rendering :as r]
-            [ripple.assets :as asset-db]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.physics.box2d
             World
@@ -177,6 +176,8 @@
 
   :on-show
   (fn [system]
+    (c/register-component-def 'AreaTrigger AreaTrigger)
+    (c/register-component-def 'PhysicsBody PhysicsBody)
     (-> system
         (assoc-in [:physics :world] (create-world))
         (assoc-in [:physics :debug-renderer] (Box2DDebugRenderer.))

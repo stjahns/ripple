@@ -24,13 +24,35 @@
     (-> system
         (prefab/instantiate "PlatformLevel" {}))))
 
+(defn- init-system
+  "Initialize the ES system and all subsystems"
+  []
+  (-> (e/create-system)
+
+      (a/init-asset-manager) ;; clears any existing asset defs
+      (c/init-component-manager) ;; clears any existing component defs
+
+      (subsystem/register-subsystem a/assets)
+      (subsystem/register-subsystem c/components)
+      (subsystem/register-subsystem rendering/rendering)
+      (subsystem/register-subsystem physics/physics)
+      (subsystem/register-subsystem prefab/prefabs)
+      (subsystem/register-subsystem sprites/sprites)
+      (subsystem/register-subsystem audio/audio)
+      (subsystem/register-subsystem player/player)
+      (subsystem/register-subsystem tiled-map/level)
+
+      ;; Initialize component module (clear component defs) (unecessary if we keep them in system!)
+
+      ;; Initialise subsystems
+      (subsystem/on-system-event :on-show) ;; TODO rename
+
+      (start)))
+
 (defscreen main-screen
   :on-show
   (fn [screen entities]
-    (-> (e/create-system)
-        (subsystem/on-system-event :on-show)
-        (start)
-        (as-> s (reset! sys s)))
+    (reset! sys (init-system))
     (update! screen :renderer (stage) :camera (orthographic))
     nil)
 
