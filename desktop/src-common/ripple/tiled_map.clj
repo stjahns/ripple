@@ -71,6 +71,21 @@
 
 (defmulti create-entity-from-map-object (fn [_ map-object _] (class map-object)))
 
+(defn- get-event-connections-from-map-object
+  "TODO docs"
+  [map-object]
+  (let [properties (.getProperties map-object)
+        event-keys (filter #(= \+ (first %))
+                           (-> properties
+                               (.getKeys)
+                               (iterator-seq)))]
+    (reduce (fn [outputs event-key]
+              (let [output-event (subs event-key 1)
+                    connection-string (.get properties event-key)
+                    [_ connected-tag connected-event] (re-matches #"(.*):(.*)" connection-string)]
+                (conj outputs [output-event connected-tag (keyword connected-event)])))
+            [] event-keys)))
+
 (defmethod create-entity-from-map-object com.badlogic.gdx.maps.objects.RectangleMapObject
   [system map-object pixels-per-unit]
   "For the given map object, create and add an entity with the required components
@@ -78,14 +93,17 @@
   (let [rectangle (.getRectangle map-object)
         width (/ (.width rectangle) pixels-per-unit)
         height (/ (.height rectangle) pixels-per-unit)
+        tag (.getName map-object)
         x (+ (/ (.x rectangle) pixels-per-unit)
              (/ width 2))
         y (+ (/ (.y rectangle) pixels-per-unit)
-             (/ height 2))]
+             (/ height 2))
+        event-connections  (get-event-connections-from-map-object map-object)]
     (prefab/instantiate system
                         (-> map-object (.getProperties) (.get "type"))
                         ;; TODO - more extendable way of instantiation params
                         {:transform {:position [x y]}
+                         :eventhub {:outputs event-connections :tag tag}
                          :areatrigger {:x x :y y :width width :height height}
                          :physicsbody {:x x :y y}})))
 

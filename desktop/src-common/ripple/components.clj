@@ -48,12 +48,14 @@
   [n & options]
   `(let [options# ~(apply hash-map options)
          fields# (apply hash-map (:fields options#))
+         on-event# (apply hash-map (:on-event options#))
          init-fn# (or (:init options#) (fn [c# _# _# _#] c#))]
      (intern *ns*  '~n (assoc options#
                               :create-component (fn [entity# system# params#]
                                                   (-> (#'ripple.components/init-component-fields system#
                                                                                                  params#
-                                                                                                 {:type '~n}
+                                                                                                 {:type '~n
+                                                                                                  :on-event on-event#}
                                                                                                  fields# )
                                                       (init-fn# entity# system# params#)))))))
 

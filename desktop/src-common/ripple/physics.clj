@@ -5,6 +5,7 @@
             [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.rendering :as r]
+            [ripple.event :as event]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.physics.box2d
             World
@@ -126,6 +127,37 @@
 
 (defn- debug-render [system] (debug-render* system) system)
 
+(defn get-entities-with-tag [system tag]
+  (filter #(= (:tag (e/get-component system % 'EventHub))
+              tag)
+          (e/get-all-entities-with-component system 'EventHub)))
+
+;; TODO refactor following 
+
+(defn- area-trigger-entered
+  [system trigger-entity entering-fixture]
+  (if-let [event-hub (e/get-component system trigger-entity 'EventHub)]
+    (let [outgoing-connections (filter #(= (first %) "on-enter")
+                                       (:outputs event-hub))]
+      (reduce (fn [system [output-event receiver-tag receiver-event]]
+                (event/send-event system
+                                  (first (get-entities-with-tag system receiver-tag))
+                                  receiver-event))
+              system outgoing-connections))
+    system))
+
+(defn- area-trigger-exited
+  [system trigger-entity entering-fixture]
+  (if-let [event-hub (e/get-component system trigger-entity 'EventHub)]
+    (let [outgoing-connections (filter #(= (first %) "on-exit")
+                                       (:outputs event-hub))]
+      (reduce (fn [system [output-event receiver-tag receiver-event]]
+                (event/send-event system
+                                  (first (get-entities-with-tag system receiver-tag))
+                                  receiver-event))
+              system outgoing-connections))
+    system))
+
 (c/defcomponent AreaTrigger
   :init ;; This needs to happen in add-component so we can get a guid..
   (fn [component entity system {:keys [x y width height]}]
@@ -139,31 +171,50 @@
                                                                :is-sensor true
                                                                :shape "box"}))
                     (.setUserData {:entity entity
-                                   :on-begin-contact (fn [system other]
-                                                       (println "TRIGGER ENTERED: " entity))
-                                   :on-end-contact (fn [system other]
-                                                     (println "TRIGGER EXITED:" entity))}))]
+                                   :on-begin-contact area-trigger-entered
+                                   :on-end-contact area-trigger-exited}))]
       (assoc component :body body))))
+
+
+(defn- handle-begin-contact-event
+  [system fixture-a fixture-b]
+  (if-let [data (.getUserData fixture-a)]
+    ((:on-begin-contact data) system (:entity data) fixture-b)
+    system))
+
+(defn- handle-end-contact-event
+  [system fixture-a fixture-b]
+  (if-let [data (.getUserData fixture-a)]
+    ((:on-end-contact data) system (:entity data) fixture-b)
+    system))
+
+(defn- handle-begin-contact-events
+  [system contact-events]
+  (reduce (fn [system {:keys [fixture-a fixture-b]}]
+            (-> system
+                (handle-begin-contact-event fixture-a fixture-b)
+                (handle-begin-contact-event fixture-b fixture-a)))
+          system contact-events))
+
+(defn- handle-end-contact-events
+  [system contact-events]
+  (reduce (fn [system {:keys [fixture-a fixture-b]}]
+            (-> system
+                (handle-end-contact-event fixture-a fixture-b)
+                (handle-end-contact-event fixture-b fixture-a)))
+          system contact-events))
 
 (defn- handle-contact-events
   [system]
 
-  (let [contact-events @begin-contact-events]
+  (let [queued-begin-contact-events @begin-contact-events
+        queued-end-contact-events @end-contact-events]
+    ;; TODO how much risk of missing events is there here?
     (reset! begin-contact-events [])
-    (doseq [{:keys [fixture-a fixture-b]} contact-events]
-      (if-let [data (.getUserData fixture-a)]
-        ((:on-begin-contact data) system {}))
-      (if-let [data (.getUserData fixture-b)]
-        ((:on-begin-contact data) system {}))))
-
-  (let [contact-events @end-contact-events]
     (reset! end-contact-events [])
-    (doseq [{:keys [fixture-a fixture-b]} contact-events]
-      (if-let [data (.getUserData fixture-a)]
-        ((:on-end-contact data) system {}))
-      (if-let [data (.getUserData fixture-b)]
-        ((:on-end-contact data) system {}))))
-  system)
+    (-> system
+        (handle-begin-contact-events queued-begin-contact-events)
+        (handle-end-contact-events queued-end-contact-events))))
 
 (defn on-shutdown
   "Dispose of Box2D world"
@@ -171,7 +222,6 @@
   (println "Shutting down physics...")
   (if-let [world (get-in system [:physics :world])]
     (.dispose world)))
-
 (s/defsubsystem physics
 
   :on-show

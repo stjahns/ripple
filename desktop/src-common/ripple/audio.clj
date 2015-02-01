@@ -2,6 +2,7 @@
   (:import [com.badlogic.gdx Gdx])
   (:require [ripple.subsystem :as s]
             [ripple.components :as c]
+            [brute.entity :as e]
             [ripple.assets :as a]))
 
 (def instances (atom []))
@@ -37,14 +38,12 @@
             (.play))
           component))
 
-(c/defcomponent SoundPlayer
-  :fields [:audio-asset {:asset true}
-           :play-on-start {:default false}
-           :looping {:default true}
-           :pan {:default 0}
-           :volume {:default 1}]
-  :init (fn [component entity system params]
-          (assoc component :params params)))
+(defn play-sound
+  [system entity]
+  (let [sound-player (e/get-component system entity 'SoundPlayer)
+        {:keys [audio-asset looping volume pitch pan]} sound-player]
+    (.play audio-asset volume pitch pan))
+  system)
 
 (defn on-shutdown
   "Stop all sounds and release all resources"
@@ -54,6 +53,17 @@
     (.stop instance)
     (.dispose instance))
   (reset! instances []))
+
+(c/defcomponent SoundPlayer
+  :on-event [:play play-sound]
+  :fields [:audio-asset {:asset true}
+           :play-on-start {:default false}
+           :looping {:default true}
+           :pan {:default 0}
+           :pitch {:default 1}
+           :volume {:default 1}]
+  :init (fn [component entity system params]
+          (assoc component :params params)))
 
 (s/defsubsystem audio
   :on-show (fn [system]
