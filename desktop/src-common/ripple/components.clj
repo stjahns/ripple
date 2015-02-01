@@ -69,7 +69,7 @@
 (defcomponent Transform
   :fields [:position {:default [0 0]}
            :rotation {:default 0}
-           :scale {:default [0 0]}])
+           :scale {:default [1 1]}])
 
 (defn init-component-manager
   "Clear any old component definitions, "

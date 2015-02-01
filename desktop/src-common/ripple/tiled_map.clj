@@ -46,8 +46,10 @@
    (.getLayers tiled-map)))
 
 (defn- get-map-objects [tiled-map]
-  (let [object-layer (first (get-object-layers tiled-map))]
-    (.getObjects object-layer)))
+  (flatten (reduce #(conj % (-> (.getObjects %2)
+                                (.iterator)
+                                (iterator-seq)))
+                   [] (get-object-layers tiled-map))))
 
 (defn- get-tile-layers
   [tiled-map]
@@ -130,10 +132,13 @@
 
 (defn- spawn-prefab-for-tile-cell [system tile-cell x y]
   (let [prefab-name (-> tile-cell (.getTile) (.getProperties) (.get "prefab"))]
-    (prefab/instantiate system
-                        prefab-name
-                        {:transform {:position [x y]}
-                         :physicsbody {:x x :y y}})))
+    (if (not (nil? prefab-name))
+      (prefab/instantiate system
+                          prefab-name
+                          {:transform {:position [x y]}
+                           :physicsbody {:x x :y y}})
+      ;; Else, nothing to instantiate
+      system)))
 
 (defn- create-entities-for-map-tiles
   [system tiled-map pixels-per-unit]

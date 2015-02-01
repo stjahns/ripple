@@ -2,7 +2,8 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.space-roaches.player :as player]
+            [ripple.space-roaches.player :as roaches-player]
+            [ripple.leaks.player :as leaks-player]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]
@@ -23,7 +24,7 @@
   [system]
   (let [tile-map (e/create-entity)]
     (-> system
-        (prefab/instantiate "PlatformLevel" {}))))
+        (prefab/instantiate "LeaksLevel" {}))))
 
 (defn- init-system
   "Initialize the ES system and all subsystems"
@@ -41,7 +42,10 @@
       (subsystem/register-subsystem prefab/prefabs)
       (subsystem/register-subsystem sprites/sprites)
       (subsystem/register-subsystem audio/audio)
-      (subsystem/register-subsystem player/player)
+
+      ;(subsystem/register-subsystem roaches-player/player)
+      (subsystem/register-subsystem leaks-player/player)
+
       (subsystem/register-subsystem tiled-map/level)
 
       ;; Initialize component module (clear component defs) (unecessary if we keep them in system!)

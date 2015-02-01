@@ -78,8 +78,11 @@
 (def begin-contact-events (atom []))
 (def end-contact-events (atom []))
 
-(defn- create-world []
-  (let [gravity (Vector2. 0 -9.8)
+(defn- create-world
+  "Initialize Box2D world.
+  TODO: check for some kind of Box2DSettings asset for configuration"
+  []
+  (let [gravity (Vector2. 0 -2.8)
         do-sleep true]
     (doto (World. gravity do-sleep)
       (.setContactListener (reify com.badlogic.gdx.physics.box2d.ContactListener
@@ -112,8 +115,7 @@
     (reduce update-physics-body
             system entities)))
 
-
-(def debug-render? true)
+(def debug-render? false)
 
 (defn- debug-render*
   [system]
@@ -132,7 +134,7 @@
               tag)
           (e/get-all-entities-with-component system 'EventHub)))
 
-;; TODO refactor following 
+;; TODO refactor following
 
 (defn- area-trigger-entered
   [system trigger-entity entering-fixture]

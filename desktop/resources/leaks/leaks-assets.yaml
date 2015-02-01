@@ -1,0 +1,64 @@
+# Level
+
+  - asset: tiled-map
+    name: LeaksMap
+    path: resources/leaks/leaks-level.tmx
+
+  - asset: prefab
+    name: LeaksLevel
+    components:
+      - type: OrthogonalTiledMapRendererComponent
+        params:
+          tiled-map: LeaksMap
+          pixels-per-unit: 32
+      - type: TiledMapSpawner
+        params:
+          tiled-map: LeaksMap
+          pixels-per-unit: 32
+
+  - asset: prefab
+    name: BlockTilePrefab
+    components:
+      - type: Transform
+      - type: PhysicsBody
+        params:
+          body-type: static
+          velocity-x: 0
+          velocity-y: 0
+          fixtures:
+            - shape: box
+              width: 1
+              height: 1
+              density: 1
+              friction: 0.7
+
+# Player
+
+  - asset: texture
+    name: JanitorSprite
+    path: leaks/janitor.png
+
+  - asset: prefab
+    name: LeaksPlayer
+    components:
+      - type: Transform
+      - type: AnimationController
+      - type: Player
+        params:
+          jet-force: 10
+      - type: PhysicsBody
+        params:
+          body-type: dynamic
+          velocity-x: 0
+          velocity-y: 0
+          fixed-rotation: true
+          fixtures:
+            - shape: circle
+              radius: 0.5
+              density: 1
+              friction: 0.7
+      - type: SpriteRenderer
+        params:
+          texture: JanitorSprite
+          tile-size: [32, 32]
+          tile-indices: [0, 0]
