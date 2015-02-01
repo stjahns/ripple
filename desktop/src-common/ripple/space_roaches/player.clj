@@ -1,4 +1,4 @@
-(ns ripple.player
+(ns ripple.space-roaches.player
   (:require [play-clj.core :refer :all]
             [brute.entity :as e]
             [ripple.components :as c]

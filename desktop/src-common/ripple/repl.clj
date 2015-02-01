@@ -4,7 +4,6 @@
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
             [ripple.core :refer :all]
-            [ripple.player :as player]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]

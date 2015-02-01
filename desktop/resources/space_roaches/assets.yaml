@@ -1,6 +1,6 @@
   - asset: texture
     name: PlayerSpriteSheet
-    path: sprites/PlayerV2.png
+    path: space_roaches/sprites/PlayerV2.png
 
   - asset: texture-region
     name: PlayerSprite1
@@ -10,19 +10,7 @@
 
   - asset: tiled-map
     name: PlatformMap
-    path: resources/platform.tmx
-
-  - asset: tiled-map
-    name: DungeonMap
-    path: resources/dungeon.tmx
-
-  - asset: prefab
-    name: DungeonLevel
-    components:
-      - type: OrthogonalTiledMapRendererComponent
-        params:
-          tiled-map: DungeonMap
-          pixels-per-unit: 32
+    path: resources/space_roaches/platform.tmx
 
   - asset: prefab
     name: PlatformLevel
@@ -149,7 +137,7 @@
 
   - asset: sound
     name: FireSound
-    path: "resources/audio/Shoot.wav"
+    path: resources/space_roaches/audio/Shoot.wav
 
   - asset: prefab
     name: Player
@@ -201,7 +189,7 @@
 
   - asset: texture
     name: BlockSprite
-    path: sprites/Block.png
+    path: space_roaches/sprites/Block.png
 
   - asset: prefab
     name: BlockPrefab
@@ -245,11 +233,11 @@
 
   - asset: music
     name: SpaceRoachesMusic
-    path: "resources/audio/space_roaches.ogg"
+    path: resources/space_roaches/audio/space_roaches.ogg
 
   - asset: sound
     name: SpaceRoachDeathSound
-    path: "resources/audio/RoachDeath.wav"
+    path: resources/space_roaches/audio/RoachDeath.wav
 
   - asset: prefab
     name: MusicPlayer

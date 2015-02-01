@@ -2,7 +2,7 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.player :as player]
+            [ripple.space-roaches.player :as player]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]
