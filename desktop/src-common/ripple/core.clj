@@ -11,6 +11,7 @@
             [ripple.assets :as a]
             [ripple.subsystem :as subsystem]
             [ripple.prefab :as prefab]
+            [ripple.event :as event]
             [ripple.tiled-map :as tiled-map]
             [brute.entity :as e]
             [brute.system :as s]))
@@ -34,6 +35,7 @@
 
       (subsystem/register-subsystem a/assets)
       (subsystem/register-subsystem c/components)
+      (subsystem/register-subsystem event/events)
       (subsystem/register-subsystem rendering/rendering)
       (subsystem/register-subsystem physics/physics)
       (subsystem/register-subsystem prefab/prefabs)

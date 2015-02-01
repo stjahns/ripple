@@ -87,3 +87,7 @@
 
 (defn p-asset-defs []
   (aprint @ripple.assets/asset-defs))
+
+(defn get-components [system type]
+  (map #(e/get-component system % type)
+       (e/get-all-entities-with-component system type)))

@@ -194,6 +194,7 @@
     name: AreaTrigger
     components:
       - type: Transform
+      - type: EventHub
       - type: AreaTrigger
 
 # Block
@@ -260,6 +261,7 @@
   - asset: prefab
     name: RoachSoundPlayer
     components:
+      - type: EventHub
       - type: SoundPlayer
         params:
           audio-asset: SpaceRoachDeathSound
