@@ -67,19 +67,21 @@
     (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             transform (e/get-component system entity 'Transform)
-            [x y] (:position transform)
-            [sx sy] (:scale transform)
-            r (:rotation transform)
+
+            position (c/get-position system transform)
+            scale (c/get-scale system transform)
+            r (c/get-rotation system transform)
+
             pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
             [width height] (map #(/ % pixels-per-unit)
                                 (get-sprite-size texture))]
         (draw-sprite sprite-batch
                      texture
-                     (:position transform)
+                     [(.x position) (.y position)]
                      [width height]
-                     (:scale transform)
-                     (:rotation transform))))
+                     [(.x scale) (.y scale)]
+                     r)))
     (.end sprite-batch)
     system))
 

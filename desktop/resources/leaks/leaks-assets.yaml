@@ -38,11 +38,43 @@
     name: JanitorSprite
     path: leaks/janitor.png
 
+  - asset: texture
+    name: JanitorArm
+    path: leaks/arm.png
+
   - asset: prefab
-    name: LeaksPlayer
+    name: Arm
     components:
       - type: Transform
-      - type: AnimationController
+      - type: SpriteRenderer
+        params:
+          texture: JanitorArm
+          tile-size: [32, 32]
+          tile-indices: [0, 0]
+
+  - asset: prefab
+    name: ArmRoot
+    children:
+      - prefab: Arm
+        options:
+          transform:
+            position: [-0.5, 0]
+    components:
+      - type: Transform
+      - type: EventHub
+        params:
+          tag: PlayerArmRoot
+
+  - asset: prefab
+    name: LeaksPlayer
+    children:
+      - prefab: ArmRoot
+        options:
+          transform:
+            position: [0, -0.1]
+            rotation: 0
+    components:
+      - type: Transform
       - type: Player
         params:
           jet-force: 10

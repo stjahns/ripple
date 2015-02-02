@@ -14,6 +14,18 @@
                                                                       component-options))))
                                   components))))
 
+(defn- instantiate-children
+  "Given a list of children, instantiate them into the system"
+  [system entity children]
+  (reduce (fn [system {:keys [prefab options]}]
+            (instantiate system prefab (assoc-in options [:transform :parent] entity)))
+          system children))
+
+(defn- add-components
+  [system entity components]
+  (reduce (fn [system component] (e/add-component system entity component))
+          system components))
+
 (a/defasset prefab
   :instantiate
   (fn [system params]
@@ -24,8 +36,9 @@
                                                         (symbol (:type %))
                                                         (:params %))
                           (:components params))]
-      (reduce (fn [system component] (e/add-component system entity component))
-              system components))))
+      (-> system
+          (instantiate-children entity (:children params))
+          (add-components entity components)))))
 
 (defn instantiate [system asset-name options]
   "Get a prefab by name and instantiate it in the ES system"
