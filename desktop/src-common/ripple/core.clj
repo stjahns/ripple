@@ -48,8 +48,6 @@
 
       (subsystem/register-subsystem tiled-map/level)
 
-      ;; Initialize component module (clear component defs) (unecessary if we keep them in system!)
-
       ;; Initialise subsystems
       (subsystem/on-system-event :on-show) ;; TODO rename
 
