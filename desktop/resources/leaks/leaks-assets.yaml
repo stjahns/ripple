@@ -62,6 +62,8 @@
     components:
       - type: Transform
       - type: MopHead
+        params:
+          pop-sound: BlobPopSound
       - type: EventHub
       - type: AreaTrigger
         params:
@@ -182,3 +184,20 @@
           tile-size: [32, 32]
           tile-indices: [0, 0]
 
+# Audio
+
+  - asset: sound
+    name: BlobPopSound
+    path: "resources/leaks/oildeath.wav"
+
+  - asset: music
+    name: LeaksMusic
+    path: "resources/leaks/griddygrindy.mp3"
+
+  - asset: prefab
+    name: MusicPlayer
+    components:
+      - type: MusicPlayer
+        params:
+          audio-asset: LeaksMusic
+          volume: 0.1

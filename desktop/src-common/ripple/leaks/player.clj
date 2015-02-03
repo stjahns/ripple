@@ -11,12 +11,14 @@
 (defn- mophead-on-enter
   [system entity {:keys [entering-fixture]}]
   (if-let [entering-entity (:entity (.getUserData entering-fixture))]
-    (c/destroy-entity system entering-entity)
+    (let [component (e/get-component system entity 'MopHead)]
+      (.play (:pop-sound component) 1 1 0)
+      (c/destroy-entity system entering-entity))
     system))
 
 (c/defcomponent MopHead
   :on-event [:on-trigger-entered mophead-on-enter]
-  :fields [])
+  :fields [:pop-sound {:asset true}])
 
 (c/defcomponent Player
   :fields [:jet-force {:default 100}])
