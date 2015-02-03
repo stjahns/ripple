@@ -2,7 +2,8 @@
   (:require [brute.entity :as e]
             [ripple.components :as c]
             [ripple.rendering :as r]
-            [ripple.subsystem :as s])
+            [ripple.subsystem :as s]
+            [ripple.physics :as physics])
   (:import [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
@@ -79,7 +80,7 @@
 
 (defn- aim-broom
   [system entity]
-  (if-let [broom-root (first (ripple.physics/get-entities-with-tag system "PlayerArmRoot"))]
+  (if-let [broom-root (first (physics/get-entities-with-tag system "PlayerArmRoot"))]
     (let [aim-direction (get-player-aim-direction system entity)
           aim-rotation (- (.angle aim-direction) 180)]
       ;;(println aim-rotation)

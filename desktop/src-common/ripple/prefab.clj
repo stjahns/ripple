@@ -14,6 +14,14 @@
                                                                       component-options))))
                                   components))))
 
+(defn instantiate 
+  "Get a prefab by name and instantiate it in the ES system"
+  [system asset-name options]
+  (let [instance-def (get-in system [:assets :instance-defs asset-name])
+        asset-def (a/get-asset-def (keyword (:asset instance-def)))
+        inst-fn (:instantiate asset-def)]
+    (inst-fn system (override-prefab-params instance-def options))))
+
 (defn- instantiate-children
   "Given a list of children, instantiate them into the system"
   [system entity children]
@@ -39,13 +47,6 @@
       (-> system
           (instantiate-children entity (:children params))
           (add-components entity components)))))
-
-(defn instantiate [system asset-name options]
-  "Get a prefab by name and instantiate it in the ES system"
-  (let [instance-def (get-in system [:assets :instance-defs asset-name])
-        asset-def (a/get-asset-def (keyword (:asset instance-def)))
-        inst-fn (:instantiate asset-def)]
-    (inst-fn system (override-prefab-params instance-def options))))
 
 (s/defsubsystem prefabs
   :asset-defs [:prefab]

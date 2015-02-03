@@ -14,12 +14,21 @@
  <tileset firstgid="3" name="pipe2" tilewidth="32" tileheight="32">
   <image source="pipe2.png" width="32" height="32"/>
  </tileset>
+ <tileset firstgid="4" name="tube-sheet" tilewidth="32" tileheight="32">
+  <image source="tube-sheet.png" width="64" height="96"/>
+ </tileset>
+ <tileset firstgid="10" name="powerbox" tilewidth="32" tileheight="32">
+  <image source="powerbox.png" width="32" height="32"/>
+ </tileset>
+ <tileset firstgid="11" name="gravbox" tilewidth="32" tileheight="32">
+  <image source="gravbox.png" width="32" height="32"/>
+ </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <properties>
    <property name="prefab" value="BlockTilePref"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJzt1LEKACAIQEGr///n5sZKsOAOHPPhUgTwupY8J/1+dcG6S19ff+/NKO5n+bVf+f8CQKYJ8GoATg==
+   eJxjYBgFo2AUDHbASGVMjv3YAAuJ4vjMoof9XANsPz6zBrv9rFgwJw71HGjq2KlgPyUAOTxG7R+a9nMPsP0DWf6OglEwCkbBKBgF1AQAdDEAxg==
   </data>
  </layer>
  <objectgroup name="Object Layer 1">

@@ -36,11 +36,27 @@
 
   - asset: texture
     name: JanitorSprite
-    path: leaks/janitor.png
+    path: leaks/janitor2.png
+
 
   - asset: texture
     name: JanitorArm
     path: leaks/arm.png
+
+  - asset: texture
+    name: JanitorSpriteSheet
+    path: leaks/walking_jan.png
+
+  - asset: animation
+    name: PlayerWalking
+    texture: JanitorSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 0.1
+    frames:
+      - [0, 0]
+      - [1, 0]
+      - [2, 0]
+      - [3, 0]
 
   - asset: prefab
     name: Arm
@@ -94,3 +110,7 @@
           texture: JanitorSprite
           tile-size: [32, 32]
           tile-indices: [0, 0]
+      - type: AnimationController
+        params:
+          animation: PlayerWalking
+          play-on-start: true

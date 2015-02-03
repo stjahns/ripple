@@ -13,9 +13,11 @@
 (c/defcomponent AnimationController
   :fields [:animation {:asset true}
            :playing {:default false}
-           :start-time 0])
+           :play-on-start {:default false}
+           :start-time {:default 0}])
 
 (defn play-animation [system entity animation]
+  (println "!")
   (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
                                                                        :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                                                                        :playing true))))
@@ -106,6 +108,20 @@
     (reduce update-animation-controller
             system entities)))
 
+(defn- autostart-animation
+  [system entity]
+  (let [animation-controller (e/get-component system entity 'AnimationController)]
+    (if (and (:play-on-start animation-controller)
+             (not (:playing animation-controller)))
+      (play-animation system entity (:animation animation-controller))
+      system)))
+
+(defn- autostart-animations
+  [system]
+  (let [entities (e/get-all-entities-with-component system 'AnimationController)]
+    (reduce autostart-animation
+            system entities)))
+
 (s/defsubsystem sprites
 
   :on-show
@@ -119,4 +135,5 @@
   :on-pre-render
   (fn [system]
     (-> system
+        (autostart-animations)
         (update-animation-controllers))))
