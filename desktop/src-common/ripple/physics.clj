@@ -39,23 +39,10 @@
       (-> .friction (set! (or friction 1)))
       (-> .isSensor (set! (or is-sensor false))))))
 
-(defn- set-fixture-width-height
-  "Modifies the 'fixtures' list so the first fixture uses the specified width
-  and height (if both non-nil).
-  Used by spawners that need to specify custom width + height"
-  [fixtures width height]
-  (if (and width height)
-    (let [first-fixture (assoc (first fixtures)
-                               :width width
-                               :height height)
-          rest (subvec (vec fixtures) 1)]
-      (into [first-fixture] rest))
-    fixtures))
-
 (c/defcomponent PhysicsBody
   :init
-  (fn init-physics-body [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
-                                width height]}]
+  (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
+                                       width height]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
                       "dynamic" BodyDef$BodyType/DynamicBody
@@ -63,15 +50,20 @@
                       "static" BodyDef$BodyType/StaticBody)
 
           fixed-rotation (Boolean/valueOf fixed-rotation)
-          ;fixtures (set-fixture-width-height fixtures width height)
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
                      (-> .position (.set (or x 0) (or y 0)))
                      (-> .fixedRotation (set! fixed-rotation)))
           body (doto (.createBody world body-def)
                  (.setLinearVelocity (or velocity-x 0) 
-                                     (or velocity-y 0)))]
-      (assoc component :body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
+                                     (or velocity-y 0))
+                 (.setUserData {:entity entity}))
+          create-fixture (fn [body fixture-params]
+                           (doto (.createFixture body (get-fixture-def fixture-params))
+                             (.setUserData {:entity entity})))]
+      (assoc component :body (reduce (fn [body fixture-params]
+                                       (doto body 
+                                         (create-fixture fixture-params)))
                                      body fixtures)))))
 
 ;;
@@ -153,6 +145,11 @@
 ;; TODO refactor following
 
 (defn- fire-output-connections
+  "On a given 'output-event', send events to other entities given the
+  connections on the EventHub
+  TODO - move this to event.clj - can probably handle more generally, 
+  eg fire on-trigger-entered event on self, then EventHub sees event
+  and forwards events on connections"
   [system entity output-event] 
   (if-let [event-hub (e/get-component system entity 'EventHub)]
     (let [outgoing-connections (filter #(= (first %) output-event)
@@ -160,7 +157,7 @@
       (reduce (fn [system [output-event receiver-tag receiver-event]]
                 (event/send-event system
                                   (first (get-entities-with-tag system receiver-tag))
-                                  receiver-event))
+                                  {:event-id receiver-event}))
               system outgoing-connections))
     system))
 
@@ -168,13 +165,15 @@
   [system trigger-entity entering-fixture]
   (-> system
       (fire-output-connections trigger-entity "on-enter")
-      (event/send-event trigger-entity :on-trigger-entered)))
+      (event/send-event trigger-entity {:event-id :on-trigger-entered
+                                        :entering-fixture entering-fixture})))
 
 (defn- area-trigger-exited
-  [system trigger-entity entering-fixture]
+  [system trigger-entity exiting-fixture]
   (-> system
       (fire-output-connections trigger-entity "on-exit")
-      (event/send-event trigger-entity :on-trigger-exited)))
+      (event/send-event trigger-entity {:event-id :on-trigger-exited
+                                        :entering-fixture exiting-fixture})))
 
 (c/defcomponent AreaTrigger
   :init
@@ -217,13 +216,17 @@
 (defn- handle-begin-contact-event
   [system fixture-a fixture-b]
   (if-let [data (.getUserData fixture-a)]
-    ((:on-begin-contact data) system (:entity data) fixture-b)
+    (if-let [on-begin-contact (:on-begin-contact data)]
+      (on-begin-contact system (:entity data) fixture-b)
+      system)
     system))
 
 (defn- handle-end-contact-event
   [system fixture-a fixture-b]
   (if-let [data (.getUserData fixture-a)]
-    ((:on-end-contact data) system (:entity data) fixture-b)
+    (if-let [on-end-contact (:on-end-contact data)]
+      (on-end-contact system (:entity data) fixture-b)
+      system)
     system))
 
 (defn- handle-begin-contact-events

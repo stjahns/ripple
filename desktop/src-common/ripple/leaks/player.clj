@@ -9,12 +9,13 @@
            [com.badlogic.gdx Gdx]))
 
 (defn- mophead-on-entered
-  [system entity]
+  [system entity {:keys [entering-fixture]}]
   ;; TODO
   ;; Event needs to contain the entering fixture
   ;; DESTROY the entering entity!
   ;;  - Destroy should handle: 
   ;;      cleaning up any refs, like PhysicsBodies etc
+  (println (.getUserData entering-fixture))
   system)
 
 (c/defcomponent MopHead

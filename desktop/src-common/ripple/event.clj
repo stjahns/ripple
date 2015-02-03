@@ -21,10 +21,10 @@
 (defn dispatch-event
   [system entity event]
   (let [components (e/get-all-components-on-entity system entity)
-        event-handlers (->> (map #(get-in % [:on-event event]) components)
+        event-handlers (->> (map #(get-in % [:on-event (:event-id event)]) components)
                             (filter #(not (nil? %))))]
     (if (> (count event-handlers) 0)
-      (reduce (fn [system handler] (handler system entity))
+      (reduce (fn [system handler] (handler system entity event))
               system event-handlers)
       system)))
 

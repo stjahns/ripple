@@ -142,7 +142,6 @@
             - shape: circle
               radius: 0.5
 
-
 # Leaks
 
   - asset: texture
