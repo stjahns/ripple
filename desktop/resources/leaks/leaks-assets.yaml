@@ -38,7 +38,6 @@
     name: JanitorSprite
     path: leaks/janitor2.png
 
-
   - asset: texture
     name: JanitorArm
     path: leaks/arm.png
@@ -87,7 +86,7 @@
       - prefab: ArmRoot
         options:
           transform:
-            position: [0, -0.1]
+            position: [0, 0]
             rotation: 0
     components:
       - type: Transform
@@ -114,3 +113,57 @@
         params:
           animation: PlayerWalking
           play-on-start: true
+
+# 'Systems'
+  - asset: prefab
+    name: GravityGenerator
+    components:
+      - type: Transform
+      - type: PhysicsBody
+        params:
+          body-type: static
+          fixtures:
+            - shape: circle
+              radius: 0.5
+
+
+# Leaks
+
+  - asset: texture
+    name: DropletSprite
+    path: leaks/droplet.png
+
+  - asset: texture
+    name: RipSprite
+    path: leaks/rip.png
+
+  - asset: prefab
+    name: Blob
+    components:
+      - type: Transform
+      - type: PhysicsBody
+        params:
+          body-type: dynamic
+          fixtures:
+            - shape: circle
+              radius: 0.25
+      - type: SpriteRenderer
+        params:
+          texture: DropletSprite
+          tile-size: [32, 32]
+          tile-indices: [0, 0]
+
+  - asset: prefab
+    name: LeakEmitter
+    components:
+      - type: Transform
+      - type: LeakEmitter
+        params:
+          emitted-prefab: Blob
+          emit-interval: 2.0
+      - type: SpriteRenderer
+        params:
+          texture: RipSprite
+          tile-size: [32, 32]
+          tile-indices: [0, 0]
+

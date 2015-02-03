@@ -4,6 +4,7 @@
             [play-clj.utils :as u]
             [ripple.space-roaches.player :as roaches-player]
             [ripple.leaks.player :as leaks-player]
+            [ripple.leaks.leak-emitter :as emitter]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]
@@ -45,6 +46,7 @@
 
       ;(subsystem/register-subsystem roaches-player/player)
       (subsystem/register-subsystem leaks-player/player)
+      (subsystem/register-subsystem emitter/emitters)
 
       (subsystem/register-subsystem tiled-map/level)
 

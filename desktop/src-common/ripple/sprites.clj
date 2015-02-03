@@ -17,7 +17,6 @@
            :start-time {:default 0}])
 
 (defn play-animation [system entity animation]
-  (println "!")
   (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
                                                                        :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                                                                        :playing true))))

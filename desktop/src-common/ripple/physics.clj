@@ -68,7 +68,8 @@
                      (-> .position (.set x y))
                      (-> .fixedRotation (set! fixed-rotation)))
           body (doto (.createBody world body-def)
-                 (.setLinearVelocity velocity-x velocity-y))]
+                 (.setLinearVelocity (or 0 velocity-x) 
+                                     (or 0 velocity-y)))]
       (assoc component :body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
                                      body fixtures)))))
 
@@ -115,7 +116,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? false)
+(def debug-render? true)
 
 (defn- debug-render*
   [system]

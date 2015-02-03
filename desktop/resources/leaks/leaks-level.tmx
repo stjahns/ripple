@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="4">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="12">
  <tileset firstgid="1" name="Block" tilewidth="32" tileheight="32">
   <image source="../space_roaches/sprites/Block.png" width="32" height="32"/>
   <tile id="0">
@@ -19,19 +19,31 @@
  </tileset>
  <tileset firstgid="10" name="powerbox" tilewidth="32" tileheight="32">
   <image source="powerbox.png" width="32" height="32"/>
+  <tile id="0">
+   <properties>
+    <property name="prefab" value="GravityGenerator"/>
+   </properties>
+  </tile>
  </tileset>
  <tileset firstgid="11" name="gravbox" tilewidth="32" tileheight="32">
   <image source="gravbox.png" width="32" height="32"/>
+  <tile id="0">
+   <properties>
+    <property name="prefab" value="GravityGenerator"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="Tile Layer 1" width="32" height="32">
   <properties>
    <property name="prefab" value="BlockTilePref"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJxjYBgFo2AUDHbASGVMjv3YAAuJ4vjMoof9XANsPz6zBrv9rFgwJw71HGjq2KlgPyUAOTxG7R+a9nMPsP0DWf6OglEwCkbBKBgF1AQAdDEAxg==
+   eJzt1NEKABEQQFGKLP7/f71qs4Spsbmn5kWaWx4YA+B0VnhW+i1u8ry364Z+Uu73do36vjHx4/7zuhcE+jvq96D/z35W7mv+vwAASCpvMQDG
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
   <object id="1" name="player1" type="LeaksPlayer" x="608" y="384" width="32" height="32"/>
+  <object id="10" name="rip1" type="LeakEmitter" x="512" y="384" width="32" height="32"/>
+  <object id="11" name="rip2" type="LeakEmitter" x="832" y="384" width="32" height="32" visible="0"/>
  </objectgroup>
 </map>
