@@ -11,9 +11,15 @@
     (e/update-component system entity 'EventHub
                         #(assoc % :event-queue (conj (:event-queue event-hub) event)))))
 
+;; TODO - events need arguments as well as keywords!
+;; option 1 (vector) [:<event-name> arg1 arg2 arg3 ...]
+;; option 2 (map) {:event :<event-name> :args [arg1 arg2 ...]}
+
+;; eg: {:event :on-trigger-entered
+;;      :params {:entering-fixture <some fixture>}}
+
 (defn dispatch-event
   [system entity event]
-
   (let [components (e/get-all-components-on-entity system entity)
         event-handlers (->> (map #(get-in % [:on-event event]) components)
                             (filter #(not (nil? %))))]

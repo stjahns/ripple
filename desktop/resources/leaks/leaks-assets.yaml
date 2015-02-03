@@ -58,7 +58,23 @@
       - [3, 0]
 
   - asset: prefab
+    name: MopHead
+    components:
+      - type: Transform
+      - type: MopHead
+      - type: EventHub
+      - type: AreaTrigger
+        params:
+          width: .1
+          height: 0.8 
+
+  - asset: prefab
     name: Arm
+    children:
+      - prefab: MopHead
+        options:
+          transform:
+            position: [-0.3, 0]
     components:
       - type: Transform
       - type: SpriteRenderer

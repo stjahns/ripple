@@ -8,6 +8,19 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
+(defn- mophead-on-entered
+  [system entity]
+  ;; TODO
+  ;; Event needs to contain the entering fixture
+  ;; DESTROY the entering entity!
+  ;;  - Destroy should handle: 
+  ;;      cleaning up any refs, like PhysicsBodies etc
+  system)
+
+(c/defcomponent MopHead
+  :on-event [:on-trigger-entered mophead-on-entered]
+  :fields [])
+
 (c/defcomponent Player
   :fields [:jet-force {:default 100}])
 
@@ -106,5 +119,6 @@
   :on-show
   (fn [system]
     (c/register-component-def 'Player Player)
+    (c/register-component-def 'MopHead MopHead)
     system)
   :on-pre-render update-player-components)

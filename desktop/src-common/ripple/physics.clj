@@ -61,15 +61,16 @@
                       "dynamic" BodyDef$BodyType/DynamicBody
                       "kinematic" BodyDef$BodyType/KinematicBody
                       "static" BodyDef$BodyType/StaticBody)
+
           fixed-rotation (Boolean/valueOf fixed-rotation)
           ;fixtures (set-fixture-width-height fixtures width height)
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
-                     (-> .position (.set x y))
+                     (-> .position (.set (or x 0) (or y 0)))
                      (-> .fixedRotation (set! fixed-rotation)))
           body (doto (.createBody world body-def)
-                 (.setLinearVelocity (or 0 velocity-x) 
-                                     (or 0 velocity-y)))]
+                 (.setLinearVelocity (or velocity-x 0) 
+                                     (or velocity-y 0)))]
       (assoc component :body (reduce #(doto %1 (.createFixture (get-fixture-def %2)))
                                      body fixtures)))))
 
@@ -84,7 +85,7 @@
   TODO: check for some kind of Box2DSettings asset for configuration"
   []
   (let [gravity (Vector2. 0 -2.8)
-        do-sleep true]
+        do-sleep false]
     (doto (World. gravity do-sleep)
       (.setContactListener (reify com.badlogic.gdx.physics.box2d.ContactListener
                              (beginContact [this contact]
@@ -98,6 +99,17 @@
                              (preSolve [this contact oldManifold])
                              (postSolve [this contact impulse]))))))
 
+
+(defn- update-kinematic-body
+  "For kinematic bodies, update with transform of Transform component"
+  [system entity body]
+  (let [transform (e/get-component system entity 'Transform)]
+    (.setTransform body 
+                   (c/get-position system transform)
+                   (* com.badlogic.gdx.math.MathUtils/degreesToRadians 
+                      (c/get-rotation system transform)))
+    system))
+
 (defn- update-physics-body
   "Updates the Transform component on the entity with the current position and rotation of the Box2D body"
   [system entity]
@@ -106,9 +118,12 @@
         body-position (.getPosition body)
         x (.x body-position)
         y (.y body-position)
+        is-kinematic (= BodyDef$BodyType/KinematicBody (.getType body))
         rotation (-> (.getAngle body)
                      (Math/toDegrees))]
-    (e/update-component system entity 'Transform #(assoc % :position [x y] :rotation rotation))))
+    (if is-kinematic
+      (update-kinematic-body system entity body)
+      (e/update-component system entity 'Transform #(assoc % :position [x y] :rotation rotation)))))
 
 (defn- update-physics-bodies
   [system]
@@ -137,10 +152,10 @@
 
 ;; TODO refactor following
 
-(defn- area-trigger-entered
-  [system trigger-entity entering-fixture]
-  (if-let [event-hub (e/get-component system trigger-entity 'EventHub)]
-    (let [outgoing-connections (filter #(= (first %) "on-enter")
+(defn- fire-output-connections
+  [system entity output-event] 
+  (if-let [event-hub (e/get-component system entity 'EventHub)]
+    (let [outgoing-connections (filter #(= (first %) output-event)
                                        (:outputs event-hub))]
       (reduce (fn [system [output-event receiver-tag receiver-event]]
                 (event/send-event system
@@ -148,26 +163,26 @@
                                   receiver-event))
               system outgoing-connections))
     system))
+
+(defn- area-trigger-entered
+  [system trigger-entity entering-fixture]
+  (-> system
+      (fire-output-connections trigger-entity "on-enter")
+      (event/send-event trigger-entity :on-trigger-entered)))
 
 (defn- area-trigger-exited
   [system trigger-entity entering-fixture]
-  (if-let [event-hub (e/get-component system trigger-entity 'EventHub)]
-    (let [outgoing-connections (filter #(= (first %) "on-exit")
-                                       (:outputs event-hub))]
-      (reduce (fn [system [output-event receiver-tag receiver-event]]
-                (event/send-event system
-                                  (first (get-entities-with-tag system receiver-tag))
-                                  receiver-event))
-              system outgoing-connections))
-    system))
+  (-> system
+      (fire-output-connections trigger-entity "on-exit")
+      (event/send-event trigger-entity :on-trigger-exited)))
 
 (c/defcomponent AreaTrigger
-  :init ;; This needs to happen in add-component so we can get a guid..
+  :init
   (fn [component entity system {:keys [x y width height]}]
     (let [world (get-in system [:physics :world])
           body-def (doto (BodyDef.)
-                     (-> .type (set! BodyDef$BodyType/StaticBody))
-                     (-> .position (.set x y)))
+                     (-> .type (set! BodyDef$BodyType/KinematicBody))
+                     (-> .position (.set (or x 0) (or y 0))))
           body (.createBody world body-def)
           fixture (doto (.createFixture body (get-fixture-def {:width width
                                                                :height height
@@ -178,6 +193,26 @@
                                    :on-end-contact area-trigger-exited}))]
       (assoc component :body body))))
 
+(defn- update-trigger-body
+  "Updates the Transform component on the entity with the current position and rotation of the Box2D body"
+  [system entity]
+  (let [body (-> (e/get-component system entity 'AreaTrigger)
+                 (:body))
+        body-position (.getPosition body)
+        x (.x body-position)
+        y (.y body-position)
+        is-kinematic (= BodyDef$BodyType/KinematicBody (.getType body))
+        rotation (-> (.getAngle body)
+                     (Math/toDegrees))]
+    (if is-kinematic
+      (update-kinematic-body system entity body)
+      (e/update-component system entity 'Transform #(assoc % :position [x y] :rotation rotation)))))
+
+(defn- update-trigger-bodies
+  [system]
+  (let [entities (e/get-all-entities-with-component system 'AreaTrigger)]
+    (reduce update-trigger-body
+            system entities)))
 
 (defn- handle-begin-contact-event
   [system fixture-a fixture-b]
@@ -244,6 +279,7 @@
       (.step world (.getDeltaTime Gdx/graphics) 6 2)) ;; TODO - want fixed physics update
     (-> system
         (update-physics-bodies)
+        (update-trigger-bodies)
         (handle-contact-events))))
 
 ;; TODO - how much should we be cleaning up? (.dispose world) etc..
