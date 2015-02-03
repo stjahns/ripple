@@ -7,6 +7,20 @@
    [clojure.lang PersistentArrayMap PersistentHashMap]
    [com.badlogic.gdx.math Matrix3 Vector2]))
 
+(defn destroy-entity
+  "Completely destroys an entity and all its components"
+  [system entity]
+  (let [components (get-all-components-on-entity system entity)
+        destroy-callbacks (->> (map #(:on-destroy %) components)
+                               (filter #(not (nil? %))))
+        fire-callbacks (fn [system entity]
+                            (reduce (fn [system callback] 
+                                      (callback system entity))
+                                    system destroy-callbacks))]
+    (-> system 
+        (fire-callbacks entity)
+        (kill-entity entity))))
+
 ;;
 ;; Tell brute.entity to use value for :type in a component map
 ;; to differentiate component types
@@ -56,7 +70,8 @@
                                                   (-> (#'ripple.components/init-component-fields system#
                                                                                                  params#
                                                                                                  {:type '~n
-                                                                                                  :on-event on-event#}
+                                                                                                  :on-event on-event#
+                                                                                                  :on-destroy (:on-destroy options#)}
                                                                                                  fields# )
                                                       (init-fn# entity# system# params#)))))))
 

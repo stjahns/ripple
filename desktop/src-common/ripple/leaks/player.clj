@@ -8,18 +8,14 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
-(defn- mophead-on-entered
+(defn- mophead-on-enter
   [system entity {:keys [entering-fixture]}]
-  ;; TODO
-  ;; Event needs to contain the entering fixture
-  ;; DESTROY the entering entity!
-  ;;  - Destroy should handle: 
-  ;;      cleaning up any refs, like PhysicsBodies etc
-  (println (.getUserData entering-fixture))
-  system)
+  (if-let [entering-entity (:entity (.getUserData entering-fixture))]
+    (c/destroy-entity system entering-entity)
+    system))
 
 (c/defcomponent MopHead
-  :on-event [:on-trigger-entered mophead-on-entered]
+  :on-event [:on-trigger-entered mophead-on-enter]
   :fields [])
 
 (c/defcomponent Player

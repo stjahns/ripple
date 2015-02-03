@@ -39,7 +39,17 @@
       (-> .friction (set! (or friction 1)))
       (-> .isSensor (set! (or is-sensor false))))))
 
+(defn- destroy-physics-body
+  [system entity]
+  (let [world (get-in system [:physics :world])
+        component (e/get-component system entity 'PhysicsBody)]
+    (.destroyBody world (:body component)))
+  system)
+
 (c/defcomponent PhysicsBody
+  :on-destroy
+  (fn [system entity]
+    (destroy-physics-body system entity))
   :init
   (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
                                        width height]}]
