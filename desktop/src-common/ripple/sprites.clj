@@ -21,7 +21,6 @@
                                                                        :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                                                                        :playing true))))
 
-
 (defmulti get-sprite-size class)
 
 (defmethod get-sprite-size com.badlogic.gdx.graphics.Texture

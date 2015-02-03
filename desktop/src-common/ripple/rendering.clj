@@ -10,6 +10,7 @@
            [com.badlogic.gdx Gdx]))
 
 (def pixels-per-unit 32)
+(def camera-scale 2)
 
 (defn update-camera-position [camera x y]
   (let [position (.position camera)]
@@ -18,8 +19,8 @@
       (-> .y (set! y)))))
 
 (defn- update-camera-projection [camera]
-  (let [width (/ (.getWidth Gdx/graphics) pixels-per-unit)
-        height (/ (.getHeight Gdx/graphics) pixels-per-unit)]
+  (let [width (/ (.getWidth Gdx/graphics) (* camera-scale pixels-per-unit))
+        height (/ (.getHeight Gdx/graphics) (* camera-scale pixels-per-unit))]
     (.setToOrtho camera false width height)))
 
 (defn- create-camera []
@@ -62,7 +63,7 @@
 
   :on-pre-render
   (fn [system]
-    (clear!)
+    (clear! 0.1 0.1 0.1 1)
     system)
 
   :on-render render)
