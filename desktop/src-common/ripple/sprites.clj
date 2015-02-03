@@ -8,7 +8,8 @@
           [com.badlogic.gdx.graphics Texture ]))
 
 (c/defcomponent SpriteRenderer
-  :fields [:texture {:asset true}])
+  :fields [:texture {:asset true}
+           :flip-x {:default false}])
 
 (c/defcomponent AnimationController
   :fields [:animation {:asset true}
@@ -36,7 +37,12 @@
 (defmulti draw-sprite (fn [sprite-batch texture & args] (class texture)))
 
 (defmethod draw-sprite com.badlogic.gdx.graphics.g2d.TextureRegion
-  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation]
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x]
+  
+  ;; ew
+  (when (not (= (.isFlipX texture) flip-x))
+    (.flip texture true false))
+
   (.draw sprite-batch texture
          (float (- x (/ width 2))) (float (- y (/ height 2)))
          (/ width 2) (/ height 2)
@@ -45,7 +51,8 @@
          rotation))
 
 (defmethod draw-sprite com.badlogic.gdx.graphics.Texture
-  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation]
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x]
+  ;; TODO handle flip-x ....
   (let [[srcWidth srcHeight] (get-sprite-size texture)]
     (.draw sprite-batch texture
            (float (- x (/ width 2))) (float (- y (/ height 2)))
@@ -81,7 +88,8 @@
                      [(.x position) (.y position)]
                      [width height]
                      [(.x scale) (.y scale)]
-                     r)))
+                     r
+                     (:flip-x sprite-renderer))))
     (.end sprite-batch)
     system))
 

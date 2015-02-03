@@ -45,6 +45,6 @@
   <object id="1" name="player1" type="LeaksPlayer" x="608" y="384" width="32" height="32"/>
   <object id="10" name="rip1" type="LeakEmitter" x="512" y="384" width="32" height="32"/>
   <object id="11" name="rip2" type="LeakEmitter" x="832" y="384" width="32" height="32"/>
-  <object id="14" name="music" type="MusicPlayer" x="608" y="192" width="32" height="32"/>
+  <object id="14" name="music" type="MusicPlayer" x="608" y="192" width="32" height="32" visible="0"/>
  </objectgroup>
 </map>

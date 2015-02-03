@@ -91,14 +91,17 @@
     (.nor player-to-mouse)))
 
 (defn- aim-broom
+  "Aims broom in direciton of mouse and flips player sprite to face mouse"
   [system entity]
   (if-let [broom-root (first (physics/get-entities-with-tag system "PlayerArmRoot"))]
     (let [aim-direction (get-player-aim-direction system entity)
-          aim-rotation (- (.angle aim-direction) 180)]
-      ;;(println aim-rotation)
-      (e/update-component system broom-root 'Transform #(assoc % :rotation aim-rotation))
-      ;system
-      )
+          aim-rotation (- (.angle aim-direction) 180)
+          facing-left (< (.x aim-direction) 0)]
+      (-> system
+          ;; Aim broom at mouse
+          (e/update-component broom-root 'Transform #(assoc % :rotation aim-rotation))
+          ;; Player sprite should face mouse.
+          (e/update-component entity 'SpriteRenderer #(assoc % :flip-x facing-left))))
     system))
 
 (defn- update-player
