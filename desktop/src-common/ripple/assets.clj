@@ -1,5 +1,6 @@
 (ns ripple.assets
-  (:import [com.badlogic.gdx.graphics.g2d TextureRegion Animation]
+  (:import [com.badlogic.gdx Gdx]
+           [com.badlogic.gdx.graphics.g2d TextureRegion Animation]
            [com.badlogic.gdx.graphics Texture])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
@@ -58,7 +59,8 @@
 (defasset texture
   :create
   (fn [system {:keys [path]}]
-    (Texture. path)))
+    (or (u/load-asset path Texture)
+        (Texture. path))))
 
 (defasset texture-region
   :create
@@ -87,15 +89,14 @@
 (defn- parse-asset-file
   "Parse the asset source file for the given path"
   [path]
-  (yaml/parse-string
-   (slurp path)))
+  (yaml/parse-string (slurp (clojure.java.io/resource path))))
 
 (defn load-asset-instance-defs
   "Parses asset source files into instance definitions
    and stores them in the system indexed by keyword corresponding to the asset instance name.
   This can happen at any time."
   [system]
-  (let [asset-files ["resources/leaks/leaks-assets.yaml"]
+  (let [asset-files ["leaks/leaks-assets.yaml"]
         instance-defs (flatten (map parse-asset-file asset-files))]
     (assoc-in system [:assets :instance-defs]
               (reduce #(assoc % (:name %2) %2)

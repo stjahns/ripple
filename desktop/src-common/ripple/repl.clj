@@ -14,8 +14,7 @@
             [ripple.prefab :as prefab]
             [ripple.tiled-map :as tiled-map]
             [brute.entity :as e]
-            [brute.system :as s]
-            [clojure.tools.namespace.repl :refer [refresh]]))
+            [brute.system :as s]))
 
 (defn contextual-eval [ctx expr]
     (eval
