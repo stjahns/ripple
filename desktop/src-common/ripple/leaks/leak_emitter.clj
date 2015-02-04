@@ -9,15 +9,45 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
+(defn- blob-on-splat
+  "When a blob hits a ship system: 
+      play a sound 
+      swap the sprite
+      set collision filter mask on blob fixtures to collide with nothing except mop
+      TODO increment some hit counter on the ship system
+      TODO move to a random position on the ship system?"
+  [system entity]
+  (let [blob (e/get-component system entity 'Blob)
+        body (:body (e/get-component system entity 'PhysicsBody))
+        new-filter (physics/create-filter :category 2 :mask 0)
+        update-filters (fn [body]
+                         (doseq [fixture (.getFixtureList body)]
+                           (.setFilterData fixture new-filter)))]
+    (.play (:splash-sound blob))
+    (doto body
+      (.setGravityScale 0)
+      (.setAngularVelocity 0)
+      (.setLinearVelocity 0 0)
+      (update-filters))
+    (e/update-component system entity 'SpriteRenderer #(assoc % :texture (:splat-sprite blob)))))
+
 (defn- blob-on-collide
-  [system entity other-fixture]
-  (let [blob (e/get-component system entity 'Blob)]
-    ;(.play (:splash-sound blob))
-    system))
+  [system entity event]
+  (let [blob (e/get-component system entity 'Blob)
+        other-entity (-> (:other-fixture event)
+                         (.getUserData)
+                         (:entity))
+        ship-system (e/get-component system other-entity 'ShipSystem)]
+    (if ship-system
+      (blob-on-splat system entity)
+      system)))
 
 (c/defcomponent Blob
-  :fields [:splash-sound {:asset true}]
+  :fields [:splash-sound {:asset true} ;; TODO - warn / exception when not set!? {:required true}
+           :splat-sprite {:asset true}]
   :on-event [:on-collision-start blob-on-collide])
+
+(c/defcomponent ShipSystem)
 
 ;; This could probably be generalized as 'spawner' ?
 
@@ -64,5 +94,6 @@
   (fn [system]
     (c/register-component-def 'LeakEmitter LeakEmitter)
     (c/register-component-def 'Blob Blob)
+    (c/register-component-def 'ShipSystem ShipSystem)
     system)
   :on-pre-render update-leak-emitters)

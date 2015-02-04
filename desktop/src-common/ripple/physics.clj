@@ -14,6 +14,7 @@
             PolygonShape
             CircleShape
             FixtureDef
+            Filter
             Box2DDebugRenderer]
            [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Gdx]))
@@ -30,8 +31,16 @@
   (doto (PolygonShape.)
     (.setAsBox (/ width 2) (/ height 2))))
 
+(defn create-filter
+  "Create a Box2D filter for the given params"
+  [& {:keys [category mask]}]
+  (doto (Filter.)
+    (-> .categoryBits (set! (or category 1)))
+    (-> .maskBits (set! (or mask 1)))
+    (-> .groupIndex (set! 0))))
+
 (defn- get-fixture-def
-  [{:keys [shape density friction is-sensor restitution] :as params}]
+  [{:keys [shape density friction is-sensor restitution category mask] :as params}]
   (let [shape-def (get-shape-def params)]
     (doto (FixtureDef.)
       (-> .shape (set! shape-def))
@@ -53,13 +62,15 @@
       (event/send-event entity {:event-id :on-collision-start
                                 :other-fixture other-fixture})))
 
+
 (c/defcomponent PhysicsBody
   :on-destroy
   (fn [system entity]
     (destroy-physics-body system entity))
   :init
   (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
-                                       width height]}]
+                                       width height
+                                       category mask]}]
     (let [world (get-in system [:physics :world])
           body-type (case body-type
                       "dynamic" BodyDef$BodyType/DynamicBody
@@ -75,8 +86,11 @@
                  (.setLinearVelocity (or velocity-x 0) 
                                      (or velocity-y 0))
                  (.setUserData {:entity entity}))
+          filter-def (create-filter :category (or category 1) 
+                                    :mask (or mask 1))
           create-fixture (fn [body fixture-params]
                            (doto (.createFixture body (get-fixture-def fixture-params))
+                             (.setFilterData filter-def)
                              (.setUserData {:entity entity
                                             :on-begin-contact on-collision-start})))]
       (assoc component :body (reduce (fn [body fixture-params]

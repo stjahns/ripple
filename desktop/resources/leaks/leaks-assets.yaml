@@ -137,6 +137,7 @@
     name: GravityGenerator
     components:
       - type: Transform
+      - type: ShipSystem
       - type: PhysicsBody
         params:
           body-type: static
@@ -151,6 +152,10 @@
     path: leaks/droplet.png
 
   - asset: texture
+    name: SplatSprite
+    path: leaks/splat.png
+
+  - asset: texture
     name: RipSprite
     path: leaks/rip.png
 
@@ -162,6 +167,7 @@
       - type: Blob
         params:
           splash-sound: BlobSplashSound
+          splat-sprite: SplatSprite
       - type: PhysicsBody
         params:
           body-type: dynamic
