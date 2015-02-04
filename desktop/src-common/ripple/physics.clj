@@ -47,6 +47,12 @@
     (.destroyBody world (:body component)))
   system)
 
+(defn- on-collision-start
+  [system entity other-fixture]
+  (-> system
+      (event/send-event entity {:event-id :on-collision-start
+                                :other-fixture other-fixture})))
+
 (c/defcomponent PhysicsBody
   :on-destroy
   (fn [system entity]
@@ -71,7 +77,8 @@
                  (.setUserData {:entity entity}))
           create-fixture (fn [body fixture-params]
                            (doto (.createFixture body (get-fixture-def fixture-params))
-                             (.setUserData {:entity entity})))]
+                             (.setUserData {:entity entity
+                                            :on-begin-contact on-collision-start})))]
       (assoc component :body (reduce (fn [body fixture-params]
                                        (doto body 
                                          (create-fixture fixture-params)))

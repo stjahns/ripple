@@ -9,6 +9,16 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
+(defn- blob-on-collide
+  [system entity other-fixture]
+  (let [blob (e/get-component system entity 'Blob)]
+    ;(.play (:splash-sound blob))
+    system))
+
+(c/defcomponent Blob
+  :fields [:splash-sound {:asset true}]
+  :on-event [:on-collision-start blob-on-collide])
+
 ;; This could probably be generalized as 'spawner' ?
 
 (c/defcomponent LeakEmitter
@@ -53,5 +63,6 @@
   :on-show
   (fn [system]
     (c/register-component-def 'LeakEmitter LeakEmitter)
+    (c/register-component-def 'Blob Blob)
     system)
   :on-pre-render update-leak-emitters)

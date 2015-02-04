@@ -158,6 +158,10 @@
     name: Blob
     components:
       - type: Transform
+      - type: EventHub
+      - type: Blob
+        params:
+          splash-sound: BlobSplashSound
       - type: PhysicsBody
         params:
           body-type: dynamic
@@ -178,7 +182,7 @@
       - type: LeakEmitter
         params:
           emitted-prefab: Blob
-          emit-interval: 2.0
+          emit-interval: 5.0
           emit-direction: [1, 0]
           emit-speed: 1
       - type: SpriteRenderer
@@ -192,6 +196,10 @@
   - asset: sound
     name: BlobPopSound
     path: "resources/leaks/oildeath.wav"
+
+  - asset: sound
+    name: BlobSplashSound
+    path: "resources/leaks/splash.wav"
 
   - asset: music
     name: LeaksMusic
