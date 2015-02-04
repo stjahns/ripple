@@ -9,24 +9,39 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
-;; This could be generalized as 'spawner' ?
+;; This could probably be generalized as 'spawner' ?
+
 (c/defcomponent LeakEmitter
   :fields [:emit-interval {:default 1.0}
+           :emit-speed {:default 0}
+           :emit-direction {:default [0 0]}
            :emit-timer {:default 0}
            :emitted-prefab nil])
+
+(defn- emit-prefab
+  "Spawns the prefab at the emitter's location, with a random velocity"
+  [system entity]
+  (let [emitter (e/get-component system entity 'LeakEmitter)
+        [x y] (:position (e/get-component system entity 'Transform))
+        [direction-x direction-y] (:emit-direction emitter)
+        velocity (-> (Vector2. direction-x direction-y)
+                     (.nor)
+                     (.scl (float (:emit-speed emitter))))]
+    (prefab/instantiate system (:emitted-prefab emitter) {:physicsbody {:x x :y y
+                                                                        :velocity-x (.x velocity)
+                                                                        :velocity-y (.y velocity)}})))
 
 (defn- update-leak-emitter
   "Increments :emit-timer, resets timer and spawns :emitted-prefab if timer
   exceeds :emit-interval"
   [system entity]
   (let [emitter (e/get-component system entity 'LeakEmitter)
-        [x y] (:position (e/get-component system entity 'Transform))
         elapsed-time (+ (.getDeltaTime Gdx/graphics)
                         (:emit-timer emitter))]
     (if (> elapsed-time (:emit-interval emitter))
       (-> system
           (e/update-component entity 'LeakEmitter #(assoc % :emit-timer 0))
-          (prefab/instantiate (:emitted-prefab emitter) {:physicsbody {:x x :y y}}))
+          (emit-prefab entity))
       (e/update-component system entity 'LeakEmitter #(assoc % :emit-timer elapsed-time)))))
 
 (defn- update-leak-emitters

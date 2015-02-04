@@ -164,6 +164,7 @@
           fixtures:
             - shape: circle
               radius: 0.25
+              restitution: 1
       - type: SpriteRenderer
         params:
           texture: DropletSprite
@@ -178,6 +179,8 @@
         params:
           emitted-prefab: Blob
           emit-interval: 2.0
+          emit-direction: [1, 0]
+          emit-speed: 1
       - type: SpriteRenderer
         params:
           texture: RipSprite

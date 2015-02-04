@@ -31,12 +31,13 @@
     (.setAsBox (/ width 2) (/ height 2))))
 
 (defn- get-fixture-def
-  [{:keys [shape density friction is-sensor] :as params}]
+  [{:keys [shape density friction is-sensor restitution] :as params}]
   (let [shape-def (get-shape-def params)]
     (doto (FixtureDef.)
       (-> .shape (set! shape-def))
       (-> .density (set! (or density 1)))
       (-> .friction (set! (or friction 1)))
+      (-> .restitution (set! (or restitution 0)))
       (-> .isSensor (set! (or is-sensor false))))))
 
 (defn- destroy-physics-body
