@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="38">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="32" height="32" tilewidth="32" tileheight="32" nextobjectid="39">
  <tileset firstgid="1" name="Block" tilewidth="32" tileheight="32">
   <image source="../space_roaches/sprites/Block.png" width="32" height="32"/>
   <tile id="0">
@@ -38,17 +38,18 @@
    <property name="prefab" value="BlockTilePref"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJzt1EELABAMQOEpwv//w67SKLOyw/tqFy2vHIgAiC45j6WvyZfnp7vox+4XZfpmvy171aH/Yn4P+vQt/Z//LwAAnga05gCx
+   eJzt00ELABAMQGEK5f//YQ4OWhS1NeV9tdvq2UEIAICXxYux6kvpcE+zX/rkMdWhv7p5fpNlf3dzEntW/Z1f+p7/DwAATQ3A9QBu
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="1" name="player1" type="LeaksPlayer" x="608" y="384" width="32" height="32"/>
-  <object id="10" name="rip1" type="LeakEmitter" x="512" y="384" width="32" height="32"/>
-  <object id="11" name="rip2" type="LeakEmitter" x="832" y="384" width="32" height="32"/>
-  <object id="14" name="music" type="MusicPlayer" x="512" y="640" width="32" height="32"/>
-  <object id="17" name="GameText" type="LeaksText" x="576" y="640" width="32" height="32"/>
-  <object id="18" name="GameController" type="GameController" x="640" y="640" width="32" height="32"/>
-  <object id="26" name="GravityGenerator" type="GravityGenerator" gid="11" x="384" y="544" width="32" height="32"/>
-  <object id="36" name="PowerGenerator" type="PowerGenerator" gid="10" x="912" y="560"/>
+  <object id="1" name="player1" type="LeaksPlayer" x="480" y="544" width="32" height="32"/>
+  <object id="10" name="rip1" type="LeakEmitter" x="480" y="416" width="32" height="32"/>
+  <object id="11" name="rip2" type="LeakEmitter" x="544" y="448" width="32" height="32"/>
+  <object id="14" name="music" type="MusicPlayer" x="384" y="640" width="32" height="32"/>
+  <object id="17" name="GameText" type="LeaksText" x="480" y="640" width="32" height="32"/>
+  <object id="18" name="GameController" type="GameController" x="560" y="640" width="32" height="32"/>
+  <object id="26" name="GravityGenerator" type="GravityGenerator" gid="11" x="352" y="544" width="32" height="32"/>
+  <object id="36" name="PowerGenerator" type="PowerGenerator" gid="10" x="624" y="560"/>
+  <object id="38" name="rip3" type="LeakEmitter" x="384" y="416" width="32" height="32"/>
  </objectgroup>
 </map>
