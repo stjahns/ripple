@@ -3,11 +3,11 @@
            [ripple.components :as c]
            [ripple.rendering :as r]
            [ripple.assets :as a]
-           [play-clj.utils :as u]
+           [ play-clj.utils :as u]
            [brute.entity :as e])
-  (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion]
+  (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion Animation BitmapFont]
           [com.badlogic.gdx.graphics Texture ]
-          [com.badlogic.gdx.graphics.g2d TextureRegion Animation]))
+          [com.badlogic.gdx Gdx]))
 
 (a/defasset texture
   :create
@@ -42,6 +42,14 @@
 (c/defcomponent SpriteRenderer
   :fields [:texture {:asset true}
            :flip-x {:default false}])
+
+(c/defcomponent TextRenderer
+  :fields [:text {:default "TEXT"}
+           :position {:default [100 100]}]
+  :init
+  (fn [component entity system {:keys [font]}]
+    (println "!")
+    (assoc component :font (BitmapFont.))))
 
 (c/defcomponent AnimationController
   :fields [:animation {:asset true}
@@ -95,6 +103,23 @@
            0 0
            srcWidth srcHeight
            false false)))
+
+(defn- render-text-renderers
+  "Render text for each TextRenderer component"
+  [system]
+  (let [sprite-batch (get-in system [:sprites :sprite-batch])
+        screen-matrix (get-in system [:renderer :screen-matrix])]
+    ;; BitmapFont needs to work in screen space
+    (.setProjectionMatrix sprite-batch screen-matrix)
+    (.begin sprite-batch)
+    (doseq [entity (e/get-all-entities-with-component system 'TextRenderer)]
+      (let [text-renderer (e/get-component system entity 'TextRenderer)
+            bitmap-font (:font text-renderer)
+            text (:text text-renderer) 
+            [x y] (:position text-renderer)]
+        (.draw bitmap-font sprite-batch text x y)))
+    (.end sprite-batch)
+    system))
 
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
@@ -168,10 +193,12 @@
     (a/register-asset-def :texture-region texture-region-asset-def)
     (a/register-asset-def :animation animation-asset-def)
     (c/register-component-def 'SpriteRenderer SpriteRenderer)
+    (c/register-component-def 'TextRenderer TextRenderer)
     (c/register-component-def 'AnimationController AnimationController)
     (-> system
         (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
-        (r/register-render-callback render-sprites 1))) ;; TODO - be able to specify order for each SpriteRenderer component
+        (r/register-render-callback render-sprites 1)
+        (r/register-render-callback render-text-renderers 3))) ;; TODO - be able to specify order for each SpriteRenderer component
 
   :on-pre-render
   (fn [system]

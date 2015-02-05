@@ -197,3 +197,12 @@
       - type: MusicPlayer
         audio-asset: LeaksMusic
         volume: 0.1
+
+# UI
+  - asset: prefab
+    name: LeaksText
+    components:
+      - type: TextRenderer
+        text: "LEAKS v0.1"
+        position: [100, 100]
+

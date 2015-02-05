@@ -76,7 +76,7 @@
 
   :on-resize
   (fn [screen entities]
-    (subsystem/on-system-event  @sys :on-resize)
+    (reset! sys (-> @sys (subsystem/on-system-event :on-resize)))
     nil))
 
 (defgame ripple
