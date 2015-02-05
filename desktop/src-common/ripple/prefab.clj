@@ -10,8 +10,7 @@
     (assoc instance-def :components (map (fn [component]
                                     (let [component-type (keyword (clojure.string/lower-case (:type component)))
                                           component-options (get options component-type)]
-                                      (assoc component :params (merge (:params component)
-                                                                      component-options))))
+                                      (merge component component-options)))
                                   components))))
 
 (defn instantiate 
@@ -24,9 +23,11 @@
 
 (defn- instantiate-children
   "Given a list of children, instantiate them into the system"
-  [system entity children]
-  (reduce (fn [system {:keys [prefab options]}]
-            (instantiate system prefab (assoc-in options [:transform :parent] entity)))
+  [system parent-entity children]
+  (reduce (fn [system child-params]
+            (instantiate system 
+                         (:prefab child-params) 
+                         (assoc-in child-params [:transform :parent] parent-entity)))
           system children))
 
 (defn- add-components
@@ -42,7 +43,7 @@
           components (map #(components/create-component system
                                                         entity
                                                         (symbol (:type %))
-                                                        (:params %))
+                                                        %)
                           (:components params))]
       (-> system
           (instantiate-children entity (:children params))
