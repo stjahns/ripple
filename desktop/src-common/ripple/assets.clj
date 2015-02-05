@@ -56,36 +56,6 @@
 
 ;; TODO move these to the proper modules...
 
-(defasset texture
-  :create
-  (fn [system {:keys [path]}]
-    (or (u/load-asset path Texture)
-        (Texture. path))))
-
-(defasset texture-region
-  :create
-  (fn [system {texture-id :texture
-               [x y] :tile-indices
-               [width height] :tile-size}]
-    (let [texture (get-asset system texture-id)]
-      (TextureRegion. texture x y width height))))
-
-(defasset animation
-  :create
-  (fn [system {:keys [frame-duration
-                      texture
-                      frames] ; frames should be a list of [x, y] pairs
-               [frame-width frame-height] :frame-size}]
-    (let [texture (get-asset system texture)
-          key-frames (map #(TextureRegion. texture
-                                           (* frame-width (first %))
-                                           (* frame-height (second %))
-                                           frame-width
-                                           frame-height)
-                          frames)]
-      (Animation. (float frame-duration)
-                  (u/gdx-array key-frames)))))
-
 (defn- parse-asset-file
   "Parse the asset source file for the given path"
   [path]
@@ -112,7 +82,4 @@
   ;;:asset-defs [:texture :texture-region :animation] ;; TODO handle with macro
   :on-show
   (fn [system]
-    (register-asset-def :texture texture-asset-def)
-    (register-asset-def :texture-region texture-region-asset-def)
-    (register-asset-def :animation animation-asset-def)
     (load-asset-instance-defs system)))

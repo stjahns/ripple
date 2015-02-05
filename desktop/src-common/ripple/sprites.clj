@@ -2,10 +2,42 @@
   (require [ripple.subsystem :as s]
            [ripple.components :as c]
            [ripple.rendering :as r]
-           [brute.entity :as e]
-           [ripple.assets :as a])
+           [ripple.assets :as a]
+           [play-clj.utils :as u]
+           [brute.entity :as e])
   (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion]
-          [com.badlogic.gdx.graphics Texture ]))
+          [com.badlogic.gdx.graphics Texture ]
+          [com.badlogic.gdx.graphics.g2d TextureRegion Animation]))
+
+(a/defasset texture
+  :create
+  (fn [system {:keys [path]}]
+    (or (u/load-asset path Texture)
+        (Texture. path))))
+
+(a/defasset texture-region
+  :create
+  (fn [system {texture-id :texture
+               [x y] :tile-indices
+               [width height] :tile-size}]
+    (let [texture (a/get-asset system texture-id)]
+      (TextureRegion. texture x y width height))))
+
+(a/defasset animation
+  :create
+  (fn [system {:keys [frame-duration
+                      texture
+                      frames] ; frames should be a list of [x, y] pairs
+               [frame-width frame-height] :frame-size}]
+    (let [texture (a/get-asset system texture)
+          key-frames (map #(TextureRegion. texture
+                                           (* frame-width (first %))
+                                           (* frame-height (second %))
+                                           frame-width
+                                           frame-height)
+                          frames)]
+      (Animation. (float frame-duration)
+                  (u/gdx-array key-frames)))))
 
 (c/defcomponent SpriteRenderer
   :fields [:texture {:asset true}
@@ -132,6 +164,9 @@
 
   :on-show
   (fn [system]
+    (a/register-asset-def :texture texture-asset-def)
+    (a/register-asset-def :texture-region texture-region-asset-def)
+    (a/register-asset-def :animation animation-asset-def)
     (c/register-component-def 'SpriteRenderer SpriteRenderer)
     (c/register-component-def 'AnimationController AnimationController)
     (-> system
