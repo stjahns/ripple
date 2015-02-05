@@ -119,16 +119,54 @@
         play-on-start: true
 
 # 'Systems'
+
+  - asset: texture
+    name: GravityGeneratorSprite
+    path: leaks/gravbox.png
+
+  - asset: texture
+    name: PowerGeneratorSprite
+    path: leaks/powerbox.png
+
   - asset: prefab
     name: GravityGenerator
     components:
       - type: Transform
       - type: ShipSystem
+        system-name: "GRAVITY GENERATOR"
+      - type: EventHub
+      - type: SpriteRenderer
+        texture: GravityGeneratorSprite
+        tile-size: [32, 32]
+        tile-indices: [0, 0]
       - type: PhysicsBody
         body-type: static
         fixtures:
           - shape: circle
             radius: 0.5
+
+  - asset: prefab
+    name: PowerGenerator
+    components:
+      - type: Transform
+      - type: ShipSystem
+        system-name: "POWER GENERATOR"
+      - type: EventHub
+      - type: SpriteRenderer
+        texture: PowerGeneratorSprite
+        tile-size: [32, 32]
+        tile-indices: [0, 0]
+      - type: PhysicsBody
+        body-type: static
+        fixtures:
+          - shape: circle
+            radius: 0.5
+
+  - asset: prefab
+    name: GameController
+    components:
+      - type: GameController
+      - type: EventHub
 
 # Leaks
 
@@ -202,6 +240,7 @@
   - asset: prefab
     name: LeaksText
     components:
+      - type: EventHub
       - type: TextRenderer
         text: "LEAKS v0.1"
         position: [100, 100]

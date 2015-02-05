@@ -4,12 +4,31 @@
             [brute.entity :as e]
             [ripple.assets :as a]))
 
+;; Event System
+
+;; TODO - separate event queues on each EventHub instance isn't ideal
+;; A single event queue for all entities should allow us to handle multiple event 
+;; sequences in a single frame
+
+(defn get-entities-with-tag 
+  [system tag]
+  (filter #(= (:tag (e/get-component system % 'EventHub))
+              tag)
+          (e/get-all-entities-with-component system 'EventHub)))
+
 (defn send-event
   "Stores the given event in the event queue for the given entity"
   [system entity event]
+  ;; TODO - assert that event has a value for :event-id
   (let [event-hub (e/get-component system entity 'EventHub)]
     (e/update-component system entity 'EventHub
                         #(assoc % :event-queue (conj (:event-queue event-hub) event)))))
+
+(defn send-event-to-tag 
+  [system tag event]
+  (let [entities (get-entities-with-tag system tag)]
+    (reduce #(send-event % %2 event)
+            system entities)))
 
 (defn- dispatch-event
   [system entity event]

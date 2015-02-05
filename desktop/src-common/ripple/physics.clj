@@ -155,7 +155,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? false)
+(def debug-render? true)
 
 (defn- debug-render*
   [system]
@@ -168,11 +168,6 @@
   system)
 
 (defn- debug-render [system] (debug-render* system) system)
-
-(defn get-entities-with-tag [system tag]
-  (filter #(= (:tag (e/get-component system % 'EventHub))
-              tag)
-          (e/get-all-entities-with-component system 'EventHub)))
 
 ;; TODO refactor following
 
@@ -188,7 +183,7 @@
                                        (:outputs event-hub))]
       (reduce (fn [system [output-event receiver-tag receiver-event]]
                 (event/send-event system
-                                  (first (get-entities-with-tag system receiver-tag))
+                                  (first (event/get-entities-with-tag system receiver-tag))
                                   {:event-id receiver-event}))
               system outgoing-connections))
     system))

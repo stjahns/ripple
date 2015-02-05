@@ -3,7 +3,8 @@
             [ripple.components :as c]
             [ripple.rendering :as r]
             [ripple.subsystem :as s]
-            [ripple.physics :as physics])
+            [ripple.physics :as physics]
+            [ripple.event :as event])
   (:import [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
@@ -93,7 +94,7 @@
 (defn- aim-broom
   "Aims broom in direciton of mouse and flips player sprite to face mouse"
   [system entity]
-  (if-let [broom-root (first (physics/get-entities-with-tag system "PlayerArmRoot"))]
+  (if-let [broom-root (first (event/get-entities-with-tag system "PlayerArmRoot"))]
     (let [aim-direction (get-player-aim-direction system entity)
           aim-rotation (- (.angle aim-direction) 180)
           facing-left (< (.x aim-direction) 0)]

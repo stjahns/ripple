@@ -6,7 +6,7 @@
            [ play-clj.utils :as u]
            [brute.entity :as e])
   (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion Animation BitmapFont]
-          [com.badlogic.gdx.graphics Texture ]
+          [com.badlogic.gdx.graphics Texture Color]
           [com.badlogic.gdx Gdx]))
 
 (a/defasset texture
@@ -43,12 +43,16 @@
   :fields [:texture {:asset true}
            :flip-x {:default false}])
 
+(defn- text-renderer-show-text
+  [system entity event]
+  (e/update-component system entity 'TextRenderer #(assoc % :text (:text event))))
+
 (c/defcomponent TextRenderer
+  :on-event [:show-text text-renderer-show-text]
   :fields [:text {:default "TEXT"}
            :position {:default [100 100]}]
   :init
   (fn [component entity system {:keys [font]}]
-    (println "!")
     (assoc component :font (BitmapFont.))))
 
 (c/defcomponent AnimationController
@@ -140,6 +144,8 @@
             texture (:texture sprite-renderer)
             [width height] (map #(/ % pixels-per-unit)
                                 (get-sprite-size texture))]
+        ; TODO handle color?
+        ;(.setColor sprite-batch Color/RED)
         (draw-sprite sprite-batch
                      texture
                      [(.x position) (.y position)]
