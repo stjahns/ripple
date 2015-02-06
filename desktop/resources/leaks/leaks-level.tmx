@@ -74,8 +74,8 @@
   <object id="26" name="GravityGenerator" type="GravityGenerator" gid="11" x="352" y="544" width="32" height="32"/>
   <object id="36" name="PowerGenerator" type="PowerGenerator" gid="10" x="624" y="560"/>
   <object id="38" name="rip3" type="LeakEmitter" x="384" y="416" width="32" height="32"/>
-  <object id="39" name="StarField" type="StarField" x="360" y="632" width="32" height="32"/>
-  <object id="40" name="StarField" type="StarField" x="576" y="616" width="32" height="32"/>
-  <object id="41" name="StarField" type="StarField" x="464" y="320" width="32" height="32"/>
+  <object id="39" name="StarField" type="StarField1" x="288" y="584" width="32" height="32"/>
+  <object id="40" name="StarField" type="StarField2" x="688" y="616" width="32" height="32"/>
+  <object id="41" name="StarField" type="StarField3" x="488" y="296" width="32" height="32"/>
  </objectgroup>
 </map>

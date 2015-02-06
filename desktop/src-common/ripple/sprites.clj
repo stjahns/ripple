@@ -1,19 +1,23 @@
 (ns ripple.sprites
-  (require [ripple.subsystem :as s]
-           [ripple.components :as c]
-           [ripple.rendering :as r]
-           [ripple.assets :as a]
-           [ play-clj.utils :as u]
-           [brute.entity :as e])
-  (import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion Animation BitmapFont]
-          [com.badlogic.gdx.graphics Texture Color]
-          [com.badlogic.gdx Gdx]))
+  (:use [pallet.thread-expr])
+  (:require [ripple.subsystem :as s]
+            [ripple.components :as c]
+            [ripple.rendering :as r]
+            [ripple.assets :as a]
+            [play-clj.utils :as u]
+            [brute.entity :as e])
+  (:import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion Animation BitmapFont]
+           [com.badlogic.gdx.graphics Texture Texture$TextureWrap Color]
+           [com.badlogic.gdx Gdx]))
 
 (a/defasset texture
   :create
-  (fn [system {:keys [path]}]
-    (or (u/load-asset path Texture)
-        (Texture. path))))
+  (fn [system {:keys [path wrap]}]
+    (let [texture (or (u/load-asset path Texture)
+                      (Texture. path))]
+      (when (= wrap "repeat")
+        (.setWrap texture Texture$TextureWrap/Repeat Texture$TextureWrap/Repeat))
+      texture)))
 
 (a/defasset texture-region
   :create
@@ -39,10 +43,33 @@
       (Animation. (float frame-duration)
                   (u/gdx-array key-frames)))))
 
+(defn- update-sprite-scroller
+  [system entity]
+  (let [sprite-scroller (e/get-component system entity 'SpriteScroller)
+        [vx vy] (:speed sprite-scroller)
+        sprite-renderer (e/get-component system entity 'SpriteRenderer)
+        [x y] (:offset sprite-renderer)
+        dt (.getDeltaTime Gdx/graphics)
+        new-x (+ x (* dt vx))
+        new-y (+ y (* dt vy))]
+    (e/update-component system entity 'SpriteRenderer #(assoc % :offset [new-x new-y]))))
+
+(defn- update-sprite-scrollers
+  [system]
+  (-> system
+      (for-> [entity (e/get-all-entities-with-component system 'SpriteScroller)]
+             (update-sprite-scroller entity))))
+
+(c/defcomponent SpriteScroller
+  :fields [:speed {:default [1 1]}])
+
 (c/defcomponent SpriteRenderer
   :fields [:texture {:asset true}
            :flip-x {:default false}
-           :layer {:default 0}])
+           :color {:default [1 1 1 1]} ; r g b a
+           :layer {:default 0}
+           :offset {:default [0 0]}
+           :tiling {:default [1 1]}])
 
 (defn- text-renderer-show-text
   [system entity event]
@@ -82,7 +109,7 @@
 (defmulti draw-sprite (fn [sprite-batch texture & args] (class texture)))
 
 (defmethod draw-sprite com.badlogic.gdx.graphics.g2d.TextureRegion
-  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x]
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x x-offset y-offset x-tilecount y-tilecount]
   
   ;; ew
   (when (not (= (.isFlipX texture) flip-x))
@@ -96,7 +123,7 @@
          rotation))
 
 (defmethod draw-sprite com.badlogic.gdx.graphics.Texture
-  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x]
+  [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x x-offset y-offset x-tilecount y-tilecount]
   ;; TODO handle flip-x ....
   (let [[srcWidth srcHeight] (get-sprite-size texture)]
     (.draw sprite-batch texture
@@ -105,9 +132,10 @@
            (float width) (float height)
            (float scale-x) (float scale-y)
            (float rotation)
-           0 0
-           srcWidth srcHeight
-           false false)))
+           x-offset y-offset 
+           (* x-tilecount srcWidth) 
+           (* y-tilecount srcHeight) 
+           flip-x false)))
 
 (defn- render-text-renderers
   "Render text for each TextRenderer component"
@@ -148,21 +176,24 @@
 
             position (c/get-position system transform)
             scale (c/get-scale system transform)
-            r (c/get-rotation system transform)
+            rotation (c/get-rotation system transform)
 
             pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
             [width height] (map #(/ % pixels-per-unit)
-                                (get-sprite-size texture))]
-        ; TODO handle color?
-        ;(.setColor sprite-batch Color/RED)
+                                (get-sprite-size texture))
+            [x-offset y-offset] (:offset sprite-renderer)
+            [x-tilecount y-tilecount] (:tiling sprite-renderer)
+            [r g b a] (:color sprite-renderer)]
+        (.setColor sprite-batch r g b a)
         (draw-sprite sprite-batch
                      texture
                      [(.x position) (.y position)]
                      [width height]
                      [(.x scale) (.y scale)]
-                     r
-                     (:flip-x sprite-renderer))))
+                     rotation
+                     (:flip-x sprite-renderer)
+                     x-offset y-offset x-tilecount y-tilecount)))
     (.end sprite-batch)
     system))
 
@@ -217,6 +248,7 @@
     (a/register-asset-def :texture texture-asset-def)
     (a/register-asset-def :texture-region texture-region-asset-def)
     (a/register-asset-def :animation animation-asset-def)
+    (c/register-component-def 'SpriteScroller SpriteScroller)
     (c/register-component-def 'SpriteRenderer SpriteRenderer)
     (c/register-component-def 'TextRenderer TextRenderer)
     (c/register-component-def 'AnimationController AnimationController)
@@ -228,4 +260,5 @@
   (fn [system]
     (-> system
         (autostart-animations)
+        (update-sprite-scrollers)
         (update-animation-controllers))))
