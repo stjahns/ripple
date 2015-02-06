@@ -29,6 +29,19 @@
             density: 1
             friction: 0.7
 
+  - asset: texture
+    name: StarfieldSprite
+    path: leaks/Stars.png
+
+  - asset: prefab
+    name: StarField
+    components:
+      - type: Transform
+        scale: [3, 3]
+      - type: SpriteRenderer
+        texture: StarfieldSprite
+        layer: -1
+
 # Player
 
   - asset: texture
@@ -75,8 +88,6 @@
       - type: Transform
       - type: SpriteRenderer
         texture: JanitorArm
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
 
   - asset: prefab
     name: ArmRoot
@@ -112,8 +123,6 @@
             friction: 0.7
       - type: SpriteRenderer
         texture: JanitorSprite
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
       - type: AnimationController
         animation: PlayerWalking
         play-on-start: true
@@ -137,8 +146,6 @@
       - type: EventHub
       - type: SpriteRenderer
         texture: GravityGeneratorSprite
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
       - type: PhysicsBody
         body-type: static
         fixtures:
@@ -154,8 +161,6 @@
       - type: EventHub
       - type: SpriteRenderer
         texture: PowerGeneratorSprite
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
       - type: PhysicsBody
         body-type: static
         fixtures:
@@ -198,8 +203,6 @@
             restitution: 1
       - type: SpriteRenderer
         texture: DropletSprite
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
 
   - asset: prefab
     name: LeakEmitter
@@ -212,8 +215,6 @@
         emit-speed: 1
       - type: SpriteRenderer
         texture: RipSprite
-        tile-size: [32, 32]
-        tile-indices: [0, 0]
 
 # Audio
 

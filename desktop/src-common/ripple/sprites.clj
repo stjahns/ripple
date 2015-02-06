@@ -41,7 +41,8 @@
 
 (c/defcomponent SpriteRenderer
   :fields [:texture {:asset true}
-           :flip-x {:default false}])
+           :flip-x {:default false}
+           :layer {:default 0}])
 
 (defn- text-renderer-show-text
   [system entity event]
@@ -125,14 +126,23 @@
     (.end sprite-batch)
     system))
 
+;; FIXME - filtering sprites into layers on every frame kinda sucks?
+
+(defn- render-sprite-layer
+  [system layer-index]
+  (->> (e/get-all-entities-with-component system 'SpriteRenderer)
+       (filter #(= layer-index 
+                   (:layer (e/get-component system % 'SpriteRenderer))))
+       (render-sprites system)))
+
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
-  [system]
+  [system entities]
   (let [sprite-batch (get-in system [:sprites :sprite-batch])
         camera (get-in system [:renderer :camera])]
     (.setProjectionMatrix sprite-batch (.combined camera))
     (.begin sprite-batch)
-    (doseq [entity (e/get-all-entities-with-component system 'SpriteRenderer)]
+    (doseq [entity entities]
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             transform (e/get-component system entity 'Transform)
 
@@ -191,6 +201,15 @@
     (reduce autostart-animation
             system entities)))
 
+;; Need to register a render callback for _each_ sprite layer
+;; Hardcode for now, but should try need to do this on demand eventually?
+(defn- register-render-callbacks
+  [system]
+  (-> system
+      (r/register-render-callback render-text-renderers 3)
+      (r/register-render-callback #(render-sprite-layer % -1) -1)
+      (r/register-render-callback #(render-sprite-layer % 0) 0)))
+
 (s/defsubsystem sprites
 
   :on-show
@@ -203,8 +222,7 @@
     (c/register-component-def 'AnimationController AnimationController)
     (-> system
         (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
-        (r/register-render-callback render-sprites 1)
-        (r/register-render-callback render-text-renderers 3))) ;; TODO - be able to specify order for each SpriteRenderer component
+        (register-render-callbacks)))
 
   :on-pre-render
   (fn [system]

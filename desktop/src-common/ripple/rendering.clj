@@ -70,7 +70,7 @@
 
   :on-pre-render
   (fn [system]
-    (clear! 0.1 0.1 0.1 1)
+    (clear! 0 0 0 1)
     system)
 
   :on-render render)
