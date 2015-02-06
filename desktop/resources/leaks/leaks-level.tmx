@@ -11,11 +11,11 @@
  <tileset firstgid="2" name="Pipe1" tilewidth="32" tileheight="32">
   <image source="Pipe1.png" width="32" height="32"/>
  </tileset>
- <tileset firstgid="3" name="pipe2" tilewidth="32" tileheight="32">
-  <image source="pipe2.png" width="32" height="32"/>
- </tileset>
- <tileset firstgid="4" name="tube-sheet" tilewidth="32" tileheight="32">
+ <tileset firstgid="3" name="tube-sheet" tilewidth="32" tileheight="32">
   <image source="tube-sheet.png" width="64" height="96"/>
+ </tileset>
+ <tileset firstgid="9" name="pipe2" tilewidth="32" tileheight="32">
+  <image source="pipe2.png" width="32" height="32"/>
  </tileset>
  <tileset firstgid="10" name="powerbox" tilewidth="32" tileheight="32">
   <image source="powerbox.png" width="32" height="32"/>
@@ -33,12 +33,35 @@
    </properties>
   </tile>
  </tileset>
- <layer name="Tile Layer 1" width="32" height="32">
+ <tileset firstgid="12" name="LevelDecorations" tilewidth="32" tileheight="32">
+  <image source="LevelDecorations.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="16" name="ShipFrontBottom" tilewidth="32" tileheight="32">
+  <image source="ShipFrontBottom.png" width="288" height="224"/>
+ </tileset>
+ <tileset firstgid="79" name="ShipFrontTop" tilewidth="32" tileheight="32">
+  <image source="ShipFrontTop.png" width="192" height="128"/>
+ </tileset>
+ <tileset firstgid="103" name="ShipExterior" tilewidth="32" tileheight="32">
+  <image source="ShipExterior.png" width="160" height="576"/>
+ </tileset>
+ <tileset firstgid="193" name="ShipThruster" tilewidth="96" tileheight="128">
+  <image source="ShipThruster.png" width="128" height="128"/>
+ </tileset>
+ <tileset firstgid="194" name="ShipTiles" tilewidth="32" tileheight="32">
+  <image source="ShipTiles.png" width="160" height="224"/>
+ </tileset>
+ <layer name="Exterior" width="32" height="32">
+  <data encoding="base64" compression="zlib">
+   eJzt0TtOAmEUhmGWoKgoiDcEQRtRC0VouDUKKigoKFfFUFsQShoXYE2ihStxDyyIlwSTP1PNGaQx502e8j/fJONyaZqm/U1DdPEufHeNGxRQxC3uprfs3vtCwiCphDLu8YAKqugZPozvsfq2bEv3H/GEGupooGlsS3Ky30Ibz3hBB6+W/ZEN5v6PYH8Bi3BjCctYgQerWHOwL8kLH9bhxwY2sYVt7Mx5P4BdBBHCHsKIYB8Hc963dogojnCMEwf7kv9vdoozxHCO+PSeZH/gcPu3JFJII4Os4O1kvz/j/gUukUMeV3iz6XPGbU3TNO3/NwaWLFQv
+  </data>
+ </layer>
+ <layer name="Walls n Pipes" width="32" height="32">
   <properties>
    <property name="prefab" value="BlockTilePref"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJzt00ELABAMQGEK5f//YQ4OWhS1NeV9tdvq2UEIAICXxYux6kvpcE+zX/rkMdWhv7p5fpNlf3dzEntW/Z1f+p7/DwAATQ3A9QBu
+   eJzt00ELABAMQGFC+f+/mIODFkVtTXlf7bZ6dhACAOBl8WKs+lI63NPslz55THXor26e32TZ392cxJ5Vf+eXvuf/AwBAUwNHOQBg
   </data>
  </layer>
  <objectgroup name="Object Layer 1">

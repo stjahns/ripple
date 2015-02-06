@@ -56,12 +56,10 @@
   (filter (fn [layer] (= (type layer) TiledMapTileLayer))
    (.getLayers tiled-map)))
 
-(defn- get-tile-cells
-  "Lazy seq of all available tile cells for all tile layers for a given tiled-map
-   TODO - handle multiple tile layers"
-  [tiled-map]
-  (let [tile-layer (first (get-tile-layers tiled-map))
-        height (.getHeight tile-layer)
+(defn- get-tile-cells-for-layer
+  "Lazy seq of all available tile cells for all tile layers for a given tile layer"
+  [tile-layer]
+  (let [height (.getHeight tile-layer)
         width (.getWidth tile-layer)]
     (for [x (range width)
           y (range height)
@@ -70,6 +68,12 @@
       {:tile-cell tile-cell
        :x (+ x 0.5)  ;; TODO - don't assume 1 tile == 1 world unit?
        :y (+ y 0.5)})))
+
+(defn- get-tile-cells
+  "Lazy seq of all available tile cells for all tile layers for a given tiled-map"
+  [tiled-map]
+  (flatten (map #(get-tile-cells-for-layer %)
+                (get-tile-layers tiled-map))))
 
 (defmulti create-entity-from-map-object (fn [_ map-object _] (class map-object)))
 
@@ -132,6 +136,7 @@
 
 (defn- spawn-prefab-for-tile-cell [system tile-cell x y]
   (let [prefab-name (-> tile-cell (.getTile) (.getProperties) (.get "prefab"))]
+    (println prefab-name)
     (if (not (nil? prefab-name))
       (prefab/instantiate system
                           prefab-name
