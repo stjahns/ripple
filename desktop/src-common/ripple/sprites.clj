@@ -4,6 +4,7 @@
             [ripple.components :as c]
             [ripple.rendering :as r]
             [ripple.assets :as a]
+            [ripple.event :as event]
             [play-clj.utils :as u]
             [brute.entity :as e])
   (:import [com.badlogic.gdx.graphics.g2d SpriteBatch TextureRegion Animation BitmapFont]
@@ -83,17 +84,6 @@
   (fn [component entity system {:keys [font]}]
     (assoc component :font (BitmapFont.))))
 
-(c/defcomponent AnimationController
-  :fields [:animation {:asset true}
-           :playing {:default false}
-           :play-on-start {:default false}
-           :start-time {:default 0}])
-
-(defn play-animation [system entity animation]
-  (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
-                                                                       :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
-                                                                       :playing true))))
-
 (defmulti get-sprite-size class)
 
 (defmethod get-sprite-size com.badlogic.gdx.graphics.Texture
@@ -154,15 +144,6 @@
     (.end sprite-batch)
     system))
 
-;; FIXME - filtering sprites into layers on every frame kinda sucks?
-
-(defn- render-sprite-layer
-  [system layer-index]
-  (->> (e/get-all-entities-with-component system 'SpriteRenderer)
-       (filter #(= layer-index 
-                   (:layer (e/get-component system % 'SpriteRenderer))))
-       (render-sprites system)))
-
 (defn- render-sprites
   "Render sprites for each SpriteRenderer component"
   [system entities]
@@ -197,10 +178,33 @@
     (.end sprite-batch)
     system))
 
-;;
-;; Not a huge fan of this, would be nicer if you could somehow 'plug in' an AnimationController to a SpriteRenderer
-;; so the SpriteRenderer can just query the controller for a texture region as necessary
-;;
+;; FIXME - filtering sprites into layers on every frame kinda sucks?
+
+(defn- render-sprite-layer
+  [system layer-index]
+  (->> (e/get-all-entities-with-component system 'SpriteRenderer)
+       (filter #(= layer-index 
+                   (:layer (e/get-component system % 'SpriteRenderer))))
+       (render-sprites system)))
+
+;;================================================================================
+;; AnimationController
+;;================================================================================
+
+(c/defcomponent AnimationController
+  :fields [:animation {:asset true}
+           :playing {:default false}
+           :play-on-start {:default false}
+           :start-time {:default 0}
+           :loop {:default false} ;; FIXME default: true not being respected properly! -- also this shoould be a property of the animation
+           :duration {:default 0}
+           :finished {:default false}])
+
+(defn play-animation [system entity animation]
+  (e/update-component system entity 'AnimationController #(-> % (assoc :animation animation
+                                                                       :start-time (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
+                                                                       :playing true))))
+
 (defn- update-animation-controller
   [system entity]
   (let [animation-controller (e/get-component system entity 'AnimationController)
@@ -209,7 +213,15 @@
       (let [anim-time (- (/ (com.badlogic.gdx.utils.TimeUtils/millis) 1000.)
                          (:start-time animation-controller))
             anim-frame (.getKeyFrame animation (float anim-time) true)]
-        (e/update-component system entity 'SpriteRenderer #(-> % (assoc :texture anim-frame))))
+        (if (and (not (:loop animation-controller))
+                 (>= anim-time (:duration animation-controller)))
+          ;; Animation is finished
+          (-> system
+              (when-> (not (:finished animation-controller))
+                      (e/update-component entity 'SpriteRenderer #(assoc % :finished true))
+                      (event/send-event entity {:event-id :animation-finished})))
+          ;; Advance animation
+          (e/update-component system entity 'SpriteRenderer #(-> % (assoc :texture anim-frame)))))
       system)))
 
 (defn- update-animation-controllers

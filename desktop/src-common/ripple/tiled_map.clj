@@ -136,7 +136,6 @@
 
 (defn- spawn-prefab-for-tile-cell [system tile-cell x y]
   (let [prefab-name (-> tile-cell (.getTile) (.getProperties) (.get "prefab"))]
-    (println prefab-name)
     (if (not (nil? prefab-name))
       (prefab/instantiate system
                           prefab-name

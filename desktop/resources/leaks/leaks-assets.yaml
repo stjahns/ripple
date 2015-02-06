@@ -157,6 +157,7 @@
       - type: AnimationController
         animation: PlayerWalking
         play-on-start: true
+        loop: true
 
 # 'Systems'
 
@@ -203,6 +204,38 @@
     components:
       - type: GameController
       - type: EventHub
+
+  - asset: sound
+    name: ExplosionSound
+    path: "resources/leaks/explosion.wav"
+
+  - asset: texture
+    name: ExplosionSpriteSheet
+    path: leaks/explosion.png
+
+  - asset: animation
+    name: ExplosionAnim
+    texture: ExplosionSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 0.1
+    frames:
+      - [0, 0]
+      - [1, 0]
+      - [2, 0]
+      - [3, 0]
+
+  - asset: prefab
+    name: Explosion
+    components:
+      - type: Transform
+      - type: EventHub
+      - type: SpriteRenderer
+      - type: Explosion
+      - type: AnimationController
+        animation: ExplosionAnim
+        play-on-start: true
+        loop: false
+        duration: 0.4
 
 # Leaks
 

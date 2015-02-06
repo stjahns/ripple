@@ -1,4 +1,4 @@
-(ns ripple.leaks.leak-emitter
+(ns ripple.leaks.components
   (:use [pallet.thread-expr])
   (:require [brute.entity :as e]
             [ripple.components :as c]
@@ -6,10 +6,15 @@
             [ripple.rendering :as r]
             [ripple.subsystem :as s]
             [ripple.prefab :as prefab]
+            [ripple.assets :as a]
             [ripple.physics :as physics])
   (:import [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
+
+;;================================================================================
+;; Blob Component
+;;================================================================================
 
 (defn- blob-on-splat
   "When a blob hits a ship system: 
@@ -49,17 +54,37 @@
            :splat-sprite {:asset true}]
   :on-event [:on-collision-start blob-on-collide])
 
+;;================================================================================
+;; Explosion Component
+;;================================================================================
+
+(defn- explosion-on-finished
+  [system entity event]
+  (c/destroy-entity system entity))
+
+(c/defcomponent Explosion
+  :on-event [:animation-finished explosion-on-finished])
+
+;;================================================================================
+;; ShipSystem Component
+;;================================================================================
+
 (defn- destroy-ship-system
   "Explode the system (when it's been hit by too many blobs"
 
-  ;; TODO play explosion animation
   ;; TODO play explosion sound
 
   [system entity]
 
-  (let [component (e/get-component system entity 'ShipSystem)] 
+  (let [component (e/get-component system entity 'ShipSystem)
+        transform (e/get-component system entity 'Transform)
+        position (c/get-position system transform)
+        [px py] [(.x position) (.y position)]] 
+    (-> (a/get-asset system "ExplosionSound")
+        (.play))
     (-> system
         (c/destroy-entity entity)
+        (prefab/instantiate "Explosion" {:transform {:position [px py]}})
         (event/send-event-to-tag "GameController" {:event-id :on-system-destroyed
                                                    :system-name (:system-name component)}))))
 
@@ -79,6 +104,10 @@
            :system-name {:default "UNNAMED SHIP SYSTEM"}]
   :on-event [:on-blob-splat system-on-blobbed])
 
+;;================================================================================
+;; GameController Component
+;;================================================================================
+
 (defn- on-system-destroyed
   "When system destroyed, tell GameText to show '<system name> destroyed!'"
 
@@ -93,6 +122,10 @@
 (c/defcomponent GameController
   :fields [:system-count {:default 2}]
   :on-event [:on-system-destroyed on-system-destroyed])
+
+;;================================================================================
+;; LeakEmitter Component
+;;================================================================================
 
 ;; This could probably be generalized as 'spawner' ?
 
@@ -134,12 +167,17 @@
   (let [entities (e/get-all-entities-with-component system 'LeakEmitter)]
     (reduce update-leak-emitter system entities)))
 
-(s/defsubsystem emitters
+;;================================================================================
+;; Leak Systems
+;;================================================================================
+
+(s/defsubsystem leak-systems
   :on-show
   (fn [system]
     (c/register-component-def 'LeakEmitter LeakEmitter)
     (c/register-component-def 'Blob Blob)
     (c/register-component-def 'ShipSystem ShipSystem)
+    (c/register-component-def 'Explosion Explosion)
     (c/register-component-def 'GameController GameController)
     system)
   :on-pre-render update-leak-emitters)
