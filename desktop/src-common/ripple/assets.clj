@@ -1,5 +1,6 @@
 (ns ripple.assets
-  (:import [com.badlogic.gdx.graphics.g2d TextureRegion Animation]
+  (:import [com.badlogic.gdx Gdx]
+           [com.badlogic.gdx.graphics.g2d TextureRegion Animation]
            [com.badlogic.gdx.graphics Texture])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
@@ -55,47 +56,17 @@
 
 ;; TODO move these to the proper modules...
 
-(defasset texture
-  :create
-  (fn [system {:keys [path]}]
-    (Texture. path)))
-
-(defasset texture-region
-  :create
-  (fn [system {texture-id :texture
-               [x y] :tile-indices
-               [width height] :tile-size}]
-    (let [texture (get-asset system texture-id)]
-      (TextureRegion. texture x y width height))))
-
-(defasset animation
-  :create
-  (fn [system {:keys [frame-duration
-                      texture
-                      frames] ; frames should be a list of [x, y] pairs
-               [frame-width frame-height] :frame-size}]
-    (let [texture (get-asset system texture)
-          key-frames (map #(TextureRegion. texture
-                                           (* frame-width (first %))
-                                           (* frame-height (second %))
-                                           frame-width
-                                           frame-height)
-                          frames)]
-      (Animation. (float frame-duration)
-                  (u/gdx-array key-frames)))))
-
 (defn- parse-asset-file
   "Parse the asset source file for the given path"
   [path]
-  (yaml/parse-string
-   (slurp path)))
+  (yaml/parse-string (slurp (clojure.java.io/resource path))))
 
 (defn load-asset-instance-defs
   "Parses asset source files into instance definitions
    and stores them in the system indexed by keyword corresponding to the asset instance name.
   This can happen at any time."
   [system]
-  (let [asset-files ["resources/assets.yaml"]
+  (let [asset-files ["leaks/leaks-assets.yaml"]
         instance-defs (flatten (map parse-asset-file asset-files))]
     (assoc-in system [:assets :instance-defs]
               (reduce #(assoc % (:name %2) %2)
@@ -111,7 +82,4 @@
   ;;:asset-defs [:texture :texture-region :animation] ;; TODO handle with macro
   :on-show
   (fn [system]
-    (register-asset-def :texture texture-asset-def)
-    (register-asset-def :texture-region texture-region-asset-def)
-    (register-asset-def :animation animation-asset-def)
     (load-asset-instance-defs system)))

@@ -46,20 +46,20 @@
    (.getLayers tiled-map)))
 
 (defn- get-map-objects [tiled-map]
-  (let [object-layer (first (get-object-layers tiled-map))]
-    (.getObjects object-layer)))
+  (flatten (reduce #(conj % (-> (.getObjects %2)
+                                (.iterator)
+                                (iterator-seq)))
+                   [] (get-object-layers tiled-map))))
 
 (defn- get-tile-layers
   [tiled-map]
   (filter (fn [layer] (= (type layer) TiledMapTileLayer))
    (.getLayers tiled-map)))
 
-(defn- get-tile-cells
-  "Lazy seq of all available tile cells for all tile layers for a given tiled-map
-   TODO - handle multiple tile layers"
-  [tiled-map]
-  (let [tile-layer (first (get-tile-layers tiled-map))
-        height (.getHeight tile-layer)
+(defn- get-tile-cells-for-layer
+  "Lazy seq of all available tile cells for all tile layers for a given tile layer"
+  [tile-layer]
+  (let [height (.getHeight tile-layer)
         width (.getWidth tile-layer)]
     (for [x (range width)
           y (range height)
@@ -68,6 +68,12 @@
       {:tile-cell tile-cell
        :x (+ x 0.5)  ;; TODO - don't assume 1 tile == 1 world unit?
        :y (+ y 0.5)})))
+
+(defn- get-tile-cells
+  "Lazy seq of all available tile cells for all tile layers for a given tiled-map"
+  [tiled-map]
+  (flatten (map #(get-tile-cells-for-layer %)
+                (get-tile-layers tiled-map))))
 
 (defmulti create-entity-from-map-object (fn [_ map-object _] (class map-object)))
 
@@ -130,10 +136,13 @@
 
 (defn- spawn-prefab-for-tile-cell [system tile-cell x y]
   (let [prefab-name (-> tile-cell (.getTile) (.getProperties) (.get "prefab"))]
-    (prefab/instantiate system
-                        prefab-name
-                        {:transform {:position [x y]}
-                         :physicsbody {:x x :y y}})))
+    (if (not (nil? prefab-name))
+      (prefab/instantiate system
+                          prefab-name
+                          {:transform {:position [x y]}
+                           :physicsbody {:x x :y y}})
+      ;; Else, nothing to instantiate
+      system)))
 
 (defn- create-entities-for-map-tiles
   [system tiled-map pixels-per-unit]
