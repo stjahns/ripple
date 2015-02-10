@@ -18,14 +18,16 @@
             [brute.entity :as e]
             [brute.system :as s]))
 
+(declare shutdown
+         restart)
+
 (def sys (atom 0))
 
 (defn- start
   "Create all the initial entities with their components"
   [system]
-  (let [tile-map (e/create-entity)]
-    (-> system
-        (prefab/instantiate "LeaksLevel" {}))))
+  (-> system
+      (prefab/instantiate "LeaksLevel" {})))
 
 (defn- init-system
   "Initialize the ES system and all subsystems"
@@ -72,6 +74,9 @@
     (reset! sys (-> @sys
                     (subsystem/on-system-event :on-pre-render)
                     (subsystem/on-system-event :on-render)))
+    (when (:restart @sys)
+      (shutdown)
+      (restart))
     nil)
 
   :on-resize
@@ -83,3 +88,23 @@
   :on-create
   (fn [this]
     (set-screen! this main-screen)))
+
+;; Exception Wrapper
+(defscreen blank-screen
+  :on-render
+  (fn [screen entities]
+    (clear!)))
+
+(set-screen-wrapper! (fn [screen screen-fn]
+                       (try (screen-fn)
+                         (catch Exception e
+                           (.printStackTrace e)
+                           (set-screen! ripple blank-screen)))))
+
+(defn shutdown []
+  (set-screen! ripple blank-screen)
+  (Thread/sleep 100)
+  (subsystem/on-system-event @sys :on-shutdown))
+
+(defn restart []
+  (set-screen! ripple main-screen))

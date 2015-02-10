@@ -1,9 +1,11 @@
 (ns ripple.leaks.player
+  (:use [pallet.thread-expr])
   (:require [brute.entity :as e]
             [ripple.components :as c]
             [ripple.rendering :as r]
             [ripple.subsystem :as s]
             [ripple.physics :as physics]
+            [ripple.sprites :as sprites]
             [ripple.event :as event])
   (:import [com.badlogic.gdx.math Vector2]
            [com.badlogic.gdx Input$Keys]
@@ -21,8 +23,23 @@
   :on-event [:on-trigger-entered mophead-on-enter]
   :fields [:pop-sound {:asset true}])
 
+(defn- on-player-death
+  [system entity event]
+  (doto (:body (e/get-component system entity 'PhysicsBody))
+    (.setGravityScale 0)
+    (.setLinearVelocity 0.1 0.1)
+    (.setAngularVelocity 0.1)
+    (.setFixedRotation false))
+  (-> system
+      (let-> [player (e/get-component system entity 'Player)]
+        (sprites/play-animation entity (:death-animation player)))
+      (e/update-component entity 'Player #(assoc % :dead true))))
+
 (c/defcomponent Player
-  :fields [:jet-force {:default 100}])
+  :on-event [:player-death on-player-death]
+  :fields [:dead {:default false}
+           :death-animation {:asset true}
+           :jet-force {:default 100}])
 
 (defn- get-move-direction []
   "Return normalized movement direction for whatever movement keys are currently depressed"
@@ -105,13 +122,22 @@
           (e/update-component entity 'SpriteRenderer #(assoc % :flip-x facing-left))))
     system))
 
+(defn- check-player-restart
+  [system]
+  (-> system 
+      (when-> (.isKeyPressed Gdx/input Input$Keys/R)
+              (event/send-event-to-tag "GameController" {:event-id :restart-game}))))
+
 (defn- update-player
   [system entity]
   (let [player (e/get-component system entity 'Player)]
     (-> system
         (update-camera-target entity)
-        (aim-broom entity)
-        (update-player-movement entity))))
+        (when-> (:dead player)
+                (check-player-restart))
+        (when-not-> (:dead player)
+                    (aim-broom entity)
+                    (update-player-movement entity)))))
 
 (defn- update-player-components
   [system]

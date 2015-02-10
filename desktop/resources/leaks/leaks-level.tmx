@@ -65,7 +65,7 @@
   </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="1" name="player1" type="LeaksPlayer" x="480" y="544" width="32" height="32"/>
+  <object id="1" name="Player" type="LeaksPlayer" x="480" y="544" width="32" height="32"/>
   <object id="10" name="rip1" type="LeakEmitter" x="480" y="416" width="32" height="32"/>
   <object id="11" name="rip2" type="LeakEmitter" x="544" y="448" width="32" height="32"/>
   <object id="14" name="music" type="MusicPlayer" x="384" y="640" width="32" height="32"/>

@@ -20,38 +20,23 @@
     (eval
         `(let [~@(mapcat (fn [[k v]] [k `'~v]) ctx)]
              ~expr)))
+
 (defmacro local-context []
     (let [symbols (keys &env)]
         (zipmap (map (fn [sym] `(quote ~sym)) symbols) symbols)))
+
 (defn readr [prompt exit-code]
     (let [input (clojure.main/repl-read prompt exit-code)]
         (if (= input ::tl)
             exit-code
              input)))
+
 ;;make a break point
 (defmacro break []
   `(clojure.main/repl
     :prompt #(print "debug=> ")
     :read readr
     :eval (partial contextual-eval (local-context))))
-
-;; Exception Wrapper
-(defscreen blank-screen
-  :on-render
-  (fn [screen entities]
-    (clear!)))
-
-(set-screen-wrapper! (fn [screen screen-fn]
-                       (try (screen-fn)
-                         (catch Exception e
-                           (.printStackTrace e)
-                           (set-screen! ripple blank-screen)))))
-
-(defn shutdown []
-  (println "Shutting down...")
-  (set-screen! ripple blank-screen)
-  (Thread/sleep 100)
-  (subsystem/on-system-event @sys :on-shutdown))
 
 (defn resume []
   (on-gl (set-screen! ripple main-screen)))
