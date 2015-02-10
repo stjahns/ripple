@@ -64,7 +64,4 @@
 
 (s/defsubsystem events
   :on-pre-render update-event-hubs
-  :on-show
-  (fn [system]
-    (c/register-component-def 'EventHub EventHub)
-    system))
+  :component-defs ['EventHub])

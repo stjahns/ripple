@@ -145,9 +145,5 @@
     (reduce update-player system player-entities)))
 
 (s/defsubsystem player
-  :on-show
-  (fn [system]
-    (c/register-component-def 'Player Player)
-    (c/register-component-def 'MopHead MopHead)
-    system)
+  :component-defs ['Player 'MopHead]
   :on-pre-render update-player-components)

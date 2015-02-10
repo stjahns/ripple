@@ -171,11 +171,10 @@
           system (e/get-all-entities-with-component system 'TiledMapSpawner)))
 
 (s/defsubsystem level
+  :component-defs ['OrthogonalTiledMapRendererComponent 'TiledMapSpawner]
   :on-pre-render init-map-spawner-components
   :on-show
   (fn [system]
-    (c/register-component-def 'OrthogonalTiledMapRendererComponent OrthogonalTiledMapRendererComponent)
-    (c/register-component-def 'TiledMapSpawner TiledMapSpawner)
     (a/register-asset-def :tiled-map tiled-map-asset-def)
     (-> system
         (r/register-render-callback render-maps 0))))

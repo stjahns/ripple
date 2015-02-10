@@ -2,6 +2,7 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
+            [ripple.transform :as t]
             [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.rendering :as r]
@@ -129,9 +130,9 @@
   [system entity body]
   (let [transform (e/get-component system entity 'Transform)]
     (.setTransform body 
-                   (c/get-position system transform)
+                   (t/get-position system transform)
                    (* com.badlogic.gdx.math.MathUtils/degreesToRadians 
-                      (c/get-rotation system transform)))
+                      (t/get-rotation system transform)))
     system))
 
 (defn- update-physics-body
@@ -290,12 +291,13 @@
   (println "Shutting down physics...")
   (if-let [world (get-in system [:physics :world])]
     (.dispose world)))
+
 (s/defsubsystem physics
+
+  :component-defs ['PhysicsBody 'AreaTrigger]
 
   :on-show
   (fn [system]
-    (c/register-component-def 'AreaTrigger AreaTrigger)
-    (c/register-component-def 'PhysicsBody PhysicsBody)
     (-> system
         (assoc-in [:physics :world] (create-world))
         (assoc-in [:physics :debug-renderer] (Box2DDebugRenderer.))

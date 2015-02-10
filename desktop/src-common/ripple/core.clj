@@ -15,6 +15,7 @@
             [ripple.prefab :as prefab]
             [ripple.event :as event]
             [ripple.tiled-map :as tiled-map]
+            [ripple.transform :as transform]
             [brute.entity :as e]
             [brute.system :as s]))
 
@@ -35,22 +36,21 @@
   (-> (e/create-system)
 
       (a/init-asset-manager) ;; clears any existing asset defs
-      (c/init-component-manager) ;; clears any existing component defs
 
-      (subsystem/register-subsystem a/assets)
-      (subsystem/register-subsystem c/components)
+      (subsystem/register-subsystem transform/transform)
       (subsystem/register-subsystem event/events)
       (subsystem/register-subsystem rendering/rendering)
       (subsystem/register-subsystem physics/physics)
       (subsystem/register-subsystem prefab/prefabs)
       (subsystem/register-subsystem sprites/sprites)
       (subsystem/register-subsystem audio/audio)
+      (subsystem/register-subsystem tiled-map/level)
 
       ;(subsystem/register-subsystem roaches-player/player)
       (subsystem/register-subsystem leaks-player/player)
       (subsystem/register-subsystem leaks-components/leak-systems)
 
-      (subsystem/register-subsystem tiled-map/level)
+      (a/load-asset-instance-defs)
 
       ;; Initialise subsystems
       (subsystem/on-system-event :on-show) ;; TODO rename

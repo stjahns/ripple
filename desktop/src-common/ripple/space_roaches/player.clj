@@ -228,9 +228,6 @@
     (reduce update-player system player-entities)))
 
 (s/defsubsystem player
-  :on-show
-  (fn [system]
-    (c/register-component-def 'Player Player)
-    system)
+  :component-defs ['Player]
   :on-pre-render update-player-components
   :on-touch-down handle-mouse-input)

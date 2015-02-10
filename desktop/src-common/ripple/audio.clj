@@ -66,10 +66,9 @@
           (assoc component :params params)))
 
 (s/defsubsystem audio
+  :component-defs ['SoundPlayer 'MusicPlayer]
   :on-show (fn [system]
              (a/register-asset-def :music music-asset-def)
              (a/register-asset-def :sound sound-asset-def)
-             (c/register-component-def 'SoundPlayer SoundPlayer)
-             (c/register-component-def 'MusicPlayer MusicPlayer)
              system)
   :on-shutdown on-shutdown)

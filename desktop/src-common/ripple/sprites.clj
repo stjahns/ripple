@@ -3,6 +3,7 @@
   (:require [ripple.subsystem :as s]
             [ripple.components :as c]
             [ripple.rendering :as r]
+            [ripple.transform :as t]
             [ripple.assets :as a]
             [ripple.event :as event]
             [play-clj.utils :as u]
@@ -155,9 +156,9 @@
       (let [sprite-renderer (e/get-component system entity 'SpriteRenderer)
             transform (e/get-component system entity 'Transform)
 
-            position (c/get-position system transform)
-            scale (c/get-scale system transform)
-            rotation (c/get-rotation system transform)
+            position (t/get-position system transform)
+            scale (t/get-scale system transform)
+            rotation (t/get-rotation system transform)
 
             pixels-per-unit (get-in system [:renderer :pixels-per-unit])
             texture (:texture sprite-renderer)
@@ -255,15 +256,16 @@
 
 (s/defsubsystem sprites
 
+  :component-defs ['SpriteScroller
+                   'SpriteRenderer
+                   'TextRenderer
+                   'AnimationController]
+
   :on-show
   (fn [system]
     (a/register-asset-def :texture texture-asset-def)
     (a/register-asset-def :texture-region texture-region-asset-def)
     (a/register-asset-def :animation animation-asset-def)
-    (c/register-component-def 'SpriteScroller SpriteScroller)
-    (c/register-component-def 'SpriteRenderer SpriteRenderer)
-    (c/register-component-def 'TextRenderer TextRenderer)
-    (c/register-component-def 'AnimationController AnimationController)
     (-> system
         (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
         (register-render-callbacks)))

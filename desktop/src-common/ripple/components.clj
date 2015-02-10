@@ -1,8 +1,7 @@
 (ns ripple.components
   (:require
    [brute.entity :refer :all]
-   [ripple.assets :as a]
-   [ripple.subsystem :as s])
+   [ripple.assets :as a])
   (:import
    [clojure.lang PersistentArrayMap PersistentHashMap]
    [com.badlogic.gdx.math Matrix3 Vector2]))
@@ -36,15 +35,13 @@
   [component]
   (:type component))
 
-(defonce component-defs (atom {}))
-
 (defn get-component-def
-  [component-symbol]
-  (get @component-defs component-symbol))
+  [system component-symbol]
+  (get-in system [:defs :components component-symbol]))
 
 (defn register-component-def
-  [component-symbol create-fn]
-  (swap! component-defs assoc component-symbol create-fn))
+  [system component-symbol create-fn]
+  (assoc-in system [:defs :components component-symbol] create-fn))
 
 (defn- init-component-fields
   [system params component fields]
@@ -76,60 +73,8 @@
                                                       (init-fn# entity# system# params#)))))))
 
 (defn create-component [system entity component-symbol params]
-  (if-let [component-def (get-component-def component-symbol)]
+  (if-let [component-def (get-component-def system component-symbol)]
     (-> component-def
         (get :create-component)
         (apply [entity system params]))
     (throw (Exception. (str "Component not defined: " component-symbol)))))
-
-(defcomponent Transform
-  :fields [:position {:default [0 0]}
-           :rotation {:default 0}
-           :scale {:default [1 1]}
-           :parent {:default nil}])
-
-(defn init-component-manager
-  "Clear any old component definitions, "
-  [system]
-  (reset! component-defs {})
-  system)
-
-(defn get-matrix
-  "TODO - instantiating new libGDX matrices on every frame doesn't seem like a good idea"
-  [system transform]
-  (let [[px py] (:position transform)
-        [sx sy] (:scale transform)
-        local-matrix (doto (Matrix3.)
-                       (.translate px py)
-                       (.rotate (:rotation transform))
-                       (.scale sx sy))]
-    (if (:parent transform)
-      (let [parent-transform (get-component system (:parent transform) 'Transform)
-            parent-matrix (get-matrix system parent-transform)]
-        (.mul parent-matrix local-matrix))
-      local-matrix)))
-
-(defn get-position
-  "Returns a Vector3 for position"
-  [system transform]
-  (-> (get-matrix system transform)
-      (.getTranslation (Vector2.))))
-
-(defn get-scale
-  "Returns a Vector3 for scale"
-  [system transform]
-  (-> (get-matrix system transform)
-      (.getScale (Vector2.))))
-
-(defn get-rotation
-  "Returns rotation in degrees"
-  [system transform]
-  (-> (get-matrix system transform)
-      (.getRotation)))
-
-(s/defsubsystem components
-  ;:asset-defs ['Transform] ;; TODO handle with macro
-  :on-show
-  (fn [system]
-    (register-component-def 'Transform Transform)
-    system))

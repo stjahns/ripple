@@ -2,6 +2,7 @@
   (:use [pallet.thread-expr])
   (:require [brute.entity :as e]
             [ripple.components :as c]
+            [ripple.transform :as t]
             [ripple.event :as event]
             [ripple.rendering :as r]
             [ripple.subsystem :as s]
@@ -78,7 +79,7 @@
 
   (let [component (e/get-component system entity 'ShipSystem)
         transform (e/get-component system entity 'Transform)
-        position (c/get-position system transform)
+        position (t/get-position system transform)
         [px py] [(.x position) (.y position)]] 
     (-> (a/get-asset system "ExplosionSound")
         (.play))
@@ -189,12 +190,5 @@
 ;;================================================================================
 
 (s/defsubsystem leak-systems
-  :on-show
-  (fn [system]
-    (c/register-component-def 'LeakEmitter LeakEmitter)
-    (c/register-component-def 'Blob Blob)
-    (c/register-component-def 'ShipSystem ShipSystem)
-    (c/register-component-def 'Explosion Explosion)
-    (c/register-component-def 'GameController GameController)
-    system)
+  :component-defs ['LeakEmitter 'Blob 'ShipSystem 'Explosion 'GameController]
   :on-pre-render update-leak-emitters)

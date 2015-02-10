@@ -1,4 +1,6 @@
-(ns ripple.subsystem)
+(ns ripple.subsystem
+  (:use [pallet.thread-expr])
+  (:require [ripple.components]))
 
 (defn register-subsystem [system subsystem]
   (if-let [subsystems (:subsystems system)]
@@ -16,5 +18,13 @@
   "Interns a symbol 'n in the current namespace bound to the
   enclosed subsystem definition."
   [n & options]
-  `(let [options# ~(apply hash-map options)]
-     (intern *ns* '~n options#)))
+  `(let [options# ~(apply hash-map options)
+         subsystem# (dissoc options# :component-defs :asset-defs)
+         ns# *ns*
+         on-show# (fn [system#]
+                    (-> system#
+                        (for-> [component-def# (:component-defs options#)]
+                               (ripple.components/register-component-def component-def# 
+                                                                         (var-get (ns-resolve ns# component-def#))))
+                        ((or (:on-show options#) identity))))]
+     (intern *ns* '~n (assoc subsystem# :on-show on-show#))))

@@ -5,7 +5,6 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.subsystem :as s]
             [clj-yaml.core :as yaml]
             [brute.entity :as e]))
 
@@ -77,9 +76,3 @@
   [system]
   (reset! asset-defs {})
   system)
-
-(s/defsubsystem assets
-  ;;:asset-defs [:texture :texture-region :animation] ;; TODO handle with macro
-  :on-show
-  (fn [system]
-    (load-asset-instance-defs system)))
