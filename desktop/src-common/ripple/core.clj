@@ -35,8 +35,6 @@
   []
   (-> (e/create-system)
 
-      (a/init-asset-manager) ;; clears any existing asset defs
-
       (subsystem/register-subsystem transform/transform)
       (subsystem/register-subsystem event/events)
       (subsystem/register-subsystem rendering/rendering)

@@ -256,6 +256,10 @@
 
 (s/defsubsystem sprites
 
+  :asset-defs [:texture
+               :texture-region
+               :animation]
+
   :component-defs ['SpriteScroller
                    'SpriteRenderer
                    'TextRenderer
@@ -263,9 +267,6 @@
 
   :on-show
   (fn [system]
-    (a/register-asset-def :texture texture-asset-def)
-    (a/register-asset-def :texture-region texture-region-asset-def)
-    (a/register-asset-def :animation animation-asset-def)
     (-> system
         (assoc-in [:sprites :sprite-batch] (SpriteBatch.))
         (register-render-callbacks)))

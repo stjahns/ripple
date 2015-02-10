@@ -67,8 +67,5 @@
 
 (s/defsubsystem audio
   :component-defs ['SoundPlayer 'MusicPlayer]
-  :on-show (fn [system]
-             (a/register-asset-def :music music-asset-def)
-             (a/register-asset-def :sound sound-asset-def)
-             system)
+  :asset-defs [:music :sound]
   :on-shutdown on-shutdown)

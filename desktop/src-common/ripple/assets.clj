@@ -20,27 +20,22 @@
 ;;
 ;; asset-instance - the created instance of a particular asset instance definition
 
-(defonce asset-defs
-  ;; Mapping of keywords to asset definitions
-  ;; TODO keep in system..?
-  (atom {}))
-
 (defn get-asset-def
   "Returns the asset definition for the given key
   Asset definitions should be maps of the form {:create fn} or {:instantiate fn} depending on whether
   it should be instantiated into the system or not'" ;; TODO needlessly complicated?
-  [key]
-  (get @asset-defs key))
+  [system key]
+  (get-in system [:defs :assets key]))
 
 (defn register-asset-def
   "Register the given asset definition with the given key"
-  [key asset-def]
-  (swap! asset-defs assoc key asset-def))
+  [system key asset-def]
+  (assoc-in system [:defs :assets key] asset-def))
 
 (defn get-asset [system asset-name]
   "Get an asset instance definition by name and instantiate it"
   (let [instance-def (get-in system [:assets :instance-defs asset-name])
-        asset-def (get-asset-def (keyword (:asset instance-def)))
+        asset-def (get-asset-def system (keyword (:asset instance-def)))
         create-fn (:create asset-def)]
     (when (not asset-def) (throw (Exception. (str "Asset definition does not exist: " (:asset instance-def)))))
     (create-fn system instance-def)))
@@ -52,8 +47,6 @@
   [n & options]
   `(let [options# ~(apply hash-map options)]
      (intern *ns* (symbol (str '~n "-asset-def")) options#)))
-
-;; TODO move these to the proper modules...
 
 (defn- parse-asset-file
   "Parse the asset source file for the given path"
@@ -70,9 +63,3 @@
     (assoc-in system [:assets :instance-defs]
               (reduce #(assoc % (:name %2) %2)
                       {} instance-defs))))
-
-(defn init-asset-manager
-  "Clear any old asset definitions"
-  [system]
-  (reset! asset-defs {})
-  system)

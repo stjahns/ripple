@@ -17,7 +17,7 @@
   "Get a prefab by name and instantiate it in the ES system"
   [system asset-name options]
   (let [instance-def (get-in system [:assets :instance-defs asset-name])
-        asset-def (a/get-asset-def (keyword (:asset instance-def)))
+        asset-def (a/get-asset-def system (keyword (:asset instance-def)))
         inst-fn (:instantiate asset-def)]
     (inst-fn system (override-prefab-params instance-def options))))
 
@@ -50,7 +50,4 @@
           (add-components entity components)))))
 
 (s/defsubsystem prefabs
-  :asset-defs [:prefab]
-  :on-show (fn [system]
-             (a/register-asset-def :prefab prefab-asset-def)
-             system))
+  :asset-defs [:prefab])

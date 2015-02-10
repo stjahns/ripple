@@ -1,6 +1,7 @@
 (ns ripple.subsystem
   (:use [pallet.thread-expr])
-  (:require [ripple.components]))
+  (:require [ripple.components]
+            [ripple.assets]))
 
 (defn register-subsystem [system subsystem]
   (if-let [subsystems (:subsystems system)]
@@ -23,6 +24,9 @@
          ns# *ns*
          on-show# (fn [system#]
                     (-> system#
+                        (for-> [asset-def# (:asset-defs options#)]
+                               (ripple.assets/register-asset-def asset-def# 
+                                                                 (var-get (ns-resolve ns# (symbol (str  (name asset-def#) "-asset-def"))))))
                         (for-> [component-def# (:component-defs options#)]
                                (ripple.components/register-component-def component-def# 
                                                                          (var-get (ns-resolve ns# component-def#))))
