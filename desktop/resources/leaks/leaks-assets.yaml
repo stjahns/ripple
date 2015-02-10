@@ -2,7 +2,7 @@
 
   - asset: tiled-map
     name: LeaksMap
-    path: resources/leaks/leaks-level.tmx
+    path: leaks/leaks-level.tmx
 
   - asset: prefab
     name: LeaksLevel
@@ -98,6 +98,14 @@
       - [2, 0]
       - [3, 0]
 
+  - asset: animation
+    name: PlayerDead
+    texture: JanitorSpriteSheet
+    frame-size: [32, 32]
+    frame-duration: 1
+    frames:
+      - [0, 1]
+
   - asset: prefab
     name: MopHead
     components:
@@ -140,8 +148,11 @@
           rotation: 0
     components:
       - type: Transform
+      - type: EventHub
+        tag: "Player"
       - type: Player
         jet-force: 10
+        death-animation: PlayerDead
       - type: PhysicsBody
         body-type: dynamic
         velocity-x: 0
@@ -207,7 +218,7 @@
 
   - asset: sound
     name: ExplosionSound
-    path: "resources/leaks/explosion.wav"
+    path: "leaks/explosion.wav"
 
   - asset: texture
     name: ExplosionSpriteSheet
@@ -284,15 +295,15 @@
 
   - asset: sound
     name: BlobPopSound
-    path: "resources/leaks/oildeath.wav"
+    path: "leaks/oildeath.wav"
 
   - asset: sound
     name: BlobSplashSound
-    path: "resources/leaks/splash.wav"
+    path: "leaks/splash.wav"
 
   - asset: music
     name: LeaksMusic
-    path: "resources/leaks/griddygrindy.mp3"
+    path: "leaks/griddygrindy.mp3"
 
   - asset: prefab
     name: MusicPlayer
@@ -307,6 +318,6 @@
     components:
       - type: EventHub
       - type: TextRenderer
-        text: "LEAKS v0.1"
+        text: "FUEL IS LEAKING EVERYWHERE! WHAT A MESS!"
         position: [100, 100]
 

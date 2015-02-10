@@ -108,20 +108,37 @@
 ;; GameController Component
 ;;================================================================================
 
-(defn- on-system-destroyed
-  "When system destroyed, tell GameText to show '<system name> destroyed!'"
-
-  ;; TODO countdown and check if any remaining systems
-
-  [system entity event]
-
-  (-> system 
+(defn- on-game-over
+  [system entity]
+  (-> system
+      (event/send-event-to-tag "Player" {:event-id :player-death})
       (event/send-event-to-tag "GameText" {:event-id :show-text
-                                           :text (str (:system-name event) " DESTROYED!")})))
+                                           :text "LIFE SUPPORT FAILURE! PRESS 'R' TO RESTART"})))
+
+(defn- on-system-destroyed
+  "When system destroyed, tell GameText to show '<system name> destroyed!'
+  Also count down :system-count, game over when 0!"
+  [system entity event]
+  (let [remaining-systems (- (-> (e/get-component system entity 'GameController)
+                                 :system-count)
+                             1)]
+    (-> system 
+        (e/update-component entity 'GameController #(assoc % :system-count remaining-systems))
+        (event/send-event-to-tag "GameText" {:event-id :show-text
+                                             :text (str (:system-name event) " DESTROYED!")})
+        (when-> (< remaining-systems 1)
+                (on-game-over entity)))))
+
+(defn- restart-game
+  [system entity event]
+  (assoc system :restart true)
+  ;(ripple.core/restart)
+  )
 
 (c/defcomponent GameController
   :fields [:system-count {:default 2}]
-  :on-event [:on-system-destroyed on-system-destroyed])
+  :on-event [:on-system-destroyed on-system-destroyed
+             :restart-game restart-game])
 
 ;;================================================================================
 ;; LeakEmitter Component

@@ -7,6 +7,7 @@
             [brute.entity :as e])
   (:import [com.badlogic.gdx.maps.tiled TmxMapLoader]
            [com.badlogic.gdx.maps MapLayer]
+           [com.badlogic.gdx Gdx]
            [com.badlogic.gdx.maps.tiled TiledMapTileLayer]
            [com.badlogic.gdx.maps.tiled.renderers OrthogonalTiledMapRenderer]))
 
