@@ -13,6 +13,26 @@
 (def pixels-per-unit 32)
 (def camera-scale 2)
 
+(defn screen-to-world
+  "Convert a pair of screen coordinates to a pair of world coordinates
+   with the current camera transform and pixels-per-unit ratio"
+  [system screen-x screen-y]
+  (let [pixels-per-unit (get-in system [:renderer :pixels-per-unit])
+
+        screen-width (.getWidth Gdx/graphics)
+        screen-height (.getHeight Gdx/graphics)
+
+        screen-x (- screen-x (/ screen-width 2))
+        screen-y (- (/ screen-height 2) screen-y) ;; pixels relative to screen center
+
+        camera (get-in system [:renderer :camera])
+        camera-x (-> camera .position .x)
+        camera-y (-> camera .position .y) ;; world space of screen center
+
+        world-x (+ (/ screen-x pixels-per-unit) camera-x)
+        world-y (+ (/ screen-y pixels-per-unit) camera-y)]
+    [(float world-x) (float world-y)]))
+
 (defn update-camera-position [camera x y]
   (let [position (.position camera)]
     (doto position

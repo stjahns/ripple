@@ -1,10 +1,8 @@
 (ns ripple.components
-  (:require
-   [brute.entity :refer :all]
-   [ripple.assets :as a])
-  (:import
-   [clojure.lang PersistentArrayMap PersistentHashMap]
-   [com.badlogic.gdx.math Matrix3 Vector2]))
+  (:require [brute.entity :refer :all]
+            [ripple.assets :as a])
+  (:import [clojure.lang PersistentArrayMap PersistentHashMap]
+           [com.badlogic.gdx.math Matrix3 Vector2]))
 
 (defn destroy-entity
   "Completely destroys an entity and all its components"
@@ -24,24 +22,24 @@
 ;; Tell brute.entity to use value for :type in a component map
 ;; to differentiate component types
 ;;
+
 (defmethod get-component-type PersistentArrayMap
   [component]
   (:type component))
 
-;;
-;; Apparently a Clojure map with more than 8 elements is a PersistentHashMap
-;;
 (defmethod get-component-type PersistentHashMap
   [component]
   (:type component))
 
 (defn get-component-def
+  "Retrieve a component definition by name from the system"
   [system component-symbol]
   (get-in system [:defs :components component-symbol]))
 
 (defn register-component-def
-  [system component-symbol create-fn]
-  (assoc-in system [:defs :components component-symbol] create-fn))
+  "Register the given component definition by name in the system"
+  [system component-symbol component-def]
+  (assoc-in system [:defs :components component-symbol] component-def))
 
 (defn- init-component-fields
   [system params component fields]

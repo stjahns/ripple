@@ -11,18 +11,6 @@
            [com.badlogic.gdx Input$Keys]
            [com.badlogic.gdx Gdx]))
 
-(defn- mophead-on-enter
-  [system entity {:keys [entering-fixture]}]
-  (if-let [entering-entity (:entity (.getUserData entering-fixture))]
-    (let [component (e/get-component system entity 'MopHead)]
-      (.play (:pop-sound component) 1 1 0)
-      (c/destroy-entity system entering-entity))
-    system))
-
-(c/defcomponent MopHead
-  :on-event [:on-trigger-entered mophead-on-enter]
-  :fields [:pop-sound {:asset true}])
-
 (defn- on-player-death
   [system entity event]
   (doto (:body (e/get-component system entity 'PhysicsBody))
@@ -75,28 +63,9 @@
     (r/update-camera-position camera x y))
   system)
 
-;; TODO move or do better
-(defn- screen-to-world
-  [system screen-x screen-y]
-  (let [pixels-per-unit (get-in system [:renderer :pixels-per-unit])
-
-        screen-width (.getWidth Gdx/graphics)
-        screen-height (.getHeight Gdx/graphics)
-
-        screen-x (- screen-x (/ screen-width 2))
-        screen-y (- (/ screen-height 2) screen-y) ;; pixels relative to screen center
-
-        camera (get-in system [:renderer :camera])
-        camera-x (-> camera .position .x)
-        camera-y (-> camera .position .y) ;; world space of screen center
-
-        world-x (+ (/ screen-x pixels-per-unit) camera-x)
-        world-y (+ (/ screen-y pixels-per-unit) camera-y)]
-    [(float world-x) (float world-y)]))
-
 (defn- get-player-aim-direction
   [system entity]
-  (let [[mouse-x mouse-y] (screen-to-world system (.getX Gdx/input) (.getY Gdx/input))
+  (let [[mouse-x mouse-y] (r/screen-to-world system (.getX Gdx/input) (.getY Gdx/input))
         [player-x player-y] (:position (e/get-component system entity 'Transform))
         player-to-mouse (Vector2. (- mouse-x player-x)
                                   (- mouse-y player-y))]
@@ -141,4 +110,4 @@
            :jet-force {:default 100}])
 
 (s/defsubsystem player
-  :component-defs ['Player 'MopHead])
+  :component-defs ['Player])
