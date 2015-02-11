@@ -147,13 +147,6 @@
 
 ;; This could probably be generalized as 'spawner' ?
 
-(c/defcomponent LeakEmitter
-  :fields [:emit-interval {:default 1.0}
-           :emit-speed {:default 0}
-           :emit-direction {:default [0 0]}
-           :emit-timer {:default 0}
-           :emitted-prefab nil])
-
 (defn- emit-prefab
   "Spawns the prefab at the emitter's location, with a random velocity"
   [system entity]
@@ -180,15 +173,17 @@
           (emit-prefab entity))
       (e/update-component system entity 'LeakEmitter #(assoc % :emit-timer elapsed-time)))))
 
-(defn- update-leak-emitters
-  [system]
-  (let [entities (e/get-all-entities-with-component system 'LeakEmitter)]
-    (reduce update-leak-emitter system entities)))
+(c/defcomponent LeakEmitter
+  :on-pre-render update-leak-emitter
+  :fields [:emit-interval {:default 1.0}
+           :emit-speed {:default 0}
+           :emit-direction {:default [0 0]}
+           :emit-timer {:default 0}
+           :emitted-prefab nil])
 
 ;;================================================================================
 ;; Leak Systems
 ;;================================================================================
 
 (s/defsubsystem leak-systems
-  :component-defs ['LeakEmitter 'Blob 'ShipSystem 'Explosion 'GameController]
-  :on-pre-render update-leak-emitters)
+  :component-defs ['LeakEmitter 'Blob 'ShipSystem 'Explosion 'GameController])

@@ -35,12 +35,6 @@
         (sprites/play-animation entity (:death-animation player)))
       (e/update-component entity 'Player #(assoc % :dead true))))
 
-(c/defcomponent Player
-  :on-event [:player-death on-player-death]
-  :fields [:dead {:default false}
-           :death-animation {:asset true}
-           :jet-force {:default 100}])
-
 (defn- get-move-direction []
   "Return normalized movement direction for whatever movement keys are currently depressed"
   (let [keys-to-direction {Input$Keys/DPAD_UP (Vector2. 0 1)
@@ -139,11 +133,12 @@
                     (aim-broom entity)
                     (update-player-movement entity)))))
 
-(defn- update-player-components
-  [system]
-  (let [player-entities (e/get-all-entities-with-component system 'Player)]
-    (reduce update-player system player-entities)))
+(c/defcomponent Player
+  :on-event [:player-death on-player-death]
+  :on-pre-render update-player
+  :fields [:dead {:default false}
+           :death-animation {:asset true}
+           :jet-force {:default 100}])
 
 (s/defsubsystem player
-  :component-defs ['Player 'MopHead]
-  :on-pre-render update-player-components)
+  :component-defs ['Player 'MopHead])

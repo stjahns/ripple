@@ -61,8 +61,10 @@
   `(let [options# ~(apply hash-map options)
          fields# (apply hash-map (:fields options#))
          on-event# (apply hash-map (:on-event options#))
+         on-pre-render# (:on-pre-render options#)
          init-fn# (or (:init options#) (fn [c# _# _# _#] c#))]
      (intern *ns*  '~n (assoc options#
+                              :on-pre-render on-pre-render#
                               :create-component (fn [entity# system# params#]
                                                   (-> (#'ripple.components/init-component-fields system#
                                                                                                  params#
@@ -71,6 +73,12 @@
                                                                                                   :on-destroy (:on-destroy options#)}
                                                                                                  fields# )
                                                       (init-fn# entity# system# params#)))))))
+
+(defn foreach-component
+  "Invoke the given function for each entity in the system with the given
+  component, and return the new system after all successive invocations"
+  [system component f]
+  (reduce f system (get-all-entities-with-component system component)))
 
 (defn create-component [system entity component-symbol params]
   (if-let [component-def (get-component-def system component-symbol)]
