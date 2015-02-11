@@ -1,4 +1,5 @@
 (ns ripple.core
+  (:use [pallet.thread-expr])
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
@@ -22,37 +23,39 @@
 (declare shutdown
          restart)
 
+(def subsystems [transform/transform
+                 event/events
+                 rendering/rendering
+                 physics/physics
+                 prefab/prefabs
+                 sprites/sprites
+                 audio/audio
+                 tiled-map/level
+                 roaches-player/player
+                 ;leaks-player/player
+                 ])
+
+(def asset-sources [; "leaks/leaks-assets.yaml" ;; 'Leaks' example game
+                    "space_roaches/assets.yaml" ;; 'Space Roaches' example game
+                    ])
+
 (def sys (atom 0))
 
 (defn- start
   "Create all the initial entities with their components"
   [system]
   (-> system
-      (prefab/instantiate "LeaksLevel" {})))
+      ;(prefab/instantiate "LeaksLevel" {})
+      (prefab/instantiate "PlatformLevel" {})))
 
 (defn- init-system
   "Initialize the ES system and all subsystems"
   []
   (-> (e/create-system)
-
-      (subsystem/register-subsystem transform/transform)
-      (subsystem/register-subsystem event/events)
-      (subsystem/register-subsystem rendering/rendering)
-      (subsystem/register-subsystem physics/physics)
-      (subsystem/register-subsystem prefab/prefabs)
-      (subsystem/register-subsystem sprites/sprites)
-      (subsystem/register-subsystem audio/audio)
-      (subsystem/register-subsystem tiled-map/level)
-
-      ;(subsystem/register-subsystem roaches-player/player)
-      (subsystem/register-subsystem leaks-player/player)
-      (subsystem/register-subsystem leaks-components/leak-systems)
-
-      (a/load-asset-instance-defs)
-
-      ;; Initialise subsystems
-      (subsystem/on-system-event :on-show) ;; TODO rename
-
+      (a/load-asset-instance-defs asset-sources)
+      (for-> [subsystem subsystems]
+             (subsystem/register-subsystem subsystem))
+      (subsystem/on-system-event :on-show)
       (start)))
 
 (defscreen main-screen

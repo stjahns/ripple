@@ -10,19 +10,17 @@
 
   - asset: tiled-map
     name: PlatformMap
-    path: resources/space_roaches/platform.tmx
+    path: space_roaches/platform.tmx
 
   - asset: prefab
     name: PlatformLevel
     components:
       - type: OrthogonalTiledMapRendererComponent
-        params:
-          tiled-map: PlatformMap
-          pixels-per-unit: 32
+        tiled-map: PlatformMap
+        pixels-per-unit: 32
       - type: TiledMapSpawner
-        params:
-          tiled-map: PlatformMap
-          pixels-per-unit: 32
+        tiled-map: PlatformMap
+        pixels-per-unit: 32
 
   - asset: animation
     name: PlayerIdle
@@ -124,59 +122,56 @@
     components: # TODO - need some kind of 'Projectile' component to handle removing old projectiles..
       - type: Transform
       - type: PhysicsBody
-        params:
-          body-type: dynamic
-          fixed-rotation: false
-          velocity-x: 0
-          velocity-y: 0
-          fixtures:
-            - shape: circle
-              radius: 0.1
-              density: 1
-              friction: 0.7
+        body-type: dynamic
+        fixed-rotation: false
+        velocity-x: 0
+        velocity-y: 0
+        fixtures:
+          - shape: circle
+            radius: 0.1
+            density: 1
+            friction: 0.7
 
   - asset: sound
     name: FireSound
-    path: resources/space_roaches/audio/Shoot.wav
+    path: space_roaches/audio/Shoot.wav
 
   - asset: prefab
     name: Player
     components:
       - type: Player
-        params:
-          move-force: 15
-          bullet-prefab: BulletPrefab
-          bullet-speed: 50
-          bullet-offset: 0.6
-          idle-animation: PlayerIdle
-          idle-up-animation: PlayerIdleAimUp
-          idle-down-animation: PlayerIdleAimDown
-          idle-up-forward-animation: PlayerIdleAimUpForward
-          idle-down-forward-animation: PlayerIdleAimDownForward
-          walking-up-animation: PlayerWalkingAimUp
-          walking-down-animation: PlayerWalkingAimDown
-          walking-up-forward-animation: PlayerWalkingAimUpForward
-          walking-down-forward-animation: PlayerWalkingAimDownForward
-          walk-animation: PlayerWalk
-          fire-sound: FireSound
+        move-force: 15
+        bullet-prefab: BulletPrefab
+        bullet-speed: 50
+        bullet-offset: 0.6
+        idle-animation: PlayerIdle
+        idle-up-animation: PlayerIdleAimUp
+        idle-down-animation: PlayerIdleAimDown
+        idle-up-forward-animation: PlayerIdleAimUpForward
+        idle-down-forward-animation: PlayerIdleAimDownForward
+        walking-up-animation: PlayerWalkingAimUp
+        walking-down-animation: PlayerWalkingAimDown
+        walking-up-forward-animation: PlayerWalkingAimUpForward
+        walking-down-forward-animation: PlayerWalkingAimDownForward
+        walk-animation: PlayerWalk
+        fire-sound: FireSound
       - type: Transform
       - type: AnimationController
+        loop: true
       - type: PhysicsBody
-        params:
-          body-type: dynamic
-          velocity-x: 0
-          velocity-y: 0
-          fixed-rotation: true
-          fixtures:
-            - shape: circle
-              radius: 0.5
-              density: 1
-              friction: 0.7
+        body-type: dynamic
+        velocity-x: 0
+        velocity-y: 0
+        fixed-rotation: true
+        fixtures:
+          - shape: circle
+            radius: 0.5
+            density: 1
+            friction: 0.7
       - type: SpriteRenderer
-        params:
-          texture: PlayerSprite1
-          tile-size: [32, 32]
-          tile-indices: [0, 0]
+        texture: PlayerSprite1
+        tile-size: [32, 32]
+        tile-indices: [0, 0]
 
   - asset: prefab
     name: AreaTrigger
@@ -195,22 +190,20 @@
     name: BlockPrefab
     components:
       - type: SpriteRenderer
-        params:
-          texture: BlockSprite
-          tile-size: [32, 32]
-          tile-indices: [0, 0]
+        texture: BlockSprite
+        tile-size: [32, 32]
+        tile-indices: [0, 0]
       - type: Transform
       - type: PhysicsBody
-        params:
-          body-type: static
-          velocity-x: 0
-          velocity-y: 0
-          fixtures:
-            - shape: box
-              width: 1
-              height: 1
-              density: 1
-              friction: 0.7
+        body-type: static
+        velocity-x: 0
+        velocity-y: 0
+        fixtures:
+          - shape: box
+            width: 1
+            height: 1
+            density: 1
+            friction: 0.7
 
   - asset: prefab
     name: BlockTilePrefab
@@ -218,38 +211,35 @@
       # Needs no SpriteRenderer as it is intended to be rendered by TiledMapRenderer
       - type: Transform
       - type: PhysicsBody
-        params:
-          body-type: static
-          velocity-x: 0
-          velocity-y: 0
-          fixtures:
-            - shape: box
-              width: 1
-              height: 1
-              density: 1
-              friction: 0.7
+        body-type: static
+        velocity-x: 0
+        velocity-y: 0
+        fixtures:
+          - shape: box
+            width: 1
+            height: 1
+            density: 1
+            friction: 0.7
 
 # Music
 
   - asset: music
     name: SpaceRoachesMusic
-    path: resources/space_roaches/audio/space_roaches.ogg
+    path: space_roaches/audio/space_roaches.ogg
 
   - asset: sound
     name: SpaceRoachDeathSound
-    path: resources/space_roaches/audio/RoachDeath.wav
+    path: space_roaches/audio/RoachDeath.wav
 
   - asset: prefab
     name: MusicPlayer
     components:
       - type: MusicPlayer
-        params:
-          audio-asset: SpaceRoachesMusic
+        audio-asset: SpaceRoachesMusic
 
   - asset: prefab
     name: RoachSoundPlayer
     components:
       - type: EventHub
       - type: SoundPlayer
-        params:
-          audio-asset: SpaceRoachDeathSound
+        audio-asset: SpaceRoachDeathSound

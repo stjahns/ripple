@@ -39,7 +39,7 @@
           component))
 
 (defn play-sound
-  [system entity]
+  [system entity event]
   (let [sound-player (e/get-component system entity 'SoundPlayer)
         {:keys [audio-asset looping volume pitch pan]} sound-player]
     (.play audio-asset volume pitch pan))

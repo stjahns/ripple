@@ -57,9 +57,8 @@
   "Parses asset source files into instance definitions
    and stores them in the system indexed by keyword corresponding to the asset instance name.
   This can happen at any time."
-  [system]
-  (let [asset-files ["leaks/leaks-assets.yaml"]
-        instance-defs (flatten (map parse-asset-file asset-files))]
+  [system asset-files]
+  (let [instance-defs (flatten (map parse-asset-file asset-files))]
     (assoc-in system [:assets :instance-defs]
               (reduce #(assoc % (:name %2) %2)
                       {} instance-defs))))
