@@ -17,41 +17,44 @@
 ;; Blob Component
 ;;================================================================================
 
+(defn- blob-switch-collision
+  "Set the collision filter mask on the given Box2D body for the blob"
+  [body]
+  (let [new-filter (physics/create-filter :category 2 :mask 0)]
+    (doseq [fixture (.getFixtureList body)]
+      (.setFilterData fixture new-filter))))
+
 (defn- blob-on-splat
   "When a blob hits a ship system: 
       play a sound 
       swap the sprite
-      set collision filter mask on blob fixtures to collide with nothing except mop (?)"
+      set collision filter mask on blob fixtures to collide with nothing except mop"
   [system entity]
   (let [blob (e/get-component system entity 'Blob)
         body (:body (e/get-component system entity 'PhysicsBody))
-        new-filter (physics/create-filter :category 2 :mask 0)
-        update-filters (fn [body]
-                         (doseq [fixture (.getFixtureList body)]
-                           (.setFilterData fixture new-filter)))]
+        new-filter (physics/create-filter :category 2 :mask 0)]
     (.play (:splash-sound blob))
     (doto body
       (.setGravityScale 0)
       (.setAngularVelocity 0)
       (.setLinearVelocity 0 0)
-      (update-filters))
+      (blob-switch-collision))
     (e/update-component system entity 'SpriteRenderer #(assoc % :texture (:splat-sprite blob)))))
 
 (defn- blob-on-collide
+  "When blob hits a ShipSystem, send it an on-blob-splat event
+  and invoke blob-on-splat for the blob"
   [system entity event]
-  (let [blob (e/get-component system entity 'Blob)
-        other-entity (-> (:other-fixture event)
+  (let [other-entity (-> (:other-fixture event)
                          (.getUserData)
-                         (:entity))
-        ship-system (e/get-component system other-entity 'ShipSystem)]
-    (if ship-system
-      (-> system
-          (blob-on-splat entity)
-          (event/send-event other-entity {:event-id :on-blob-splat}))
-      system)))
+                         (:entity))]
+    (-> system
+        (when-> (e/get-component system other-entity 'ShipSystem)
+                (blob-on-splat entity)
+                (event/send-event other-entity {:event-id :on-blob-splat})))))
 
 (c/defcomponent Blob
-  :fields [:splash-sound {:asset true} ;; TODO - warn / exception when not set!? {:required true}
+  :fields [:splash-sound {:asset true}
            :splat-sprite {:asset true}]
   :on-event [:on-collision-start blob-on-collide])
 
@@ -60,6 +63,7 @@
 ;;================================================================================
 
 (defn- explosion-on-finished
+  "Destroy the explosion entity when the animation finishes"
   [system entity event]
   (c/destroy-entity system entity))
 
@@ -71,36 +75,36 @@
 ;;================================================================================
 
 (defn- destroy-ship-system
-  "Explode the system (when it's been hit by too many blobs"
-
-  ;; TODO play explosion sound
-
+  "Play explosion sound, instantiate explosion prefab, destroy entity"
   [system entity]
-
-  (let [component (e/get-component system entity 'ShipSystem)
+  (let [ship-system (e/get-component system entity 'ShipSystem)
         transform (e/get-component system entity 'Transform)
         position (t/get-position system transform)
         [px py] [(.x position) (.y position)]] 
-    (-> (a/get-asset system "ExplosionSound")
+    (-> (a/get-asset system (:explosion-sound ship-system))
         (.play))
     (-> system
         (c/destroy-entity entity)
-        (prefab/instantiate "Explosion" {:transform {:position [px py]}})
-        (event/send-event-to-tag "GameController" {:event-id :on-system-destroyed
-                                                   :system-name (:system-name component)}))))
+        (prefab/instantiate (:explosion-prefab ship-system) 
+                            {:transform {:position [px py]}})
+        (event/send-event-to-tag "GameController" 
+                                 {:event-id :on-system-destroyed
+                                  :system-name (:system-name ship-system)}))))
 
 (defn- system-on-blobbed
   "Event handler for when a Blob splats on a ship system"
   [system entity event]
   (let [ship-system (e/get-component system entity 'ShipSystem)
-        hit-count (+ 1 (:hit-count ship-system))]
+        hit-count (inc (:hit-count ship-system))]
     (-> system 
         (e/update-component entity 'ShipSystem #(assoc % :hit-count hit-count))
         (when-> (> hit-count (:max-hit-count ship-system))
                 (destroy-ship-system entity)))))
 
 (c/defcomponent ShipSystem
-  :fields [:hit-count {:default 0}
+  :fields [:explosion-sound {:default "ExplosionSound"}
+           :explosion-prefab {:default "Explosion"}
+           :hit-count {:default 0}
            :max-hit-count {:default 1}
            :system-name {:default "UNNAMED SHIP SYSTEM"}]
   :on-event [:on-blob-splat system-on-blobbed])
@@ -110,6 +114,7 @@
 ;;================================================================================
 
 (defn- on-game-over
+  "Tell player to die, show end game text"
   [system entity]
   (-> system
       (event/send-event-to-tag "Player" {:event-id :player-death})
@@ -117,12 +122,12 @@
                                            :text "LIFE SUPPORT FAILURE! PRESS 'R' TO RESTART"})))
 
 (defn- on-system-destroyed
-  "When system destroyed, tell GameText to show '<system name> destroyed!'
-  Also count down :system-count, game over when 0!"
+  "Display SYSTEM DESTROYED text, and count down :system-count'
+  Game over when :system-count is 0"
   [system entity event]
-  (let [remaining-systems (- (-> (e/get-component system entity 'GameController)
-                                 :system-count)
-                             1)]
+  (let [remaining-systems (-> (e/get-component system entity 'GameController)
+                              :system-count
+                              dec)]
     (-> system 
         (e/update-component entity 'GameController #(assoc % :system-count remaining-systems))
         (event/send-event-to-tag "GameText" {:event-id :show-text
@@ -131,10 +136,9 @@
                 (on-game-over entity)))))
 
 (defn- restart-game
+  "Set :restart flag to inform core that we should do a full restart"
   [system entity event]
-  (assoc system :restart true)
-  ;(ripple.core/restart)
-  )
+  (assoc system :restart true))
 
 (c/defcomponent GameController
   :fields [:system-count {:default 2}]
@@ -145,14 +149,12 @@
 ;; LeakEmitter Component
 ;;================================================================================
 
-;; This could probably be generalized as 'spawner' ?
-
 (defn- emit-prefab
   "Spawns the prefab at the emitter's location, with a random velocity"
   [system entity]
   (let [emitter (e/get-component system entity 'LeakEmitter)
-        [x y] (:position (e/get-component system entity 'Transform))
         [direction-x direction-y] (:emit-direction emitter)
+        [x y] (:position (e/get-component system entity 'Transform))
         velocity (-> (Vector2. direction-x direction-y)
                      (.nor)
                      (.scl (float (:emit-speed emitter))))]
@@ -167,11 +169,13 @@
   (let [emitter (e/get-component system entity 'LeakEmitter)
         elapsed-time (+ (.getDeltaTime Gdx/graphics)
                         (:emit-timer emitter))]
-    (if (> elapsed-time (:emit-interval emitter))
-      (-> system
-          (e/update-component entity 'LeakEmitter #(assoc % :emit-timer 0))
-          (emit-prefab entity))
-      (e/update-component system entity 'LeakEmitter #(assoc % :emit-timer elapsed-time)))))
+    (-> system
+        (if-> (> elapsed-time (:emit-interval emitter)) 
+              ;; Reset timer and spawn prefab
+              (-> (e/update-component entity 'LeakEmitter #(assoc % :emit-timer 0))
+                  (emit-prefab entity))
+              ;; Advance timer
+              (e/update-component entity 'LeakEmitter #(assoc % :emit-timer elapsed-time))))))
 
 (c/defcomponent LeakEmitter
   :on-pre-render update-leak-emitter
