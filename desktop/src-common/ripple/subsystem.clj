@@ -35,7 +35,7 @@
       (-> system
           (for-> [[component component-def] components-with-callbacks]
                  (c/foreach-component component (:on-pre-render component-def)))
-          (or on-pre-render identity)))))
+          ((or on-pre-render identity))))))
 
 (defmacro defsubsystem
   "Interns a symbol 'n in the current namespace bound to the
