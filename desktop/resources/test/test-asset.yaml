@@ -1,8 +1,0 @@
-  - asset: test-asset
-    name: TestAsset
-
-  - asset: prefab
-    name: TestPrefab
-    components:
-      - type: TestComponent
-        test-asset-ref: TestAsset
