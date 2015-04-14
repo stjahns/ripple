@@ -68,6 +68,7 @@
 (c/defcomponent SpriteRenderer
   :fields [:texture {:asset true}
            :flip-x {:default false}
+           :enabled {:default true}
            :color {:default [1 1 1 1]} ; r g b a
            :layer {:default 0}
            :offset {:default [0 0]}
@@ -101,7 +102,7 @@
 
 (defmethod draw-sprite com.badlogic.gdx.graphics.g2d.TextureRegion
   [sprite-batch texture [x y] [width height] [scale-x scale-y] rotation flip-x x-offset y-offset x-tilecount y-tilecount]
-  
+
   ;; ew
   (when (not (= (.isFlipX texture) flip-x))
     (.flip texture true false))
@@ -123,9 +124,9 @@
            (float width) (float height)
            (float scale-x) (float scale-y)
            (float rotation)
-           x-offset y-offset 
-           (* x-tilecount srcWidth) 
-           (* y-tilecount srcHeight) 
+           x-offset y-offset
+           (* x-tilecount srcWidth)
+           (* y-tilecount srcHeight)
            flip-x false)))
 
 (defn- render-text-renderers
@@ -139,7 +140,7 @@
     (doseq [entity (e/get-all-entities-with-component system 'TextRenderer)]
       (let [text-renderer (e/get-component system entity 'TextRenderer)
             bitmap-font (:font text-renderer)
-            text (:text text-renderer) 
+            text (:text text-renderer)
             [x y] (:position text-renderer)]
         (.draw bitmap-font sprite-batch text x y)))
     (.end sprite-batch)
@@ -184,7 +185,8 @@
 (defn- render-sprite-layer
   [system layer-index]
   (->> (e/get-all-entities-with-component system 'SpriteRenderer)
-       (filter #(= layer-index 
+       (filter #(:enabled (e/get-component system % 'SpriteRenderer)))
+       (filter #(= layer-index
                    (:layer (e/get-component system % 'SpriteRenderer))))
        (render-sprites system)))
 

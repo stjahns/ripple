@@ -26,13 +26,13 @@
       local-matrix)))
 
 (defn get-position
-  "Returns a Vector3 for position"
+  "Returns a Vector2 for position"
   [system transform]
   (-> (get-matrix system transform)
       (.getTranslation (Vector2.))))
 
 (defn get-scale
-  "Returns a Vector3 for scale"
+  "Returns a Vector2 for scale"
   [system transform]
   (-> (get-matrix system transform)
       (.getScale (Vector2.))))
