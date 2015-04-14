@@ -17,3 +17,9 @@
 
 (defn scale [[x y] s]
   [(* x s) (* y s)]):w
+
+(defn lerp
+  "Linear interpolation between two vectors according to parameter t"
+  [[x1 y1] [x2 y2] t]
+  [(+ x1 (* t (- x2 x1)))
+   (+ y1 (* t (- y2 y1)))])
