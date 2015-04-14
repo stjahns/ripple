@@ -24,8 +24,8 @@
 (a/defasset texture-region
   :create
   (fn [system {texture-id :texture
-               [x y] :tile-indices
-               [width height] :tile-size}]
+               [x y] :top-left
+               [width height] :size}]
     (let [texture (a/get-asset system texture-id)]
       (TextureRegion. texture x y width height))))
 
