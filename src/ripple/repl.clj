@@ -16,49 +16,27 @@
             [brute.entity :as e]
             [brute.system :as s]))
 
-(defn contextual-eval [ctx expr]
-    (eval
-        `(let [~@(mapcat (fn [[k v]] [k `'~v]) ctx)]
-             ~expr)))
+;; (defn resume []
+;;   (on-gl (set-screen! ripple main-screen)))
 
-(defmacro local-context []
-    (let [symbols (keys &env)]
-        (zipmap (map (fn [sym] `(quote ~sym)) symbols) symbols)))
+;; (defn reload-and-require-all []
+;;   (shutdown)
 
-(defn readr [prompt exit-code]
-    (let [input (clojure.main/repl-read prompt exit-code)]
-        (if (= input ::tl)
-            exit-code
-             input)))
+;;   (println "Recompiling...")
 
-;;make a break point
-(defmacro break []
-  `(clojure.main/repl
-    :prompt #(print "debug=> ")
-    :read readr
-    :eval (partial contextual-eval (local-context))))
+;;   (require 'ripple.subsystem :reload-all)
+;;   (require 'ripple.core :reload-all)
+;;   (require 'ripple.core.desktop-launcher :reload-all)
 
-(defn resume []
-  (on-gl (set-screen! ripple main-screen)))
+;;   (println "Reloading...")
+;;   (on-gl (set-screen! ripple main-screen)))
 
-(defn reload-and-require-all []
-  (shutdown)
+;; (defn reload-all []
+;;   (shutdown)
+;;   (on-gl (set-screen! ripple main-screen)))
 
-  (println "Recompiling...")
-
-  (require 'ripple.subsystem :reload-all)
-  (require 'ripple.core :reload-all)
-  (require 'ripple.core.desktop-launcher :reload-all)
-
-  (println "Reloading...")
-  (on-gl (set-screen! ripple main-screen)))
-
-(defn reload-all []
-  (shutdown)
-  (on-gl (set-screen! ripple main-screen)))
-
-(defn rra [] (reload-and-require-all))
-(defn ra [] (reload-all))
+;; (defn rra [] (reload-and-require-all))
+;; (defn ra [] (reload-all))
 
 (defn aps []
   (aprint (:assets @sys))

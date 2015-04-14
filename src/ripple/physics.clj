@@ -63,13 +63,12 @@
       (event/send-event entity {:event-id :on-collision-start
                                 :other-fixture other-fixture})))
 
-
 (c/defcomponent PhysicsBody
   :on-destroy
   (fn [system entity]
     (destroy-physics-body system entity))
   :init
-  (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y
+  (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y angular-velocity angle
                                        width height
                                        category mask]}]
     (let [world (get-in system [:physics :world])
@@ -82,12 +81,14 @@
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
                      (-> .position (.set (or x 0) (or y 0)))
+                     (-> .angle (set! (or angle 0.0)))
                      (-> .fixedRotation (set! fixed-rotation)))
           body (doto (.createBody world body-def)
-                 (.setLinearVelocity (or velocity-x 0) 
+                 (.setAngularVelocity (or angular-velocity 0))
+                 (.setLinearVelocity (or velocity-x 0)
                                      (or velocity-y 0))
                  (.setUserData {:entity entity}))
-          filter-def (create-filter :category (or category 1) 
+          filter-def (create-filter :category (or category 1)
                                     :mask (or mask 1))
           create-fixture (fn [body fixture-params]
                            (doto (.createFixture body (get-fixture-def fixture-params))
@@ -95,7 +96,7 @@
                              (.setUserData {:entity entity
                                             :on-begin-contact on-collision-start})))]
       (assoc component :body (reduce (fn [body fixture-params]
-                                       (doto body 
+                                       (doto body
                                          (create-fixture fixture-params)))
                                      body fixtures)))))
 
@@ -129,9 +130,9 @@
   "For kinematic bodies, update with transform of Transform component"
   [system entity body]
   (let [transform (e/get-component system entity 'Transform)]
-    (.setTransform body 
+    (.setTransform body
                    (t/get-position system transform)
-                   (* com.badlogic.gdx.math.MathUtils/degreesToRadians 
+                   (* com.badlogic.gdx.math.MathUtils/degreesToRadians
                       (t/get-rotation system transform)))
     system))
 
@@ -156,7 +157,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? false)
+(def debug-render? true)
 
 (defn- debug-render*
   [system]
@@ -175,10 +176,10 @@
 (defn- fire-output-connections
   "On a given 'output-event', send events to other entities given the
   connections on the EventHub
-  TODO - move this to event.clj - can probably handle more generally, 
+  TODO - move this to event.clj - can probably handle more generally,
   eg fire on-trigger-entered event on self, then EventHub sees event
   and forwards events on connections"
-  [system entity output-event] 
+  [system entity output-event]
   (if-let [event-hub (e/get-component system entity 'EventHub)]
     (let [outgoing-connections (filter #(= (first %) output-event)
                                        (:outputs event-hub))]

@@ -3,6 +3,7 @@
    [brute.entity :as e]
    [ripple.assets :as a]
    [ripple.subsystem :as s]
+   [ripple.event :as event]
    [ripple.components :as components]))
 
 (defn override-prefab-params [instance-def options]
@@ -13,10 +14,17 @@
                                       (merge component component-options)))
                                   components))))
 
-(defn instantiate 
+(defn- get-instance-def
+  [system name]
+  (let [instance-def (get-in system [:assets :instance-defs name])]
+    (if instance-def
+      instance-def
+      (throw (Exception. (str "Asset instance not defined: " name))))))
+
+(defn instantiate
   "Get a prefab by name and instantiate it in the ES system"
   [system asset-name options]
-  (let [instance-def (get-in system [:assets :instance-defs asset-name])
+  (let [instance-def (get-instance-def system asset-name)
         asset-def (a/get-asset-def system (keyword (:asset instance-def)))
         inst-fn (:instantiate asset-def)]
     (inst-fn system (override-prefab-params instance-def options))))
@@ -25,8 +33,8 @@
   "Given a list of children, instantiate them into the system"
   [system parent-entity children]
   (reduce (fn [system child-params]
-            (instantiate system 
-                         (:prefab child-params) 
+            (instantiate system
+                         (:prefab child-params)
                          (assoc-in child-params [:transform :parent] parent-entity)))
           system children))
 
@@ -47,7 +55,8 @@
                           (:components params))]
       (-> system
           (instantiate-children entity (:children params))
-          (add-components entity components)))))
+          (add-components entity components)
+          (event/send-event entity {:event-id :on-spawn})))))
 
 (s/defsubsystem prefabs
   :asset-defs [:prefab])

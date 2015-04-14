@@ -55,8 +55,8 @@
   [system]
   (let [camera (:camera (:renderer system))]
     (update-camera-projection camera)
-    (assoc-in system [:renderer :screen-matrix] 
-              (doto (Matrix4.) 
+    (assoc-in system [:renderer :screen-matrix]
+              (doto (Matrix4.)
                 (.setToOrtho2D 0 0 (.getWidth Gdx/graphics) (.getHeight Gdx/graphics)))) ))
 
 (defn render
@@ -81,8 +81,9 @@
   (fn [system]
     (-> system
         (assoc-in [:renderer :camera] (create-camera))
-        (assoc-in [:renderer :screen-matrix] 
-                  (doto (Matrix4.) 
+        (assoc-in [:renderer :clear-color] [0 0 0 1])
+        (assoc-in [:renderer :screen-matrix]
+                  (doto (Matrix4.)
                     (.setToOrtho2D 0 0 (.getWidth Gdx/graphics) (.getHeight Gdx/graphics))))
         (assoc-in [:renderer :pixels-per-unit] pixels-per-unit)))
 
@@ -90,7 +91,7 @@
 
   :on-pre-render
   (fn [system]
-    (clear! 0 0 0 1)
+    (apply clear! (get-in system [:renderer :clear-color]))
     system)
 
   :on-render render)
