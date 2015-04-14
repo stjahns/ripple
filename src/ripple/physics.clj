@@ -68,7 +68,7 @@
   (fn [system entity]
     (destroy-physics-body system entity))
   :init
-  (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y angular-velocity
+  (fn [component entity system {:keys [x y fixtures body-type fixed-rotation velocity-x velocity-y angular-velocity angle
                                        width height
                                        category mask]}]
     (let [world (get-in system [:physics :world])
@@ -81,6 +81,7 @@
           body-def (doto (BodyDef.)
                      (-> .type (set! body-type))
                      (-> .position (.set (or x 0) (or y 0)))
+                     (-> .angle (set! (or angle 0.0)))
                      (-> .fixedRotation (set! fixed-rotation)))
           body (doto (.createBody world body-def)
                  (.setAngularVelocity (or angular-velocity 0))
@@ -156,7 +157,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? false)
+(def debug-render? true)
 
 (defn- debug-render*
   [system]
