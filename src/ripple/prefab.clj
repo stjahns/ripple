@@ -3,6 +3,7 @@
    [brute.entity :as e]
    [ripple.assets :as a]
    [ripple.subsystem :as s]
+   [ripple.event :as event]
    [ripple.components :as components]))
 
 (defn override-prefab-params [instance-def options]
@@ -54,7 +55,8 @@
                           (:components params))]
       (-> system
           (instantiate-children entity (:children params))
-          (add-components entity components)))))
+          (add-components entity components)
+          (event/send-event entity {:event-id :on-spawn})))))
 
 (s/defsubsystem prefabs
   :asset-defs [:prefab])
