@@ -3,9 +3,6 @@
   (:require [play-clj.core :refer :all]
             [play-clj.g2d :refer :all]
             [play-clj.utils :as u]
-            [ripple.space-roaches.player :as roaches-player]
-            [ripple.leaks.player :as leaks-player]
-            [ripple.leaks.components :as leaks-components]
             [ripple.rendering :as rendering]
             [ripple.sprites :as sprites]
             [ripple.physics :as physics]
@@ -23,6 +20,18 @@
 (declare shutdown
          restart)
 
+(defn create-game
+  "Creates a ripple game instance (ApplicationListener) with the given configuration"
+  [config]
+  (reify ApplicationListener
+    (create [this])
+    (render [this delta-time])
+    (resize [this width height])
+    (pause [this])
+    (resume [this])
+    (hide [this])
+    (dispose [this])))
+
 (def subsystems [transform/transform
                  event/events
                  rendering/rendering
@@ -31,7 +40,7 @@
                  sprites/sprites
                  audio/audio
                  tiled-map/level
-                 roaches-player/player
+                 ;roaches-player/player
                  ;leaks-player/player
                  ;leaks-components/leak-systems
                  ])
