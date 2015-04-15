@@ -254,6 +254,7 @@
   (-> system
       (r/register-render-callback render-text-renderers 3)
       (r/register-render-callback #(render-sprite-layer % -1) -1)
+      (r/register-render-callback #(render-sprite-layer % 1) 1)
       (r/register-render-callback #(render-sprite-layer % 0) 0)))
 
 (s/defsubsystem sprites

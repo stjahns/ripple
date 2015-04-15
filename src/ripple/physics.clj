@@ -157,7 +157,7 @@
     (reduce update-physics-body
             system entities)))
 
-(def debug-render? true)
+(def debug-render? false)
 
 (defn- debug-render*
   [system]
