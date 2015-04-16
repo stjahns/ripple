@@ -224,7 +224,7 @@ In Ripple, any additional assets, components, or any other systems you define ar
 
 Then, we just add `level-systems` to the subsystems list that we pass to Ripple on initialization, eg:
 
-```
+```Clojure
 (def subsystems [transform/transform
                  event/events
                  rendering/rendering
@@ -237,7 +237,9 @@ Then, we just add `level-systems` to the subsystems list that we pass to Ripple 
                  level-systems])
 ```
 
-## Defining Assets
+Subsystems can also define new asset types, or hook into a number of different events or callbacks. For example, see the built-in [`sprites` subsystem](https://github.com/stjahns/ripple/blob/master/src/ripple/sprites.clj#L260) or the built-in [physics subsystem](https://github.com/stjahns/ripple/blob/master/src/ripple/physics.clj#L296).
+
+## Defining 'Asset Instances'
 
 In `resources/assets.yaml`, we can put the following:
 
