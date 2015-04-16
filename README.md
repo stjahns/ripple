@@ -287,7 +287,6 @@ In `resources/assets.yaml`, we can put the following:
                        # that can be handled by other components on the entity
 
       - type: SpriteRenderer # Renders a sprite. Can be used with AnimationController to play a sprite animation
-        texture: PlayerSpriteSheet # Doesn't matter, gets overridden by the animation
 
       - type: AnimationController
         animation: PlayerWalking
@@ -304,7 +303,7 @@ In `resources/assets.yaml`, we can put the following:
 
       - type: Player # The component we defined above!
         jump-sound: JumpSound # we can point jump-sound and spawn-sound to the sound assets we defined
-        spawn-sound SpawnSound
+        spawn-sound: SpawnSound
 
 ```
 
