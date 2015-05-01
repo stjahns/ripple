@@ -203,7 +203,8 @@ In Ripple, any additional assets, components, or any other systems you define ar
         [position-x position-y] (:position (brute.entity/get-component system entity 'Transform))]
      (if (.isKeyPressed com.badlogic.gdx.Gdx/input com.badlogic.gdx.Input$Keys/SPACE)
          (do (.play (:jump-sound player))
-             (brute.entity/update-component system entity 'Transform #(assoc % :position [position-x (+ 10 position-y)]))))))
+             (brute.entity/update-component system entity 'Transform #(assoc % :position [position-x (+ 10 position-y)])))
+          system)))
 
 (defn player-on-spawn
   "Play spawn-sound"
